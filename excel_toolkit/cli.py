@@ -5,6 +5,7 @@ from importlib.metadata import version
 import typer
 
 from excel_toolkit.commands.info import info as info_command
+from excel_toolkit.commands.head import head as head_command
 
 try:
     __version__ = version("excel-toolkit")
@@ -31,9 +32,9 @@ def sysinfo():
     typer.echo(f"Python: 3.14")
 
 
-# Register file info command from commands module
-# Use the info function directly as a command
+# Register commands from commands module
 app.command()(info_command)
+app.command()(head_command)
 
 
 if __name__ == "__main__":
