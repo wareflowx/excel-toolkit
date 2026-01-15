@@ -12,6 +12,7 @@ from excel_toolkit.commands.sort import sort, app as sort_app
 from excel_toolkit.commands.stats import stats, app as stats_app
 from excel_toolkit.commands.validate import validate, app as validate_app
 from excel_toolkit.commands.clean import clean, app as clean_app
+from excel_toolkit.commands.select import select, app as select_app
 
 __all__ = [
     "info",
@@ -28,4 +29,6 @@ __all__ = [
     "validate_app",
     "clean",
     "clean_app",
+    "select",
+    "select_app",
 ]

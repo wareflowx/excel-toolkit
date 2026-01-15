@@ -11,6 +11,7 @@ from excel_toolkit.commands.sort import sort as sort_command
 from excel_toolkit.commands.stats import stats as stats_command
 from excel_toolkit.commands.validate import validate as validate_command
 from excel_toolkit.commands.clean import clean as clean_command
+from excel_toolkit.commands.select import select as select_command
 
 try:
     __version__ = version("excel-toolkit")
@@ -45,6 +46,7 @@ app.command()(sort_command)
 app.command()(stats_command)
 app.command()(validate_command)
 app.command()(clean_command)
+app.command()(select_command)
 
 
 if __name__ == "__main__":
