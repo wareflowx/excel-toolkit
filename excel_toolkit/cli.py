@@ -4,6 +4,8 @@ from importlib.metadata import version
 
 import typer
 
+from excel_toolkit.commands.info import info as info_command
+
 try:
     __version__ = version("excel-toolkit")
 except Exception:
@@ -21,10 +23,17 @@ def version():
 
 
 @app.command()
-def info():
+def sysinfo():
     """Show system information."""
     typer.echo("Excel CLI Toolkit")
     typer.echo("Command-line toolkit for Excel data manipulation and analysis")
+    typer.echo(f"Version: {__version__}")
+    typer.echo(f"Python: 3.14")
+
+
+# Register file info command from commands module
+# Use the info function directly as a command
+app.command()(info_command)
 
 
 if __name__ == "__main__":
