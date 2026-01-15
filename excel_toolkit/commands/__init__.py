@@ -13,6 +13,7 @@ from excel_toolkit.commands.stats import stats, app as stats_app
 from excel_toolkit.commands.validate import validate, app as validate_app
 from excel_toolkit.commands.clean import clean, app as clean_app
 from excel_toolkit.commands.select import select, app as select_app
+from excel_toolkit.commands.dedupe import dedupe, app as dedupe_app
 
 __all__ = [
     "info",
@@ -31,4 +32,6 @@ __all__ = [
     "clean_app",
     "select",
     "select_app",
+    "dedupe",
+    "dedupe_app",
 ]
