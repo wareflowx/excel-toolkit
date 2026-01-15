@@ -13,6 +13,8 @@ from excel_toolkit.commands.validate import validate as validate_command
 from excel_toolkit.commands.clean import clean as clean_command
 from excel_toolkit.commands.select import select as select_command
 from excel_toolkit.commands.dedupe import dedupe as dedupe_command
+from excel_toolkit.commands.fill import fill as fill_command
+from excel_toolkit.commands.group import group as group_command
 
 try:
     __version__ = version("excel-toolkit")
@@ -49,6 +51,8 @@ app.command()(validate_command)
 app.command()(clean_command)
 app.command()(select_command)
 app.command()(dedupe_command)
+app.command()(fill_command)
+app.command()(group_command)
 
 
 if __name__ == "__main__":

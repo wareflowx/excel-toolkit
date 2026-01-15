@@ -14,6 +14,8 @@ from excel_toolkit.commands.validate import validate, app as validate_app
 from excel_toolkit.commands.clean import clean, app as clean_app
 from excel_toolkit.commands.select import select, app as select_app
 from excel_toolkit.commands.dedupe import dedupe, app as dedupe_app
+from excel_toolkit.commands.fill import fill, app as fill_app
+from excel_toolkit.commands.group import group, app as group_app
 
 __all__ = [
     "info",
@@ -34,4 +36,8 @@ __all__ = [
     "select_app",
     "dedupe",
     "dedupe_app",
+    "fill",
+    "fill_app",
+    "group",
+    "group_app",
 ]
