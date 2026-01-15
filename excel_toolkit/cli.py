@@ -6,6 +6,7 @@ import typer
 
 from excel_toolkit.commands.info import info as info_command
 from excel_toolkit.commands.head import head as head_command
+from excel_toolkit.commands.filter import filter as filter_command
 
 try:
     __version__ = version("excel-toolkit")
@@ -35,6 +36,7 @@ def sysinfo():
 # Register commands from commands module
 app.command()(info_command)
 app.command()(head_command)
+app.command()(filter_command)
 
 
 if __name__ == "__main__":
