@@ -8,6 +8,7 @@ Each command is a separate module that can be imported and tested.
 from excel_toolkit.commands.info import info, app as info_app
 from excel_toolkit.commands.head import head, app as head_app
 from excel_toolkit.commands.filter import filter, app as filter_app
+from excel_toolkit.commands.sort import sort, app as sort_app
 
 __all__ = [
     "info",
@@ -16,4 +17,6 @@ __all__ = [
     "head_app",
     "filter",
     "filter_app",
+    "sort",
+    "sort_app",
 ]
