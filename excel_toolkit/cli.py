@@ -18,6 +18,9 @@ from excel_toolkit.commands.group import group as group_command
 from excel_toolkit.commands.unique import unique as unique_command
 from excel_toolkit.commands.transform import transform as transform_command
 from excel_toolkit.commands.rename import rename as rename_command
+from excel_toolkit.commands.search import search as search_command
+from excel_toolkit.commands.convert import convert as convert_command
+from excel_toolkit.commands.merge import merge as merge_command
 
 try:
     __version__ = version("excel-toolkit")
@@ -59,6 +62,9 @@ app.command()(group_command)
 app.command()(unique_command)
 app.command()(transform_command)
 app.command()(rename_command)
+app.command()(search_command)
+app.command()(convert_command)
+app.command()(merge_command)
 
 
 if __name__ == "__main__":

@@ -19,6 +19,9 @@ from excel_toolkit.commands.group import group, app as group_app
 from excel_toolkit.commands.unique import unique, app as unique_app
 from excel_toolkit.commands.transform import transform, app as transform_app
 from excel_toolkit.commands.rename import rename, app as rename_app
+from excel_toolkit.commands.search import search, app as search_app
+from excel_toolkit.commands.convert import convert, app as convert_app
+from excel_toolkit.commands.merge import merge, app as merge_app
 
 __all__ = [
     "info",
@@ -49,4 +52,10 @@ __all__ = [
     "transform_app",
     "rename",
     "rename_app",
+    "search",
+    "search_app",
+    "convert",
+    "convert_app",
+    "merge",
+    "merge_app",
 ]
