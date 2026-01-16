@@ -122,6 +122,16 @@ class NoValuesError:
 
 @dataclass
 @immutable
+class InvalidParameterError:
+    """Invalid parameter provided."""
+
+    parameter: str
+    value: Any
+    valid_values: list[str] | None = None
+
+
+@dataclass
+@immutable
 class ColumnNotFoundError:
     """Referenced column doesn't exist in DataFrame.
 
@@ -448,7 +458,7 @@ CompareError = ComparisonFailedError
 # Cleaning operation errors
 @dataclass
 @immutable
-class CleaningError(Error):
+class CleaningError:
     """Base error for cleaning operations."""
     message: str
 
@@ -479,7 +489,7 @@ CleaningValidationError = (
 # Transforming operation errors
 @dataclass
 @immutable
-class TransformError(Error):
+class TransformError:
     """Base error for transform operations."""
     message: str
 
@@ -530,7 +540,7 @@ TransformValidationError = (
 # Joining operation errors
 @dataclass
 @immutable
-class JoinError(Error):
+class JoinError:
     """Base error for join operations."""
     message: str
 
@@ -564,7 +574,7 @@ class JoinColumnsNotFoundError(JoinError):
 @immutable
 class MergeColumnsNotFoundError(JoinError):
     """Merge columns not found in all DataFrames."""
-    missing: dict[int, list[str]] = field(default_factory dict)  # DataFrame index -> missing columns
+    missing: dict[int, list[str]] = field(default_factory=lambda: {})  # DataFrame index -> missing columns
 
 
 @dataclass
@@ -588,7 +598,7 @@ JoinOperationError = (
 # Validation operation errors
 @dataclass
 @immutable
-class ValidationError(Error):
+class ValidationError:
     """Base error for validation operations."""
     message: str
 
