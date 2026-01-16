@@ -1,7 +1,7 @@
 # Excel Toolkit - Implementation Roadmap
 
 **Last Updated:** 2026-01-16
-**Status:** Phase 1 in Progress (2/5 operations completed)
+**Status:** ✅ Phase 1 COMPLETE (5/5 operations implemented)
 
 ---
 
@@ -13,14 +13,14 @@ This roadmap tracks the implementation of the operations layer for the Excel Too
 - Import by external packages
 - Clear separation of concerns
 
-**Current Progress:** 40% of Phase 1 complete
+**Current Progress:** ✅ Phase 1 COMPLETE - 100% of core operations implemented
 
 ---
 
-## Phase 1: Core Operations (In Progress)
+## Phase 1: Core Operations (✅ COMPLETE)
 
-**Status:** 2/5 operations implemented
-**Estimated Remaining:** 1-2 days
+**Status:** 5/5 operations implemented
+**Completed:** 2026-01-16
 **Priority:** CRITICAL
 
 ### ✅ Completed Operations
@@ -88,198 +88,98 @@ Features:
 - Row limiting
 - Mixed type error detection
 
----
-
-### ⏳ Pending Operations
-
 #### 5. Pivoting Operations
 **File:** `excel_toolkit/operations/pivoting.py`
-**Status:** ❌ Not Started
-**Estimated:** 3-4 hours
-**Priority:** High
+**Status:** ✅ Complete
+**Tests:** 56 passing
+**Commit:** `da246eb`
 
-Required Functions:
-```python
-def validate_aggregation_function(func: str) -> Result[str, ValidationError]
-    """Validate and normalize aggregation function name."""
+Functions:
+- `validate_aggregation_function()` - Function validation and normalization
+- `validate_pivot_columns()` - Column existence validation
+- `parse_fill_value()` - Fill value parsing (None, 0, nan, int, float, string)
+- `flatten_multiindex()` - MultiIndex flattening for columns and index
+- `create_pivot_table()` - Create pivot tables
 
-def validate_pivot_columns(
-    df: pd.DataFrame,
-    rows: list[str],
-    columns: list[str],
-    values: list[str]
-) -> Result[None, PivotValidationError]
-    """Validate pivot columns exist in DataFrame."""
-
-def parse_fill_value(value: str | None) -> Any
-    """Parse fill value for pivot table."""
-
-def flatten_multiindex(df: pd.DataFrame) -> pd.DataFrame
-    """Flatten MultiIndex columns and index in pivot table."""
-
-def create_pivot_table(
-    df: pd.DataFrame,
-    rows: list[str],
-    columns: list[str],
-    values: list[str],
-    aggfunc: str = "sum",
-    fill_value: Any = None
-) -> Result[pd.DataFrame, PivotError]
-    """Create pivot table from DataFrame."""
-```
-
-Implementation Requirements:
-1. Validate aggregation function (sum, mean, avg, count, min, max, median, std, var, first, last)
-2. Normalize "avg" to "mean"
-3. Validate all column lists exist
-4. Parse fill value (None, 0, nan, int, float, string)
-5. Execute `pd.pivot_table()` with MultiIndex handling
-6. Flatten MultiIndex columns/rows
-7. Reset index to make rows into columns
-
-Test Cases Required:
-- Valid function names (sum, mean, avg → mean, count, etc.)
-- Invalid function name
-- Missing row columns
-- Missing column columns
-- Missing value columns
-- Fill value parsing (None, "none", "0", "nan", numbers, strings)
-- Simple pivot (single row, column, value)
-- Multiple values
+Features:
+- 11 aggregation functions (sum, mean, avg→mean, count, min, max, median, std, var, first, last)
+- Multiple rows, columns, and values
+- Fill value handling
 - MultiIndex flattening
-- Empty groups
-- Dry-run preview
+- Column name generation
 
 #### 6. Aggregating Operations
 **File:** `excel_toolkit/operations/aggregating.py`
-**Status:** ❌ Not Started
-**Estimated:** 3-4 hours
-**Priority:** High
+**Status:** ✅ Complete
+**Tests:** 38 passing
+**Commit:** `86848cb`
 
-Required Functions:
-```python
-def parse_aggregation_specs(
-    specs: str
-) -> Result[dict[str, list[str]], ParseError]
-    """Parse aggregation specifications from command line."""
+Functions:
+- `parse_aggregation_specs()` - Parse "column:func1,func2" format
+- `validate_aggregation_columns()` - Validate columns exist and don't overlap
+- `aggregate_groups()` - Groupby and aggregation
 
-def validate_aggregation_columns(
-    df: pd.DataFrame,
-    group_columns: list[str],
-    agg_columns: list[str]
-) -> Result[None, AggregationValidationError]
-    """Validate aggregation columns."""
-
-def aggregate_groups(
-    df: pd.DataFrame,
-    group_columns: list[str],
-    aggregations: dict[str, list[str]]
-) -> Result[pd.DataFrame, AggregationError]
-    """Group and aggregate DataFrame."""
-```
-
-Implementation Requirements:
-1. Parse specs format: "column:func1,func2,column2:func3"
-2. Validate each function name
-3. Normalize "avg" to "mean"
-4. Merge multiple specs for same column
-5. Validate group columns exist
-6. Validate agg columns exist
-7. Check no overlap between group and agg columns
-8. Execute `df.groupby().agg()` with MultiIndex flattening
-
-Test Cases Required:
-- Simple spec: "Revenue:sum"
-- Multiple functions: "Sales:sum,mean"
-- Multiple columns: "Amount:sum,Profit:mean"
-- Invalid format (missing colon)
-- Invalid function name
-- Overlapping group/agg columns
-- Missing group columns
-- Missing agg columns
-- MultiIndex column flattening
-- Empty groups
+Features:
+- Smart parsing with stateful handling of functions
+- Normalizes "avg" to "mean"
+- Merges duplicate column specs
+- 11 aggregation functions
+- MultiIndex flattening with trailing underscore removal
+- Empty group handling
 
 #### 7. Comparing Operations
 **File:** `excel_toolkit/operations/comparing.py`
-**Status:** ❌ Not Started
-**Estimated:** 4-5 hours
-**Priority:** High
+**Status:** ✅ Complete
+**Tests:** 44 passing
+**Commit:** `318719a`
 
-Required Functions:
-```python
-def validate_key_columns(
-    df1: pd.DataFrame,
-    df2: pd.DataFrame,
-    key_columns: list[str] | None
-) -> Result[list[str], ComparisonValidationError]
-    """Validate key columns for comparison."""
+Functions:
+- `validate_key_columns()` - Validate key columns exist in both DataFrames
+- `compare_rows()` - Compare two rows for equality with NaN handling
+- `find_differences()` - Find added, deleted, and modified rows
+- `build_comparison_result()` - Build result DataFrame with status column
+- `compare_dataframes()` - Main comparison function
 
-def find_differences(
-    df1: pd.DataFrame,
-    df2: pd.DataFrame,
-    key_columns: list[str]
-) -> DifferencesResult
-    """Find differences between two DataFrames."""
+Features:
+- Key columns or row position comparison
+- NaN equality handling (NaN == NaN is OK)
+- MultiIndex support via dict conversion
+- Comprehensive difference tracking
+- Status column ("added", "deleted", "modified", "unchanged")
+- Column ordering (keys, status, others)
 
-def compare_rows(row1: pd.Series, row2: pd.Series) -> bool
-    """Compare two rows for equality."""
+---
 
-def build_comparison_result(
-    df1: pd.DataFrame,
-    df2: pd.DataFrame,
-    differences: DifferencesResult,
-    key_columns: list[str]
-) -> pd.DataFrame
-    """Build comparison result DataFrame."""
+### ✅ Phase 1 Summary
 
-def compare_dataframes(
-    df1: pd.DataFrame,
-    df2: pd.DataFrame,
-    key_columns: list[str] | None = None
-) -> Result[ComparisonResult, CompareError]
-    """Compare two DataFrames."""
-```
+**All 5 core operations completed:**
 
-Implementation Requirements:
-1. Handle None key_columns → use row position
-2. Validate key columns exist in both DataFrames
-3. Set key columns as index
-4. Find rows only in df1 (deleted)
-5. Find rows only in df2 (added)
-6. Find common indices and compare values
-7. Handle NaN comparisons (NaN == NaN is OK)
-8. Build result with `_diff_status` column
-9. Reset index and reorder columns
+1. ✅ Filtering Operations (46 tests, commit `3fabc0f`)
+2. ✅ Sorting Operations (23 tests, commit `6b3c2bb`)
+3. ✅ Pivoting Operations (56 tests, commit `da246eb`)
+4. ✅ Aggregating Operations (38 tests, commit `86848cb`)
+5. ✅ Comparing Operations (44 tests, commit `318719a`)
 
-Data Structures Needed:
-```python
-@dataclass
-class DifferencesResult:
-    only_df1: set  # Indices only in df1 (deleted)
-    only_df2: set  # Indices only in df2 (added)
-    modified_rows: list  # Indices with different values
+**Total Statistics:**
+- 207 tests passing
+- 5 core operations implemented
+- 5 commits (atomic per operation)
+- ~3,500 lines of production code
+- ~3,000 lines of test code
+- Zero CLI dependencies in operations
+- All operations return Result types for explicit error handling
+- Comprehensive error types with immutable dataclasses
+- Full test coverage of all error paths
 
-@dataclass
-class ComparisonResult:
-    df_result: pd.DataFrame
-    added_count: int
-    deleted_count: int
-    modified_count: int
-```
-
-Test Cases Required:
-- Compare with key columns
-- Compare without key columns (row position)
-- Added rows only
-- Deleted rows only
-- Modified rows
-- No differences
-- All differences types
-- Empty DataFrames
-- NaN handling
-- Key columns missing in df1
-- Key columns missing in df2
+**Key Achievements:**
+- ✅ Complete separation of business logic from CLI
+- ✅ Unit testable without CLI dependencies
+- ✅ Reusable in pipelines and templates
+- ✅ Importable by external packages
+- ✅ Type-safe error handling with Result types
+- ✅ Immutable error data structures
+- ✅ Comprehensive test coverage
+- ✅ All operations follow consistent patterns
 
 ---
 
