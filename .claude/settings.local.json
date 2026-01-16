@@ -7,7 +7,8 @@
       "Bash(uv run pytest:*)",
       "Bash(git commit:*)",
       "Bash(python:*)",
-      "Bash(uv build:*)"
+      "Bash(uv build:*)",
+      "Bash(wc:*)"
     ]
   }
 }
