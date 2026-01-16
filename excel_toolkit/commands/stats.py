@@ -11,9 +11,12 @@ import typer
 import pandas as pd
 import numpy as np
 
-from excel_toolkit.core import HandlerFactory, ExcelHandler, CSVHandler
+from excel_toolkit.core import HandlerFactory
 from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
-from excel_toolkit.commands.common import display_table
+from excel_toolkit.commands.common import (
+    read_data_file,
+    display_table,
+)
 
 
 def stats(
@@ -38,15 +41,7 @@ def stats(
         xl stats data.csv --all-columns --percentiles 10,25,50,75,90,95,99
         xl stats data.xlsx --all-columns --include categorical
     """
-    path = Path(file_path)
-    factory = HandlerFactory()
-
-    # Step 1: Validate file exists
-    if not path.exists():
-        typer.echo(f"File not found: {file_path}", err=True)
-        raise typer.Exit(1)
-
-    # Step 2: Parse percentiles
+    # 1. Parse percentiles
     try:
         percentile_list = [float(p.strip()) for p in percentiles.split(",")]
         if not all(0 <= p <= 100 for p in percentile_list):
@@ -57,7 +52,7 @@ def stats(
         typer.echo("Expected comma-separated values (e.g., 25,50,75)", err=True)
         raise typer.Exit(1)
 
-    # Step 3: Parse include types
+    # 2. Parse include types
     include_types = [t.strip().lower() for t in include.split(",")]
     valid_types = {"numeric", "categorical", "datetime", "all"}
     invalid_types = [t for t in include_types if t not in valid_types]
@@ -66,46 +61,15 @@ def stats(
         typer.echo(f"Valid types: {', '.join(valid_types)}", err=True)
         raise typer.Exit(1)
 
-    # Step 4: Get handler
-    handler_result = factory.get_handler(path)
-    if is_err(handler_result):
-        error = unwrap_err(handler_result)
-        typer.echo(f"{error}", err=True)
-        raise typer.Exit(1)
+    # 3. Read file
+    df = read_data_file(file_path, sheet)
 
-    handler = unwrap(handler_result)
-
-    # Step 5: Read file
-    if isinstance(handler, ExcelHandler):
-        sheet_name = sheet
-        kwargs = {"sheet_name": sheet_name} if sheet_name else {}
-        read_result = handler.read(path, **kwargs)
-    elif isinstance(handler, CSVHandler):
-        # Auto-detect encoding and delimiter
-        encoding_result = handler.detect_encoding(path)
-        encoding = unwrap(encoding_result) if is_ok(encoding_result) else "utf-8"
-
-        delimiter_result = handler.detect_delimiter(path, encoding)
-        delimiter = unwrap(delimiter_result) if is_ok(delimiter_result) else ","
-
-        read_result = handler.read(path, encoding=encoding, delimiter=delimiter)
-    else:
-        typer.echo("Unsupported handler type", err=True)
-        raise typer.Exit(1)
-
-    if is_err(read_result):
-        error = unwrap_err(read_result)
-        typer.echo(f"Error reading file: {error}", err=True)
-        raise typer.Exit(1)
-
-    df = unwrap(read_result)
-
-    # Step 6: Handle empty file
+    # 4. Handle empty file
     if df.empty:
         typer.echo("File is empty (no data rows)")
         raise typer.Exit(0)
 
-    # Step 7: Determine columns to analyze
+    # 5. Determine columns to analyze
     if column:
         if column not in df.columns:
             typer.echo(f"Error: Column '{column}' not found", err=True)
