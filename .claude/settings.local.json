@@ -3,7 +3,11 @@
     "allow": [
       "Bash(mkdir:*)",
       "Bash(git add:*)",
-      "Bash(uv run python:*)"
+      "Bash(uv run python:*)",
+      "Bash(uv run pytest:*)",
+      "Bash(git commit:*)",
+      "Bash(python:*)",
+      "Bash(uv build:*)"
     ]
   }
 }

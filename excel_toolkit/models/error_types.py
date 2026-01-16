@@ -458,15 +458,9 @@ CompareError = ComparisonFailedError
 # Cleaning operation errors
 @dataclass
 @immutable
-class CleaningError:
-    """Base error for cleaning operations."""
-    message: str
-
-
-@dataclass
-@immutable
-class InvalidFillStrategyError(CleaningError):
+class InvalidFillStrategyError:
     """Invalid fill strategy specified."""
+
     strategy: str
     valid_strategies: list[str] = field(default_factory=lambda: [
         "forward", "backward", "mean", "median", "constant", "drop"
@@ -475,37 +469,28 @@ class InvalidFillStrategyError(CleaningError):
 
 @dataclass
 @immutable
-class FillFailedError(CleaningError):
+class FillFailedError:
     """Fill operation failed."""
+
     column: str
     reason: str
 
 
-CleaningValidationError = (
-    ColumnNotFoundError |
-    InvalidParameterError
-)
-
 # Transforming operation errors
 @dataclass
 @immutable
-class TransformError:
-    """Base error for transform operations."""
-    message: str
-
-
-@dataclass
-@immutable
-class InvalidExpressionError(TransformError):
+class InvalidExpressionError:
     """Invalid expression provided."""
+
     expression: str
     reason: str
 
 
 @dataclass
 @immutable
-class InvalidTypeError(TransformError):
+class InvalidTypeError:
     """Invalid type specified for casting."""
+
     type_name: str
     valid_types: list[str] = field(default_factory=lambda: [
         "int", "float", "str", "bool", "datetime", "category"
@@ -514,8 +499,9 @@ class InvalidTypeError(TransformError):
 
 @dataclass
 @immutable
-class CastFailedError(TransformError):
+class CastFailedError:
     """Casting operation failed."""
+
     column: str
     target_type: str
     reason: str
@@ -523,32 +509,21 @@ class CastFailedError(TransformError):
 
 @dataclass
 @immutable
-class InvalidTransformationError(TransformError):
+class InvalidTransformationError:
     """Invalid transformation name."""
+
     transformation: str
     valid_transformations: list[str] = field(default_factory=lambda: [
         "log", "sqrt", "abs", "exp", "standardize", "normalize"
     ])
 
 
-TransformValidationError = (
-    ColumnNotFoundError |
-    InvalidTypeError |
-    InvalidTransformationError
-)
-
 # Joining operation errors
 @dataclass
 @immutable
-class JoinError:
-    """Base error for join operations."""
-    message: str
-
-
-@dataclass
-@immutable
-class InvalidJoinTypeError(JoinError):
+class InvalidJoinTypeError:
     """Invalid join type specified."""
+
     join_type: str
     valid_types: list[str] = field(default_factory=lambda: [
         "inner", "left", "right", "outer", "cross"
@@ -557,56 +532,43 @@ class InvalidJoinTypeError(JoinError):
 
 @dataclass
 @immutable
-class InvalidJoinParametersError(JoinError):
+class InvalidJoinParametersError:
     """Invalid combination of join parameters."""
+
     reason: str
 
 
 @dataclass
 @immutable
-class JoinColumnsNotFoundError(JoinError):
+class JoinColumnsNotFoundError:
     """Join columns not found in DataFrames."""
+
     missing_in_left: list[str] = field(default_factory=list)
     missing_in_right: list[str] = field(default_factory=list)
 
 
 @dataclass
 @immutable
-class MergeColumnsNotFoundError(JoinError):
+class MergeColumnsNotFoundError:
     """Merge columns not found in all DataFrames."""
+
     missing: dict[int, list[str]] = field(default_factory=lambda: {})  # DataFrame index -> missing columns
 
 
 @dataclass
 @immutable
-class InsufficientDataFramesError(JoinError):
+class InsufficientDataFramesError:
     """Less than 2 DataFrames provided for merge."""
+
     count: int
 
-
-JoinValidationError = (
-    InvalidJoinParametersError |
-    JoinColumnsNotFoundError
-)
-
-JoinOperationError = (
-    InvalidJoinTypeError |
-    JoinValidationError |
-    JoinColumnsNotFoundError
-)
 
 # Validation operation errors
 @dataclass
 @immutable
-class ValidationError:
-    """Base error for validation operations."""
-    message: str
-
-
-@dataclass
-@immutable
-class ValueOutOfRangeError(ValidationError):
+class ValueOutOfRangeError:
     """Values outside specified range."""
+
     column: str
     min_value: Any
     max_value: Any
@@ -615,8 +577,9 @@ class ValueOutOfRangeError(ValidationError):
 
 @dataclass
 @immutable
-class NullValueThresholdExceededError(ValidationError):
+class NullValueThresholdExceededError:
     """Null values exceed threshold."""
+
     column: str
     null_count: int
     null_percent: float
@@ -625,8 +588,9 @@ class NullValueThresholdExceededError(ValidationError):
 
 @dataclass
 @immutable
-class UniquenessViolationError(ValidationError):
+class UniquenessViolationError:
     """Duplicate values found."""
+
     columns: list[str]
     duplicate_count: int
     sample_duplicates: list = field(default_factory=list)
@@ -634,16 +598,18 @@ class UniquenessViolationError(ValidationError):
 
 @dataclass
 @immutable
-class InvalidRuleError(ValidationError):
+class InvalidRuleError:
     """Invalid validation rule."""
+
     rule_type: str
     reason: str
 
 
 @dataclass
 @immutable
-class TypeMismatchError(ValidationError):
+class TypeMismatchError:
     """Column type doesn't match expected type."""
+
     column: str
     expected_type: str | list[str]
     actual_type: str
