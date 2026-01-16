@@ -301,8 +301,9 @@ class TestFillMissingValues:
 
         assert is_ok(result)
         df_filled = unwrap(result)
-        # Forward fill: None at row 2 becomes 30
-        assert df_filled['Age'].iloc[2] == 30
+        # Forward fill: None at row 1 (index 1) becomes 25, None at row 3 (index 3) becomes 35
+        assert df_filled['Age'].iloc[1] == 25
+        assert df_filled['Age'].iloc[3] == 35
 
     def test_backward_fill_single_column(self, dataframe_with_missing_values):
         """Test backward filling single column."""
@@ -319,8 +320,9 @@ class TestFillMissingValues:
 
         assert is_ok(result)
         df_filled = unwrap(result)
-        # Mean of [25, 35] is 30
-        assert df_filled['Age'].iloc[1] == 30
+        # Mean of [25, 35, 45] is 35
+        assert df_filled['Age'].iloc[1] == 35
+        assert df_filled['Age'].iloc[3] == 35
 
     def test_median_fill_numeric_column(self, dataframe_with_missing_values):
         """Test median filling numeric column."""
@@ -345,9 +347,11 @@ class TestFillMissingValues:
 
         assert is_ok(result)
         df_filled = unwrap(result)
-        # Should drop row 2 (Name is None)
+        # Should drop row 2 (Name is None), leaving 4 rows
         assert len(df_filled) == 4
+        # After drop, index is reset, so David is now at index 2
         assert df_filled['Name'].iloc[2] == 'David'
+        assert df_filled['ID'].tolist() == [1, 2, 4, 5]  # Row with ID=3 was dropped
 
     def test_dict_strategy_different_strategies(self, dataframe_with_missing_values):
         """Test dict strategy with different strategies per column."""
@@ -359,7 +363,7 @@ class TestFillMissingValues:
 
         assert is_ok(result)
         df_filled = unwrap(result)
-        assert df_filled['Age'].iloc[1] == 30  # Mean
+        assert df_filled['Age'].iloc[1] == 35  # Mean of [25, 35, 45]
         assert df_filled['Name'].iloc[2] == 'Unknown'  # Constant
 
     def test_fill_all_columns_default(self, dataframe_with_missing_values):
@@ -441,6 +445,7 @@ class TestStandardizeColumns:
         df_std = unwrap(result)
         assert 'first name' in df_std.columns
         assert 'last name!' in df_std.columns
+        assert 'age' in df_std.columns
 
     def test_uppercase_conversion(self, dataframe_with_bad_columns):
         """Test uppercase conversion."""
@@ -449,6 +454,8 @@ class TestStandardizeColumns:
         assert is_ok(result)
         df_std = unwrap(result)
         assert 'FIRST NAME' in df_std.columns
+        assert 'LAST NAME!' in df_std.columns
+        assert 'AGE' in df_std.columns
 
     def test_title_case_conversion(self, dataframe_with_bad_columns):
         """Test title case conversion."""
@@ -457,6 +464,8 @@ class TestStandardizeColumns:
         assert is_ok(result)
         df_std = unwrap(result)
         assert 'First Name' in df_std.columns
+        assert 'Last Name!' in df_std.columns
+        assert 'Age' in df_std.columns
 
     def test_snake_case_conversion(self, dataframe_with_bad_columns):
         """Test snake case conversion."""
@@ -464,7 +473,9 @@ class TestStandardizeColumns:
 
         assert is_ok(result)
         df_std = unwrap(result)
-        assert 'First_Name' in df_std.columns
+        assert 'first_name' in df_std.columns  # lowercase with underscores
+        assert 'last_name!' in df_std.columns
+        assert 'age' in df_std.columns
 
     def test_custom_separator(self, dataframe_with_bad_columns):
         """Test custom separator."""
@@ -472,7 +483,8 @@ class TestStandardizeColumns:
 
         assert is_ok(result)
         df_std = unwrap(result)
-        assert 'First-Name' in df_std.columns
+        assert 'first-name' in df_std.columns  # lowercase with custom separator
+        assert 'last-name!' in df_std.columns
 
     def test_remove_special_characters_true(self, dataframe_with_bad_columns):
         """Test removing special characters."""
@@ -480,8 +492,9 @@ class TestStandardizeColumns:
 
         assert is_ok(result)
         df_std = unwrap(result)
-        assert 'last name' in df_std.columns  # '!' removed
-        assert 'lastname' not in df_std.columns  # Space preserved
+        assert 'last name' in df_std.columns  # '!' removed, space preserved
+        assert 'first name' in df_std.columns
+        assert 'age' in df_std.columns
 
     def test_remove_special_characters_false(self, dataframe_with_bad_columns):
         """Test keeping special characters."""
@@ -489,7 +502,9 @@ class TestStandardizeColumns:
 
         assert is_ok(result)
         df_std = unwrap(result)
-        assert 'last name!' in df_std.columns
+        assert 'last name!' in df_std.columns  # '!' preserved
+        assert 'first name' in df_std.columns
+        assert 'age' in df_std.columns
 
     def test_ensure_uniqueness(self):
         """Test that duplicate column names are made unique."""
@@ -530,7 +545,7 @@ class TestStandardizeColumns:
 
         assert is_ok(result)
         df_std = unwrap(result)
-        assert 'first name' in df_std.columns
+        assert 'first name' in df_std.columns  # Trimmed and lowercased
 
 
 # =============================================================================
@@ -653,7 +668,11 @@ class TestCleaningIntegration:
 
         assert is_ok(result)
         df_clean = unwrap(result)
+        # After standardization, dedup, etc., we should have at least some rows
         assert len(df_clean) >= 0
+        # Check that the standardized columns exist
+        assert 'first name' in df_clean.columns
+        assert 'salary' in df_clean.columns
 
     def test_cleaning_preserves_data_types(self):
         """Test that cleaning preserves data types."""
@@ -667,4 +686,5 @@ class TestCleaningIntegration:
 
         assert is_ok(result)
         df_clean = unwrap(result)
-        assert df_clean['Age'].dtype == df['Age'].dtype
+        # After standardization, 'Age' becomes 'age'
+        assert df_clean['age'].dtype == df['Age'].dtype

@@ -458,6 +458,12 @@ CompareError = ComparisonFailedError
 # Cleaning operation errors
 @dataclass
 @immutable
+class CleaningError:
+    """Generic cleaning operation failed."""
+
+    message: str
+@dataclass
+@immutable
 class InvalidFillStrategyError:
     """Invalid fill strategy specified."""
 
@@ -505,6 +511,14 @@ class CastFailedError:
     column: str
     target_type: str
     reason: str
+
+
+@dataclass
+@immutable
+class TransformingError:
+    """Generic transforming operation failed."""
+
+    message: str
 
 
 @dataclass
@@ -561,6 +575,14 @@ class InsufficientDataFramesError:
     """Less than 2 DataFrames provided for merge."""
 
     count: int
+
+
+@dataclass
+@immutable
+class JoiningError:
+    """Generic joining operation failed."""
+
+    message: str
 
 
 # Validation operation errors

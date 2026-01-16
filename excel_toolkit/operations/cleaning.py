@@ -14,6 +14,7 @@ from excel_toolkit.models.error_types import (
     InvalidParameterError,
     InvalidFillStrategyError,
     FillFailedError,
+    CleaningError,
 )
 
 
@@ -26,7 +27,7 @@ def trim_whitespace(
     df: pd.DataFrame,
     columns: list[str] | None = None,
     side: str = "both"
-) -> Result[pd.DataFrame, ColumnNotFoundError | InvalidParameterError]:
+) -> Result[pd.DataFrame, ColumnNotFoundError | InvalidParameterError | CleaningError]:
     """Trim whitespace from string columns.
 
     Args:
@@ -100,7 +101,7 @@ def remove_duplicates(
     df: pd.DataFrame,
     subset: list[str] | None = None,
     keep: str = "first"
-) -> Result[pd.DataFrame, CleaningError]:
+) -> Result[pd.DataFrame, ColumnNotFoundError | InvalidParameterError | CleaningError]:
     """Remove duplicate rows from DataFrame.
 
     Args:
@@ -161,7 +162,7 @@ def fill_missing_values(
     strategy: str | dict = "forward",
     columns: list[str] | None = None,
     value: Any = None
-) -> Result[pd.DataFrame, CleaningError]:
+) -> Result[pd.DataFrame, ColumnNotFoundError | InvalidFillStrategyError | FillFailedError]:
     """Fill missing values in DataFrame.
 
     Args:
@@ -244,12 +245,16 @@ def fill_missing_values(
                     available=list(df_filled.columns)
                 ))
 
-            # Apply strategy to each column
-            for col in columns:
-                result = _apply_fill_strategy(df_filled, col, strategy, value)
-                if is_err(result):
-                    return result
-                df_filled = unwrap(result)
+            # Handle drop strategy at DataFrame level
+            if strategy == "drop":
+                df_filled = df_filled.dropna(subset=columns)
+            else:
+                # Apply strategy to each column
+                for col in columns:
+                    result = _apply_fill_strategy(df_filled, col, strategy, value)
+                    if is_err(result):
+                        return result
+                    df_filled = unwrap(result)
 
     except Exception as e:
         return err(FillFailedError(
@@ -334,8 +339,8 @@ def standardize_columns(
     df: pd.DataFrame,
     case: str = "lower",
     separator: str = "_",
-    remove_special: bool = True
-) -> Result[pd.DataFrame, CleaningError]:
+    remove_special: bool = False
+) -> Result[pd.DataFrame, InvalidParameterError | CleaningError]:
     """Standardize column names.
 
     Args:
@@ -387,6 +392,9 @@ def standardize_columns(
             # Convert to string if not already
             col_str = str(col)
 
+            # Strip leading/trailing whitespace
+            col_str = col_str.strip()
+
             # Apply case conversion
             if case == "lower":
                 col_str = col_str.lower()
@@ -396,21 +404,20 @@ def standardize_columns(
                 col_str = col_str.title()
             elif case == "snake":
                 # Convert to snake_case
-                col_str = col_str.strip()
                 # Insert separator before capital letters (for CamelCase)
                 import re
                 col_str = re.sub(r'(?<=[a-z])(?=[A-Z])', separator, col_str)
-                # Convert to lowercase and replace spaces
+                # Convert to lowercase and replace spaces with separator
                 col_str = col_str.lower().replace(' ', separator)
 
-            # Replace spaces with separator
-            col_str = col_str.replace(' ', separator)
-
-            # Remove special characters if requested
+            # Remove special characters if requested (but preserve separator and spaces)
             if remove_special:
                 import re
-                # Keep only alphanumeric and separator
-                col_str = re.sub(rf'[^\w{re.escape(separator)}]', '', col_str)
+                # Keep only alphanumeric, separator, and spaces
+                col_str = re.sub(rf'[^\w\s{re.escape(separator)}]', '', col_str)
+
+            # Strip again after removing special chars
+            col_str = col_str.strip()
 
             # Ensure not empty
             if not col_str:
@@ -457,7 +464,7 @@ def clean_dataframe(
     fill_value: Any = None,
     standardize: bool = False,
     standardize_case: str = "lower"
-) -> Result[pd.DataFrame, CleaningError]:
+) -> Result[pd.DataFrame, ColumnNotFoundError | InvalidParameterError | InvalidFillStrategyError | FillFailedError | CleaningError]:
     """Apply multiple cleaning operations in sequence.
 
     Args:
