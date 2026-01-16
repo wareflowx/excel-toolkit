@@ -4,15 +4,18 @@ Cleans data by removing whitespace, standardizing case, and fixing formatting is
 """
 
 from pathlib import Path
-from typing import Any
 
 import typer
 import pandas as pd
-import numpy as np
 
-from excel_toolkit.core import HandlerFactory, ExcelHandler, CSVHandler
+from excel_toolkit.core import HandlerFactory
 from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
-from excel_toolkit.commands.common import display_table
+from excel_toolkit.operations.cleaning import trim_whitespace
+from excel_toolkit.commands.common import (
+    read_data_file,
+    write_or_display,
+    display_table,
+)
 
 
 def clean(
@@ -41,15 +44,7 @@ def clean(
         xl clean contacts.csv --keep-alphanumeric --column "phone"
         xl clean data.csv --uppercase --columns "category" --dry-run
     """
-    path = Path(file_path)
-    factory = HandlerFactory()
-
-    # Step 1: Validate file exists
-    if not path.exists():
-        typer.echo(f"File not found: {file_path}", err=True)
-        raise typer.Exit(1)
-
-    # Step 2: Check if at least one cleaning operation is specified
+    # 1. Validate operations
     operations = []
     if trim:
         operations.append("trim")
@@ -93,47 +88,16 @@ def clean(
         typer.echo("Error: Cannot specify both --remove-special and --keep-alphanumeric", err=True)
         raise typer.Exit(1)
 
-    # Step 3: Get handler
-    handler_result = factory.get_handler(path)
-    if is_err(handler_result):
-        error = unwrap_err(handler_result)
-        typer.echo(f"{error}", err=True)
-        raise typer.Exit(1)
-
-    handler = unwrap(handler_result)
-
-    # Step 4: Read file
-    if isinstance(handler, ExcelHandler):
-        sheet_name = sheet
-        kwargs = {"sheet_name": sheet_name} if sheet_name else {}
-        read_result = handler.read(path, **kwargs)
-    elif isinstance(handler, CSVHandler):
-        # Auto-detect encoding and delimiter
-        encoding_result = handler.detect_encoding(path)
-        encoding = unwrap(encoding_result) if is_ok(encoding_result) else "utf-8"
-
-        delimiter_result = handler.detect_delimiter(path, encoding)
-        delimiter = unwrap(delimiter_result) if is_ok(delimiter_result) else ","
-
-        read_result = handler.read(path, encoding=encoding, delimiter=delimiter)
-    else:
-        typer.echo("Unsupported handler type", err=True)
-        raise typer.Exit(1)
-
-    if is_err(read_result):
-        error = unwrap_err(read_result)
-        typer.echo(f"Error reading file: {error}", err=True)
-        raise typer.Exit(1)
-
-    df = unwrap(read_result)
+    # 2. Read file
+    df = read_data_file(file_path, sheet)
     original_count = len(df)
 
-    # Step 5: Handle empty file
+    # 3. Handle empty file
     if df.empty:
         typer.echo("File is empty (no data rows)")
         raise typer.Exit(0)
 
-    # Step 6: Determine columns to clean
+    # 4. Determine columns to clean
     if columns:
         column_list = [c.strip() for c in columns.split(",")]
         # Validate column names exist
@@ -144,19 +108,26 @@ def clean(
             raise typer.Exit(1)
     else:
         # Clean all string columns
-        column_list = []
-        for col in df.columns:
-            if df[col].dtype == "object":
-                column_list.append(col)
+        column_list = [col for col in df.columns if df[col].dtype == "object"]
 
     if not column_list:
         typer.echo("No string columns to clean")
         typer.echo("Use --columns to specify which columns to clean")
         raise typer.Exit(0)
 
-    # Step 7: Apply cleaning operations
+    # 5. Apply cleaning operations
     df_cleaned = df.copy()
 
+    # Use trim_whitespace operation if --trim specified
+    if trim:
+        result = trim_whitespace(df_cleaned, columns=column_list, side="both")
+        if is_err(result):
+            error = unwrap_err(result)
+            typer.echo(f"Error trimming whitespace: {error}", err=True)
+            raise typer.Exit(1)
+        df_cleaned = unwrap(result)
+
+    # Apply other operations
     for col in column_list:
         # Only clean string columns
         if df_cleaned[col].dtype != "object":
@@ -165,9 +136,6 @@ def clean(
         series = df_cleaned[col].copy()
 
         # Apply operations in order
-        if trim:
-            series = _trim_whitespace(series)
-
         if whitespace:
             series = _normalize_whitespace(series)
 
@@ -191,7 +159,7 @@ def clean(
 
         df_cleaned[col] = series
 
-    # Step 8: Display summary
+    # 6. Display summary
     typer.echo(f"Cleaned {len(column_list)} column(s)")
     typer.echo(f"Operations: {', '.join(operations)}")
     if columns:
@@ -199,25 +167,16 @@ def clean(
     typer.echo(f"Rows: {original_count}")
     typer.echo("")
 
-    # Step 9: Handle dry-run mode
+    # 7. Handle dry-run mode
     if dry_run:
         typer.echo("Preview of cleaned data:")
         preview_rows = min(5, original_count)
         display_table(df_cleaned.head(preview_rows))
         raise typer.Exit(0)
 
-    # Step 10: Write output or display
-    if output:
-        output_path = Path(output)
-        write_result = factory.write_file(df_cleaned, output_path)
-        if is_err(write_result):
-            error = unwrap_err(write_result)
-            typer.echo(f"Error writing file: {error}", err=True)
-            raise typer.Exit(1)
-        typer.echo(f"Written to: {output}")
-    else:
-        # Display data
-        display_table(df_cleaned)
+    # 8. Write or display
+    factory = HandlerFactory()
+    write_or_display(df_cleaned, factory, output, "table")
 
 
 def _trim_whitespace(series: pd.Series) -> pd.Series:
