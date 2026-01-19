@@ -28,6 +28,7 @@ from excel_toolkit.commands.append import append as append_command
 from excel_toolkit.commands.strip import strip as strip_command
 from excel_toolkit.commands.export import export as export_command
 from excel_toolkit.commands.extract import extract as extract_command
+from excel_toolkit.commands.calculate import calculate as calculate_command
 from excel_toolkit.commands.pivot import pivot as pivot_command
 from excel_toolkit.commands.aggregate import aggregate as aggregate_command
 from excel_toolkit.commands.compare import compare as compare_command
@@ -82,6 +83,7 @@ app.command()(append_command)
 app.command()(strip_command)
 app.command()(export_command)
 app.command()(extract_command)
+app.command()(calculate_command)
 app.command()(pivot_command)
 app.command()(aggregate_command)
 app.command()(compare_command)
