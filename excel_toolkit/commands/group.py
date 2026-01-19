@@ -25,7 +25,7 @@ from excel_toolkit.commands.common import (
 
 def group(
     file_path: str = typer.Argument(..., help="Path to input file"),
-    by: str | None = typer.Option(None, "--by", "-b", help="Columns to group by (comma-separated)"),
+    by: str | None = typer.Option(None, "--by", "-b", "-c", help="Columns to group by (comma-separated)"),
     aggregate: str | None = typer.Option(None, "--aggregate", "-a", help="Aggregations: column:func (comma-separated)"),
     sort: str | None = typer.Option(None, "--sort", help="Sort results by aggregation column (asc or desc)"),
     sort_column: str | None = typer.Option(None, "--sort-column", help="Column to sort by (default: first aggregation column)"),
