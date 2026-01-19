@@ -33,6 +33,7 @@ class DangerousPatternError:
         pattern: The dangerous pattern that was detected
     """
     pattern: str
+    ERROR_CODE: int = ErrorCode.DANGEROUS_PATTERN
 
 
 @dataclass
@@ -46,6 +47,7 @@ class ConditionTooLongError:
     """
     length: int
     max_length: int
+    ERROR_CODE: int = ErrorCode.CONDITION_TOO_LONG
 
 
 @dataclass
@@ -59,6 +61,7 @@ class UnbalancedParenthesesError:
     """
     open_count: int
     close_count: int
+    ERROR_CODE: int = ErrorCode.UNBALANCED_PARENTHESES
 
 
 @dataclass
@@ -72,6 +75,7 @@ class UnbalancedBracketsError:
     """
     open_count: int
     close_count: int
+    ERROR_CODE: int = ErrorCode.UNBALANCED_BRACKETS
 
 
 @dataclass
@@ -85,6 +89,7 @@ class UnbalancedQuotesError:
     """
     quote_type: str
     count: int
+    ERROR_CODE: int = ErrorCode.UNBALANCED_QUOTES
 
 
 @dataclass
@@ -98,6 +103,7 @@ class InvalidFunctionError:
     """
     function: str
     valid_functions: list[str]
+    ERROR_CODE: int = ErrorCode.INVALID_FUNCTION
 
 
 @dataclass
@@ -113,6 +119,7 @@ class NoColumnsError:
 class NoRowsError:
     """No row columns specified for pivot operation."""
     pass
+    ERROR_CODE: int = ErrorCode.NO_ROWS
 
 
 @dataclass
@@ -120,6 +127,7 @@ class NoRowsError:
 class NoValuesError:
     """No value columns specified for pivot operation."""
     pass
+    ERROR_CODE: int = ErrorCode.NO_VALUES
 
 
 @dataclass
@@ -130,6 +138,7 @@ class InvalidParameterError:
     parameter: str
     value: Any
     valid_values: list[str] | None = None
+    ERROR_CODE: int = ErrorCode.INVALID_PARAMETER
 
 
 @dataclass
@@ -143,6 +152,7 @@ class ColumnNotFoundError:
     """
     column: str
     available: list[str]
+    ERROR_CODE: int = ErrorCode.COLUMN_NOT_FOUND
 
 
 @dataclass
@@ -156,6 +166,7 @@ class ColumnsNotFoundError:
     """
     missing: list[str]
     available: list[str]
+    ERROR_CODE: int = ErrorCode.COLUMNS_NOT_FOUND
 
 
 @dataclass
@@ -167,6 +178,7 @@ class OverlappingColumnsError:
         overlap: List of column names that appear in both groups
     """
     overlap: list[str]
+    ERROR_CODE: int = ErrorCode.OVERLAPPING_COLUMNS
 
 
 # =============================================================================
@@ -184,6 +196,7 @@ class QueryFailedError:
     """
     message: str
     condition: str
+    ERROR_CODE: int = ErrorCode.QUERY_FAILED
 
 
 @dataclass
@@ -197,6 +210,7 @@ class ColumnMismatchError:
     """
     message: str
     condition: str
+    ERROR_CODE: int = ErrorCode.COLUMN_MISMATCH
 
 
 # =============================================================================
@@ -214,6 +228,7 @@ class NotComparableError:
     """
     column: str
     message: str
+    ERROR_CODE: int = ErrorCode.NOT_COMPARABLE
 
 
 @dataclass
@@ -225,6 +240,7 @@ class SortFailedError:
         message: The error message
     """
     message: str
+    ERROR_CODE: int = ErrorCode.SORT_FAILED
 
 
 # =============================================================================
@@ -242,6 +258,7 @@ class RowColumnsNotFoundError:
     """
     missing: list[str]
     available: list[str]
+    ERROR_CODE: int = ErrorCode.ROW_COLUMNS_NOT_FOUND
 
 
 @dataclass
@@ -255,6 +272,7 @@ class ColumnColumnsNotFoundError:
     """
     missing: list[str]
     available: list[str]
+    ERROR_CODE: int = ErrorCode.COLUMN_COLUMNS_NOT_FOUND
 
 
 @dataclass
@@ -268,6 +286,7 @@ class ValueColumnsNotFoundError:
     """
     missing: list[str]
     available: list[str]
+    ERROR_CODE: int = ErrorCode.VALUE_COLUMNS_NOT_FOUND
 
 
 @dataclass
@@ -279,6 +298,7 @@ class PivotFailedError:
         message: The error message
     """
     message: str
+    ERROR_CODE: int = ErrorCode.PIVOT_FAILED
 
 
 # =============================================================================
@@ -296,6 +316,7 @@ class InvalidFormatError:
     """
     spec: str
     expected_format: str
+    ERROR_CODE: int = ErrorCode.INVALID_FORMAT
 
 
 @dataclass
@@ -303,6 +324,7 @@ class InvalidFormatError:
 class NoValidSpecsError:
     """No valid specifications found."""
     pass
+    ERROR_CODE: int = ErrorCode.NO_VALID_SPECS
 
 
 # =============================================================================
@@ -320,6 +342,7 @@ class GroupColumnsNotFoundError:
     """
     missing: list[str]
     available: list[str]
+    ERROR_CODE: int = ErrorCode.GROUP_COLUMNS_NOT_FOUND
 
 
 @dataclass
@@ -333,6 +356,7 @@ class AggColumnsNotFoundError:
     """
     missing: list[str]
     available: list[str]
+    ERROR_CODE: int = ErrorCode.AGG_COLUMNS_NOT_FOUND
 
 
 @dataclass
@@ -344,6 +368,7 @@ class AggregationFailedError:
         message: The error message
     """
     message: str
+    ERROR_CODE: int = ErrorCode.AGGREGATION_FAILED
 
 
 # =============================================================================
@@ -361,6 +386,7 @@ class KeyColumnsNotFoundError:
     """
     missing: list[str]
     available: list[str]
+    ERROR_CODE: int = ErrorCode.KEY_COLUMNS_NOT_FOUND
 
 
 @dataclass
@@ -374,6 +400,7 @@ class KeyColumnsNotFoundError2:
     """
     missing: list[str]
     available: list[str]
+    ERROR_CODE: int = ErrorCode.KEY_COLUMNS_NOT_FOUND_2
 
 
 @dataclass
@@ -385,6 +412,7 @@ class ComparisonFailedError:
         message: The error message
     """
     message: str
+    ERROR_CODE: int = ErrorCode.COMPARISON_FAILED
 
 
 # =============================================================================
@@ -464,6 +492,7 @@ class CleaningError:
     """Generic cleaning operation failed."""
 
     message: str
+    ERROR_CODE: int = ErrorCode.CLEANING_FAILED
 @dataclass
 @immutable
 class InvalidFillStrategyError:
@@ -473,6 +502,7 @@ class InvalidFillStrategyError:
     valid_strategies: list[str] = field(default_factory=lambda: [
         "forward", "backward", "mean", "median", "constant", "drop"
     ])
+    ERROR_CODE: int = ErrorCode.INVALID_FILL_STRATEGY
 
 
 @dataclass
@@ -482,6 +512,7 @@ class FillFailedError:
 
     column: str
     reason: str
+    ERROR_CODE: int = ErrorCode.FILL_FAILED
 
 
 # Transforming operation errors
@@ -492,6 +523,7 @@ class InvalidExpressionError:
 
     expression: str
     reason: str
+    ERROR_CODE: int = ErrorCode.INVALID_EXPRESSION
 
 
 @dataclass
@@ -503,6 +535,7 @@ class InvalidTypeError:
     valid_types: list[str] = field(default_factory=lambda: [
         "int", "float", "str", "bool", "datetime", "category"
     ])
+    ERROR_CODE: int = ErrorCode.INVALID_TYPE
 
 
 @dataclass
@@ -513,6 +546,7 @@ class CastFailedError:
     column: str
     target_type: str
     reason: str
+    ERROR_CODE: int = ErrorCode.CAST_FAILED
 
 
 @dataclass
@@ -521,6 +555,7 @@ class TransformingError:
     """Generic transforming operation failed."""
 
     message: str
+    ERROR_CODE: int = ErrorCode.TRANSFORMING_FAILED
 
 
 @dataclass
@@ -532,6 +567,7 @@ class InvalidTransformationError:
     valid_transformations: list[str] = field(default_factory=lambda: [
         "log", "sqrt", "abs", "exp", "standardize", "normalize"
     ])
+    ERROR_CODE: int = ErrorCode.INVALID_TRANSFORMATION
 
 
 # Joining operation errors
@@ -544,6 +580,7 @@ class InvalidJoinTypeError:
     valid_types: list[str] = field(default_factory=lambda: [
         "inner", "left", "right", "outer", "cross"
     ])
+    ERROR_CODE: int = ErrorCode.INVALID_JOIN_TYPE
 
 
 @dataclass
@@ -552,6 +589,7 @@ class InvalidJoinParametersError:
     """Invalid combination of join parameters."""
 
     reason: str
+    ERROR_CODE: int = ErrorCode.INVALID_JOIN_PARAMETERS
 
 
 @dataclass
@@ -561,6 +599,7 @@ class JoinColumnsNotFoundError:
 
     missing_in_left: list[str] = field(default_factory=list)
     missing_in_right: list[str] = field(default_factory=list)
+    ERROR_CODE: int = ErrorCode.JOIN_COLUMNS_NOT_FOUND
 
 
 @dataclass
@@ -569,6 +608,7 @@ class MergeColumnsNotFoundError:
     """Merge columns not found in all DataFrames."""
 
     missing: dict[int, list[str]] = field(default_factory=lambda: {})  # DataFrame index -> missing columns
+    ERROR_CODE: int = ErrorCode.MERGE_COLUMNS_NOT_FOUND
 
 
 @dataclass
@@ -577,6 +617,7 @@ class InsufficientDataFramesError:
     """Less than 2 DataFrames provided for merge."""
 
     count: int
+    ERROR_CODE: int = ErrorCode.INSUFFICIENT_DATAFRAMES
 
 
 @dataclass
@@ -585,6 +626,7 @@ class JoiningError:
     """Generic joining operation failed."""
 
     message: str
+    ERROR_CODE: int = ErrorCode.JOINING_FAILED
 
 
 # Validation operation errors
@@ -597,6 +639,7 @@ class ValueOutOfRangeError:
     min_value: Any
     max_value: Any
     violation_count: int
+    ERROR_CODE: int = ErrorCode.VALUE_OUT_OF_RANGE
 
 
 @dataclass
@@ -608,6 +651,7 @@ class NullValueThresholdExceededError:
     null_count: int
     null_percent: float
     threshold: float
+    ERROR_CODE: int = ErrorCode.NULL_VALUE_THRESHOLD_EXCEEDED
 
 
 @dataclass
@@ -618,6 +662,7 @@ class UniquenessViolationError:
     columns: list[str]
     duplicate_count: int
     sample_duplicates: list = field(default_factory=list)
+    ERROR_CODE: int = ErrorCode.UNIQUENESS_VIOLATION
 
 
 @dataclass
@@ -627,6 +672,7 @@ class InvalidRuleError:
 
     rule_type: str
     reason: str
+    ERROR_CODE: int = ErrorCode.INVALID_RULE
 
 
 @dataclass
@@ -637,6 +683,7 @@ class TypeMismatchError:
     column: str
     expected_type: str | list[str]
     actual_type: str
+    ERROR_CODE: int = ErrorCode.TYPE_MISMATCH
 
 
 # Validation result structure (not an error type, mutable)
