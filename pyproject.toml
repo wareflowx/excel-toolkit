@@ -1,5 +1,5 @@
 [project]
-name = "excel-toolkit"
+name = "excel-toolkit-cwd"
 version = "0.3.0"
 description = "Command-line toolkit for Excel data manipulation and analysis"
 readme = "README.md"

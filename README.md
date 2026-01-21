@@ -24,13 +24,13 @@ Excel CLI Toolkit (`xl`) is a powerful command-line interface for performing dat
 ### Using pip
 
 ```bash
-pip install excel-toolkit
+pip install excel-toolkit-cwd
 ```
 
 ### Using uv (recommended)
 
 ```bash
-uv pip install excel-toolkit
+uv pip install excel-toolkit-cwd
 ```
 
 ### Development installation
@@ -44,7 +44,7 @@ uv pip install -e ".[dev]"
 ### With Parquet support
 
 ```bash
-pip install "excel-toolkit[parquet]"
+pip install "excel-toolkit-cwd[parquet]"
 ```
 
 ## Quick Start
