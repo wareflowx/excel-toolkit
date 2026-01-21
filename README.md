@@ -36,7 +36,7 @@ uv pip install excel-toolkit
 ### Development installation
 
 ```bash
-git clone https://github.com/yourusername/excel-toolkit.git
+git clone https://github.com/wareflowx/excel-toolkit.git
 cd excel-toolkit
 uv pip install -e ".[dev]"
 ```
@@ -113,7 +113,7 @@ For detailed documentation, see the [docs/](docs/) directory:
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/excel-toolkit.git
+git clone https://github.com/wareflowx/excel-toolkit.git
 cd excel-toolkit
 
 # Install dependencies
