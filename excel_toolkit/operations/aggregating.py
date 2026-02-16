@@ -71,6 +71,7 @@ def parse_aggregation_specs(specs: str) -> Result[dict[str, list[str]], ParseErr
     parse_errors: list[str] = []
     current_column: str | None = None
     current_funcs: list[str] = []
+    seen_columns_with_colon: set[str] = set()  # Track columns specified with "column:" prefix
 
     # Split by comma and process tokens
     for token in specs.split(","):
@@ -90,6 +91,17 @@ def parse_aggregation_specs(specs: str) -> Result[dict[str, list[str]], ParseErr
             col_name, funcs = token.split(":", 1)
             col_name = col_name.strip()
             funcs = funcs.strip()
+
+            # Check for duplicate column specification
+            if col_name in seen_columns_with_colon:
+                parse_errors.append(
+                    f"Column '{col_name}' specified multiple times. Use '{col_name}:func1,func2' instead of '{col_name}:func1,{col_name}:func2'"
+                )
+                current_column = None
+                current_funcs = []
+                continue
+
+            seen_columns_with_colon.add(col_name)
 
             if not funcs:
                 parse_errors.append(f"No functions specified for column: '{col_name}'")
