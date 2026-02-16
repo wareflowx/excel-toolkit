@@ -8,20 +8,19 @@ from typing import Any
 
 import pandas as pd
 
-from excel_toolkit.fp import ok, err, is_ok, is_err, unwrap, unwrap_err, Result
+from excel_toolkit.fp import Result, err, is_err, ok, unwrap, unwrap_err
 from excel_toolkit.models.error_types import (
-    InvalidFunctionError,
-    NoRowsError,
-    NoColumnsError,
-    NoValuesError,
-    RowColumnsNotFoundError,
     ColumnColumnsNotFoundError,
-    ValueColumnsNotFoundError,
+    InvalidFunctionError,
+    NoColumnsError,
+    NoRowsError,
+    NoValuesError,
+    PivotError,
     PivotFailedError,
     PivotValidationError,
-    PivotError,
+    RowColumnsNotFoundError,
+    ValueColumnsNotFoundError,
 )
-
 
 # =============================================================================
 # Constants
@@ -63,10 +62,7 @@ def validate_aggregation_function(func: str) -> Result[str, PivotValidationError
         "avg" → "mean"
     """
     if func.lower() not in VALID_AGGREGATION_FUNCTIONS:
-        return err(InvalidFunctionError(
-            function=func,
-            valid_functions=VALID_AGGREGATION_FUNCTIONS
-        ))
+        return err(InvalidFunctionError(function=func, valid_functions=VALID_AGGREGATION_FUNCTIONS))
 
     # Normalize "avg" to "mean"
     normalized = "mean" if func.lower() == "avg" else func.lower()
@@ -74,10 +70,7 @@ def validate_aggregation_function(func: str) -> Result[str, PivotValidationError
 
 
 def validate_pivot_columns(
-    df: pd.DataFrame,
-    rows: list[str],
-    columns: list[str],
-    values: list[str]
+    df: pd.DataFrame, rows: list[str], columns: list[str], values: list[str]
 ) -> Result[None, PivotValidationError]:
     """Validate pivot columns exist in DataFrame.
 
@@ -110,26 +103,17 @@ def validate_pivot_columns(
     # Check row columns
     missing_rows = [c for c in rows if c not in df.columns]
     if missing_rows:
-        return err(RowColumnsNotFoundError(
-            missing=missing_rows,
-            available=list(df.columns)
-        ))
+        return err(RowColumnsNotFoundError(missing=missing_rows, available=list(df.columns)))
 
     # Check column columns
     missing_cols = [c for c in columns if c not in df.columns]
     if missing_cols:
-        return err(ColumnColumnsNotFoundError(
-            missing=missing_cols,
-            available=list(df.columns)
-        ))
+        return err(ColumnColumnsNotFoundError(missing=missing_cols, available=list(df.columns)))
 
     # Check value columns
     missing_vals = [c for c in values if c not in df.columns]
     if missing_vals:
-        return err(ValueColumnsNotFoundError(
-            missing=missing_vals,
-            available=list(df.columns)
-        ))
+        return err(ValueColumnsNotFoundError(missing=missing_vals, available=list(df.columns)))
 
     return ok(None)
 
@@ -166,7 +150,7 @@ def parse_fill_value(value: str | None) -> Any:
         return 0
 
     if value.lower() == "nan":
-        return float('nan')
+        return float("nan")
 
     # Try to parse as int
     try:
@@ -204,13 +188,11 @@ def flatten_multiindex(df: pd.DataFrame) -> pd.DataFrame:
 
     # Flatten columns if MultiIndex
     if isinstance(result.columns, pd.MultiIndex):
-        result.columns = ['_'.join(map(str, col)).strip()
-                         for col in result.columns.values]
+        result.columns = ["_".join(map(str, col)).strip() for col in result.columns.values]
 
     # Flatten index if MultiIndex
     if isinstance(result.index, pd.MultiIndex):
-        result.index = ['_'.join(map(str, idx)).strip()
-                       for idx in result.index.values]
+        result.index = ["_".join(map(str, idx)).strip() for idx in result.index.values]
 
     # Reset index
     result = result.reset_index()
@@ -229,7 +211,7 @@ def create_pivot_table(
     columns: list[str],
     values: list[str],
     aggfunc: str = "sum",
-    fill_value: Any = None
+    fill_value: Any = None,
 ) -> Result[pd.DataFrame, PivotError]:
     """Create pivot table from DataFrame.
 
@@ -251,7 +233,11 @@ def create_pivot_table(
     agg_result = validate_aggregation_function(aggfunc)
     if is_err(agg_result):
         error = unwrap_err(agg_result)
-        return err(PivotFailedError(f"Invalid aggregation function: {error.function}. Valid: {', '.join(error.valid_functions)}"))
+        return err(
+            PivotFailedError(
+                f"Invalid aggregation function: {error.function}. Valid: {', '.join(error.valid_functions)}"
+            )
+        )
 
     agg_func_normalized = unwrap(agg_result)
 
@@ -266,11 +252,23 @@ def create_pivot_table(
         elif isinstance(error, NoValuesError):
             return err(PivotFailedError("No value columns specified"))
         elif isinstance(error, RowColumnsNotFoundError):
-            return err(PivotFailedError(f"Row columns not found: {', '.join(error.missing)}. Available: {', '.join(error.available)}"))
+            return err(
+                PivotFailedError(
+                    f"Row columns not found: {', '.join(error.missing)}. Available: {', '.join(error.available)}"
+                )
+            )
         elif isinstance(error, ColumnColumnsNotFoundError):
-            return err(PivotFailedError(f"Column columns not found: {', '.join(error.missing)}. Available: {', '.join(error.available)}"))
+            return err(
+                PivotFailedError(
+                    f"Column columns not found: {', '.join(error.missing)}. Available: {', '.join(error.available)}"
+                )
+            )
         elif isinstance(error, ValueColumnsNotFoundError):
-            return err(PivotFailedError(f"Value columns not found: {', '.join(error.missing)}. Available: {', '.join(error.available)}"))
+            return err(
+                PivotFailedError(
+                    f"Value columns not found: {', '.join(error.missing)}. Available: {', '.join(error.available)}"
+                )
+            )
 
     # Create pivot table
     try:

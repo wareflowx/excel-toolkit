@@ -3,10 +3,11 @@
 Tests for the sort command that sorts rows based on column values.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -107,7 +108,9 @@ class TestSortCommand:
 
     def test_sort_single_column_descending(self, sample_excel_file: Path):
         """Test sorting by single column in descending order."""
-        result = runner.invoke(app, ["sort", str(sample_excel_file), "--columns", "salary", "--desc"])
+        result = runner.invoke(
+            app, ["sort", str(sample_excel_file), "--columns", "salary", "--desc"]
+        )
 
         assert result.exit_code == 0
         assert "Sorted 5 rows" in result.stdout
@@ -134,28 +137,36 @@ class TestSortCommand:
 
     def test_sort_limited_rows(self, sample_excel_file: Path):
         """Test limiting results."""
-        result = runner.invoke(app, ["sort", str(sample_excel_file), "--columns", "name", "--rows", "3"])
+        result = runner.invoke(
+            app, ["sort", str(sample_excel_file), "--columns", "name", "--rows", "3"]
+        )
 
         assert result.exit_code == 0
         assert "Sorted" in result.stdout
 
     def test_sort_csv_format(self, sample_excel_file: Path):
         """Test CSV output format."""
-        result = runner.invoke(app, ["sort", str(sample_excel_file), "--columns", "age", "--format", "csv"])
+        result = runner.invoke(
+            app, ["sort", str(sample_excel_file), "--columns", "age", "--format", "csv"]
+        )
 
         assert result.exit_code == 0
         assert "," in result.stdout or "name,age" in result.stdout
 
     def test_sort_json_format(self, sample_excel_file: Path):
         """Test JSON output format."""
-        result = runner.invoke(app, ["sort", str(sample_excel_file), "--columns", "name", "--format", "json"])
+        result = runner.invoke(
+            app, ["sort", str(sample_excel_file), "--columns", "name", "--format", "json"]
+        )
 
         assert result.exit_code == 0
         assert "[" in result.stdout or "{" in result.stdout
 
     def test_sort_with_filter(self, sample_excel_file: Path):
         """Test sorting with filter condition."""
-        result = runner.invoke(app, ["sort", str(sample_excel_file), "--columns", "age", "--where", "age > 25"])
+        result = runner.invoke(
+            app, ["sort", str(sample_excel_file), "--columns", "age", "--where", "age > 25"]
+        )
 
         assert result.exit_code == 0
         assert "Sorted" in result.stdout
@@ -163,14 +174,18 @@ class TestSortCommand:
 
     def test_sort_with_filter_no_matches(self, sample_excel_file: Path):
         """Test sort with filter that matches no rows."""
-        result = runner.invoke(app, ["sort", str(sample_excel_file), "--columns", "age", "--where", "age > 100"])
+        result = runner.invoke(
+            app, ["sort", str(sample_excel_file), "--columns", "age", "--where", "age > 100"]
+        )
 
         assert result.exit_code == 0
         assert "No rows match" in result.stdout
 
     def test_sort_na_placement_first(self, file_with_nulls: Path):
         """Test sorting with NaN values placed first."""
-        result = runner.invoke(app, ["sort", str(file_with_nulls), "--columns", "value", "--na-placement", "first"])
+        result = runner.invoke(
+            app, ["sort", str(file_with_nulls), "--columns", "value", "--na-placement", "first"]
+        )
 
         assert result.exit_code == 0
         assert "Sorted" in result.stdout
@@ -178,7 +193,9 @@ class TestSortCommand:
 
     def test_sort_na_placement_last(self, file_with_nulls: Path):
         """Test sorting with NaN values placed last (default)."""
-        result = runner.invoke(app, ["sort", str(file_with_nulls), "--columns", "value", "--na-placement", "last"])
+        result = runner.invoke(
+            app, ["sort", str(file_with_nulls), "--columns", "value", "--na-placement", "last"]
+        )
 
         assert result.exit_code == 0
         assert "Sorted" in result.stdout
@@ -186,7 +203,9 @@ class TestSortCommand:
 
     def test_sort_invalid_na_placement(self, sample_excel_file: Path):
         """Test invalid na_placement value."""
-        result = runner.invoke(app, ["sort", str(sample_excel_file), "--columns", "age", "--na-placement", "invalid"])
+        result = runner.invoke(
+            app, ["sort", str(sample_excel_file), "--columns", "age", "--na-placement", "invalid"]
+        )
 
         assert result.exit_code == 1
 
@@ -231,7 +250,9 @@ class TestSortCommand:
 
     def test_sort_invalid_filter_condition(self, sample_excel_file: Path):
         """Test sort with invalid filter condition."""
-        result = runner.invoke(app, ["sort", str(sample_excel_file), "--columns", "age", "--where", "invalid > 30"])
+        result = runner.invoke(
+            app, ["sort", str(sample_excel_file), "--columns", "age", "--where", "invalid > 30"]
+        )
 
         assert result.exit_code == 1
 

@@ -7,23 +7,20 @@ Tests for ExcelHandler, CSVHandler, and HandlerFactory including:
 - Factory handler selection
 """
 
-import pytest
 from pathlib import Path
+
 import pandas as pd
+import pytest
 
 from excel_toolkit.core import (
-    ExcelHandler,
     CSVHandler,
-    HandlerFactory,
+    ExcelHandler,
     FileNotFoundError,
-    FileAccessError,
-    UnsupportedFormatError,
+    HandlerFactory,
     InvalidFileError,
-    FileSizeError,
-    EncodingError,
+    UnsupportedFormatError,
 )
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
-
+from excel_toolkit.fp import is_err, is_ok, unwrap, unwrap_err
 
 # =============================================================================
 # Fixtures
@@ -61,7 +58,9 @@ def multi_sheet_excel_file(tmp_path: Path) -> Path:
 @pytest.fixture
 def sample_csv_file(tmp_path: Path) -> Path:
     """Create a sample CSV file for testing."""
-    df = pd.DataFrame({"product": ["A", "B", "C"], "price": [10.5, 20.0, 15.3], "stock": [100, 50, 75]})
+    df = pd.DataFrame(
+        {"product": ["A", "B", "C"], "price": [10.5, 20.0, 15.3], "stock": [100, 50, 75]}
+    )
     file_path = tmp_path / "test.csv"
     df.to_csv(file_path, index=False)
     return file_path

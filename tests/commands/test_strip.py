@@ -3,10 +3,11 @@
 Tests for the strip command that removes whitespace from cell values.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -25,7 +26,13 @@ def whitespace_file(tmp_path: Path) -> Path:
     df = pd.DataFrame(
         {
             "name": ["  Alice  ", "Bob", "  Charlie", "David  ", "  Eve  "],
-            "email": ["  alice@example.com  ", "bob@example.com", "  charlie@example.com", "david@example.com  ", "  eve@example.com"],
+            "email": [
+                "  alice@example.com  ",
+                "bob@example.com",
+                "  charlie@example.com",
+                "david@example.com  ",
+                "  eve@example.com",
+            ],
             "age": [25, 30, 35, 40, 45],
             "city": ["  NYC  ", "LA", "  Chicago", "Boston  ", "  Seattle  "],
         }
@@ -84,10 +91,7 @@ class TestStripCommand:
     def test_strip_all_columns(self, whitespace_file: Path, tmp_path: Path):
         """Test strip all string columns."""
         output_path = tmp_path / "output.xlsx"
-        result = runner.invoke(app, [
-            "strip", str(whitespace_file),
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(app, ["strip", str(whitespace_file), "--output", str(output_path)])
 
         assert result.exit_code == 0
         assert "Cells modified:" in result.stdout
@@ -97,11 +101,17 @@ class TestStripCommand:
     def test_strip_specific_columns(self, whitespace_file: Path, tmp_path: Path):
         """Test strip specific columns only."""
         output_path = tmp_path / "output.xlsx"
-        result = runner.invoke(app, [
-            "strip", str(whitespace_file),
-            "--columns", "name,email",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "strip",
+                str(whitespace_file),
+                "--columns",
+                "name,email",
+                "--output",
+                str(output_path),
+            ],
+        )
 
         assert result.exit_code == 0
         assert "Specified columns: name, email" in result.stdout
@@ -110,11 +120,9 @@ class TestStripCommand:
     def test_strip_left_only(self, whitespace_file: Path, tmp_path: Path):
         """Test strip only leading whitespace."""
         output_path = tmp_path / "output.xlsx"
-        result = runner.invoke(app, [
-            "strip", str(whitespace_file),
-            "--left",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app, ["strip", str(whitespace_file), "--left", "--output", str(output_path)]
+        )
 
         assert result.exit_code == 0
         assert "Strip mode: left" in result.stdout
@@ -123,11 +131,9 @@ class TestStripCommand:
     def test_strip_right_only(self, whitespace_file: Path, tmp_path: Path):
         """Test strip only trailing whitespace."""
         output_path = tmp_path / "output.xlsx"
-        result = runner.invoke(app, [
-            "strip", str(whitespace_file),
-            "--right",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app, ["strip", str(whitespace_file), "--right", "--output", str(output_path)]
+        )
 
         assert result.exit_code == 0
         # The default is both left and right, so if we only specify --right, left defaults to True too
@@ -137,11 +143,9 @@ class TestStripCommand:
     def test_strip_both_sides(self, whitespace_file: Path, tmp_path: Path):
         """Test strip both sides (default)."""
         output_path = tmp_path / "output.xlsx"
-        result = runner.invoke(app, [
-            "strip", str(whitespace_file),
-            "--left", "--right",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app, ["strip", str(whitespace_file), "--left", "--right", "--output", str(output_path)]
+        )
 
         assert result.exit_code == 0
         assert "Strip mode: left/right" in result.stdout
@@ -150,11 +154,17 @@ class TestStripCommand:
     def test_strip_csv_file(self, csv_whitespace_file: Path, tmp_path: Path):
         """Test strip from CSV file."""
         output_path = tmp_path / "output.csv"
-        result = runner.invoke(app, [
-            "strip", str(csv_whitespace_file),
-            "--columns", "product",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "strip",
+                str(csv_whitespace_file),
+                "--columns",
+                "product",
+                "--output",
+                str(output_path),
+            ],
+        )
 
         assert result.exit_code == 0
         assert output_path.exists()
@@ -162,10 +172,7 @@ class TestStripCommand:
     def test_strip_mixed_types(self, mixed_types_file: Path, tmp_path: Path):
         """Test strip with mixed data types."""
         output_path = tmp_path / "output.xlsx"
-        result = runner.invoke(app, [
-            "strip", str(mixed_types_file),
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(app, ["strip", str(mixed_types_file), "--output", str(output_path)])
 
         assert result.exit_code == 0
         # Should only process string columns
@@ -174,38 +181,29 @@ class TestStripCommand:
     def test_strip_specific_sheet(self, whitespace_file: Path, tmp_path: Path):
         """Test strip from specific sheet."""
         output_path = tmp_path / "output.xlsx"
-        result = runner.invoke(app, [
-            "strip", str(whitespace_file),
-            "--sheet", "Sheet1",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app, ["strip", str(whitespace_file), "--sheet", "Sheet1", "--output", str(output_path)]
+        )
 
         assert result.exit_code == 0
 
     def test_strip_invalid_column(self, whitespace_file: Path):
         """Test strip with non-existent column."""
-        result = runner.invoke(app, [
-            "strip", str(whitespace_file),
-            "--columns", "invalid_column"
-        ])
+        result = runner.invoke(app, ["strip", str(whitespace_file), "--columns", "invalid_column"])
 
         assert result.exit_code == 1
         assert "Columns not found" in result.stdout or "Available columns" in result.stdout
 
     def test_strip_empty_file(self, empty_file: Path):
         """Test strip on empty file."""
-        result = runner.invoke(app, [
-            "strip", str(empty_file)
-        ])
+        result = runner.invoke(app, ["strip", str(empty_file)])
 
         assert result.exit_code == 0
         assert "empty" in result.stdout.lower()
 
     def test_strip_nonexistent_file(self):
         """Test strip on non-existent file."""
-        result = runner.invoke(app, [
-            "strip", "missing.xlsx"
-        ])
+        result = runner.invoke(app, ["strip", "missing.xlsx"])
 
         assert result.exit_code == 1
         assert "File not found" in result.stdout or "not found" in result.stderr

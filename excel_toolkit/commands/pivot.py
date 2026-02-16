@@ -3,30 +3,35 @@
 Creates pivot tables from data files.
 """
 
-from pathlib import Path
 import typer
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
-from excel_toolkit.operations.pivoting import (
-    validate_aggregation_function,
-    validate_pivot_columns,
-    parse_fill_value,
-    create_pivot_table,
-)
 from excel_toolkit.commands.common import (
     read_data_file,
     write_or_display,
+)
+from excel_toolkit.core import HandlerFactory
+from excel_toolkit.fp import is_err, unwrap, unwrap_err
+from excel_toolkit.operations.pivoting import (
+    create_pivot_table,
+    parse_fill_value,
+    validate_aggregation_function,
+    validate_pivot_columns,
 )
 
 
 def pivot(
     file_path: str = typer.Argument(..., help="Path to input file"),
     rows: str = typer.Option(..., "--rows", "-r", help="Column(s) for pivot table rows"),
-    columns: str | None = typer.Option(None, "--columns", "-c", help="Column(s) for pivot table columns"),
+    columns: str | None = typer.Option(
+        None, "--columns", "-c", help="Column(s) for pivot table columns"
+    ),
     values: str = typer.Option(..., "--values", "-v", help="Column(s) for pivot table values"),
-    aggfunc: str = typer.Option("sum", "--aggfunc", "-a", help="Aggregation function (sum, mean, count, etc.)"),
-    fill_value: str | None = typer.Option(None, "--fill", "-f", help="Fill value for missing cells"),
+    aggfunc: str = typer.Option(
+        "sum", "--aggfunc", "-a", help="Aggregation function (sum, mean, count, etc.)"
+    ),
+    fill_value: str | None = typer.Option(
+        None, "--fill", "-f", help="Fill value for missing cells"
+    ),
     output: str | None = typer.Option(None, "--output", "-o", help="Output file path"),
     format: str = typer.Option("table", "--format", help="Output format (table, csv, json)"),
     sheet: str | None = typer.Option(None, "--sheet", "-s", help="Sheet name for Excel files"),
@@ -93,7 +98,10 @@ def pivot(
             value_agg_funcs = {}
         else:
             # Multiple different aggregations - not supported yet
-            typer.echo("Error: Multiple different aggregation functions in --values not yet supported", err=True)
+            typer.echo(
+                "Error: Multiple different aggregation functions in --values not yet supported",
+                err=True,
+            )
             typer.echo("Use --aggfunc to specify a single aggregation for all values", err=True)
             typer.echo(f"Found: {', '.join(unique_aggs)}", err=True)
             raise typer.Exit(1)
@@ -131,7 +139,7 @@ def pivot(
         columns=col_cols,
         values=value_cols,
         aggfunc=agg_func_normalized,
-        fill_value=fill_val
+        fill_value=fill_val,
     )
     if is_err(result):
         error = unwrap_err(result)

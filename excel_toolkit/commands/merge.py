@@ -3,23 +3,23 @@
 Merge multiple files vertically.
 """
 
-from pathlib import Path
-from typing import Any
 import glob
+from pathlib import Path
 
-import typer
 import pandas as pd
+import typer
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
 from excel_toolkit.commands.common import (
     read_data_file,
-    write_or_display,
 )
+from excel_toolkit.core import HandlerFactory
+from excel_toolkit.fp import is_err, unwrap_err
 
 
 def merge(
-    files: str = typer.Option(..., "--files", "-f", help="Input files (comma-separated, supports wildcards)"),
+    files: str = typer.Option(
+        ..., "--files", "-f", help="Input files (comma-separated, supports wildcards)"
+    ),
     output: str = typer.Option(..., "--output", "-o", help="Output file path"),
     sheet: str | None = typer.Option(None, "--sheet", "-s", help="Sheet name for Excel files"),
     ignore_index: bool = typer.Option(False, "--ignore-index", help="Reset index in merged file"),
@@ -42,7 +42,7 @@ def merge(
     for file_pattern in files.split(","):
         file_pattern = file_pattern.strip()
         # Check if it contains wildcards
-        if '*' in file_pattern or '?' in file_pattern:
+        if "*" in file_pattern or "?" in file_pattern:
             matched = glob.glob(file_pattern)
             if not matched:
                 typer.echo(f"Error: No files found matching pattern: {file_pattern}", err=True)

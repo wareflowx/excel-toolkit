@@ -3,26 +3,29 @@
 Perform custom aggregations on grouped data.
 """
 
-from pathlib import Path
 import typer
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
-from excel_toolkit.operations.aggregating import (
-    parse_aggregation_specs,
-    validate_aggregation_columns,
-    aggregate_groups,
-)
 from excel_toolkit.commands.common import (
     read_data_file,
     write_or_display,
+)
+from excel_toolkit.core import HandlerFactory
+from excel_toolkit.fp import is_err, unwrap, unwrap_err
+from excel_toolkit.operations.aggregating import (
+    aggregate_groups,
+    parse_aggregation_specs,
+    validate_aggregation_columns,
 )
 
 
 def aggregate(
     file_path: str = typer.Argument(..., help="Path to input file"),
-    group: str | None = typer.Option(None, "--group", "-g", help="Columns to group by (comma-separated)"),
-    functions: str | None = typer.Option(None, "--functions", "-f", help="Aggregations: column:func1,func2 (comma-separated)"),
+    group: str | None = typer.Option(
+        None, "--group", "-g", help="Columns to group by (comma-separated)"
+    ),
+    functions: str | None = typer.Option(
+        None, "--functions", "-f", help="Aggregations: column:func1,func2 (comma-separated)"
+    ),
     output: str | None = typer.Option(None, "--output", "-o", help="Output file path"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Show preview without writing"),
     sheet: str | None = typer.Option(None, "--sheet", "-s", help="Sheet name for Excel files"),
@@ -46,7 +49,9 @@ def aggregate(
     if not functions:
         typer.echo("Error: Must specify --functions", err=True)
         typer.echo("Format: column:func1,func2 (e.g., 'Amount:sum,mean')", err=True)
-        typer.echo("Supported functions: sum, mean, avg, median, min, max, count, std, var, first, last")
+        typer.echo(
+            "Supported functions: sum, mean, avg, median, min, max, count, std, var, first, last"
+        )
         raise typer.Exit(1)
 
     # 2. Read file
@@ -88,6 +93,7 @@ def aggregate(
         typer.echo("")
         if len(df_agg) > 0:
             from excel_toolkit.commands.common import display_table
+
             preview_rows = min(5, len(df_agg))
             typer.echo("Preview of aggregated data:")
             display_table(df_agg.head(preview_rows))

@@ -5,29 +5,52 @@ Each command is a separate module that can be imported and tested.
 """
 
 # Command imports
-from excel_toolkit.commands.info import info, app as info_app
-from excel_toolkit.commands.head import head, app as head_app
-from excel_toolkit.commands.filter import filter, app as filter_app
-from excel_toolkit.commands.sort import sort, app as sort_app
-from excel_toolkit.commands.stats import stats, app as stats_app
-from excel_toolkit.commands.validate import validate, app as validate_app
-from excel_toolkit.commands.clean import clean, app as clean_app
-from excel_toolkit.commands.select import select, app as select_app
-from excel_toolkit.commands.dedupe import dedupe, app as dedupe_app
-from excel_toolkit.commands.fill import fill, app as fill_app
-from excel_toolkit.commands.group import group, app as group_app
-from excel_toolkit.commands.unique import unique, app as unique_app
-from excel_toolkit.commands.transform import transform, app as transform_app
-from excel_toolkit.commands.rename import rename, app as rename_app
-from excel_toolkit.commands.search import search, app as search_app
-from excel_toolkit.commands.convert import convert, app as convert_app
-from excel_toolkit.commands.merge import merge, app as merge_app
-from excel_toolkit.commands.join import join, app as join_app
-from excel_toolkit.commands.tail import tail, app as tail_app
-from excel_toolkit.commands.count import count, app as count_app
-from excel_toolkit.commands.append import append, app as append_app
-from excel_toolkit.commands.strip import strip, app as strip_app
-from excel_toolkit.commands.export import export, app as export_app
+from excel_toolkit.commands.append import app as append_app
+from excel_toolkit.commands.append import append
+from excel_toolkit.commands.clean import app as clean_app
+from excel_toolkit.commands.clean import clean
+from excel_toolkit.commands.convert import app as convert_app
+from excel_toolkit.commands.convert import convert
+from excel_toolkit.commands.count import app as count_app
+from excel_toolkit.commands.count import count
+from excel_toolkit.commands.dedupe import app as dedupe_app
+from excel_toolkit.commands.dedupe import dedupe
+from excel_toolkit.commands.export import app as export_app
+from excel_toolkit.commands.export import export
+from excel_toolkit.commands.fill import app as fill_app
+from excel_toolkit.commands.fill import fill
+from excel_toolkit.commands.filter import app as filter_app
+from excel_toolkit.commands.filter import filter
+from excel_toolkit.commands.group import app as group_app
+from excel_toolkit.commands.group import group
+from excel_toolkit.commands.head import app as head_app
+from excel_toolkit.commands.head import head
+from excel_toolkit.commands.info import app as info_app
+from excel_toolkit.commands.info import info
+from excel_toolkit.commands.join import app as join_app
+from excel_toolkit.commands.join import join
+from excel_toolkit.commands.merge import app as merge_app
+from excel_toolkit.commands.merge import merge
+from excel_toolkit.commands.rename import app as rename_app
+from excel_toolkit.commands.rename import rename
+from excel_toolkit.commands.search import app as search_app
+from excel_toolkit.commands.search import search
+from excel_toolkit.commands.select import app as select_app
+from excel_toolkit.commands.select import select
+from excel_toolkit.commands.sort import app as sort_app
+from excel_toolkit.commands.sort import sort
+from excel_toolkit.commands.stats import app as stats_app
+from excel_toolkit.commands.stats import stats
+from excel_toolkit.commands.strip import app as strip_app
+from excel_toolkit.commands.strip import strip
+from excel_toolkit.commands.tail import app as tail_app
+from excel_toolkit.commands.tail import tail
+from excel_toolkit.commands.transform import app as transform_app
+from excel_toolkit.commands.transform import transform
+from excel_toolkit.commands.unique import app as unique_app
+from excel_toolkit.commands.unique import unique
+from excel_toolkit.commands.validate import app as validate_app
+from excel_toolkit.commands.validate import validate
 
 __all__ = [
     "info",

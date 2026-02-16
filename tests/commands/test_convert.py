@@ -3,10 +3,11 @@
 Tests for the convert command that converts file formats.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -68,10 +69,7 @@ class TestConvertCommand:
     def test_convert_excel_to_csv(self, excel_file: Path, tmp_path: Path):
         """Test converting Excel to CSV."""
         output_path = tmp_path / "converted.csv"
-        result = runner.invoke(app, [
-            "convert", str(excel_file),
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(app, ["convert", str(excel_file), "--output", str(output_path)])
 
         assert result.exit_code == 0
         assert "Written to:" in result.stdout
@@ -84,10 +82,7 @@ class TestConvertCommand:
     def test_convert_csv_to_excel(self, csv_file: Path, tmp_path: Path):
         """Test converting CSV to Excel."""
         output_path = tmp_path / "converted.xlsx"
-        result = runner.invoke(app, [
-            "convert", str(csv_file),
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(app, ["convert", str(csv_file), "--output", str(output_path)])
 
         assert result.exit_code == 0
         assert "Written to:" in result.stdout
@@ -100,10 +95,7 @@ class TestConvertCommand:
     def test_convert_excel_to_json(self, excel_file: Path, tmp_path: Path):
         """Test converting Excel to JSON."""
         output_path = tmp_path / "converted.json"
-        result = runner.invoke(app, [
-            "convert", str(excel_file),
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(app, ["convert", str(excel_file), "--output", str(output_path)])
 
         # JSON not supported yet, should fail gracefully
         assert result.exit_code != 0
@@ -111,10 +103,7 @@ class TestConvertCommand:
     def test_convert_csv_to_json(self, csv_file: Path, tmp_path: Path):
         """Test converting CSV to JSON."""
         output_path = tmp_path / "converted.json"
-        result = runner.invoke(app, [
-            "convert", str(csv_file),
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(app, ["convert", str(csv_file), "--output", str(output_path)])
 
         # JSON not supported yet, should fail gracefully
         assert result.exit_code != 0
@@ -122,10 +111,7 @@ class TestConvertCommand:
     def test_convert_preserves_data(self, excel_file: Path, tmp_path: Path):
         """Test that conversion preserves data correctly."""
         output_path = tmp_path / "converted.csv"
-        result = runner.invoke(app, [
-            "convert", str(excel_file),
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(app, ["convert", str(excel_file), "--output", str(output_path)])
 
         assert result.exit_code == 0
 
@@ -138,41 +124,30 @@ class TestConvertCommand:
     def test_convert_with_sheet_parameter(self, excel_file: Path, tmp_path: Path):
         """Test converting specific sheet."""
         output_path = tmp_path / "converted.csv"
-        result = runner.invoke(app, [
-            "convert", str(excel_file),
-            "--output", str(output_path),
-            "--sheet", "Sheet1"
-        ])
+        result = runner.invoke(
+            app, ["convert", str(excel_file), "--output", str(output_path), "--sheet", "Sheet1"]
+        )
 
         assert result.exit_code == 0
 
     def test_convert_unsupported_format(self, excel_file: Path, tmp_path: Path):
         """Test converting to unsupported format."""
         output_path = tmp_path / "converted.txt"
-        result = runner.invoke(app, [
-            "convert", str(excel_file),
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(app, ["convert", str(excel_file), "--output", str(output_path)])
 
         assert result.exit_code == 1
 
     def test_convert_nonexistent_file(self, tmp_path: Path):
         """Test converting non-existent file."""
         output_path = tmp_path / "output.xlsx"
-        result = runner.invoke(app, [
-            "convert", "missing.xlsx",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(app, ["convert", "missing.xlsx", "--output", str(output_path)])
 
         assert result.exit_code == 1
 
     def test_convert_empty_file(self, empty_file: Path, tmp_path: Path):
         """Test converting empty file."""
         output_path = tmp_path / "output.csv"
-        result = runner.invoke(app, [
-            "convert", str(empty_file),
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(app, ["convert", str(empty_file), "--output", str(output_path)])
 
         assert result.exit_code == 0
         # Should show warning about empty file
@@ -188,10 +163,7 @@ class TestConvertCommand:
     def test_convert_displays_summary(self, excel_file: Path, tmp_path: Path):
         """Test that convert displays format summary."""
         output_path = tmp_path / "converted.csv"
-        result = runner.invoke(app, [
-            "convert", str(excel_file),
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(app, ["convert", str(excel_file), "--output", str(output_path)])
 
         assert result.exit_code == 0
         assert "Input format:" in result.stdout

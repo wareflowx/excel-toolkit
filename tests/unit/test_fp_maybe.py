@@ -1,7 +1,16 @@
 """Unit tests for Maybe type."""
 
 import pytest
-from excel_toolkit.fp import some, nothing, is_some, is_nothing, unwrap_maybe, unwrap_or_maybe, unwrap_or_else_maybe
+
+from excel_toolkit.fp import (
+    is_nothing,
+    is_some,
+    nothing,
+    some,
+    unwrap_maybe,
+    unwrap_or_else_maybe,
+    unwrap_or_maybe,
+)
 
 
 class TestMaybeConstruction:
@@ -155,9 +164,7 @@ class TestMaybeAndThen:
     def test_and_then_short_circuit_on_nothing(self):
         """and_then() should short-circuit on Nothing."""
         maybe = some(5)
-        chained = maybe.and_then(lambda x: nothing()).and_then(
-            lambda x: some(x * 2)
-        )
+        chained = maybe.and_then(lambda x: nothing()).and_then(lambda x: some(x * 2))
         assert is_nothing(chained)
 
 

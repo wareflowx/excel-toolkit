@@ -4,22 +4,19 @@ This module provides data joining/merging operations for pandas DataFrames.
 All functions return Result types for explicit error handling.
 """
 
-from typing import Any
 from functools import reduce
 
 import pandas as pd
 
-from excel_toolkit.fp import ok, err, is_ok, is_err, unwrap, unwrap_err, Result
+from excel_toolkit.fp import Result, err, is_err, ok
 from excel_toolkit.models.error_types import (
-    ColumnNotFoundError,
-    InvalidJoinTypeError,
+    InsufficientDataFramesError,
     InvalidJoinParametersError,
+    InvalidJoinTypeError,
     JoinColumnsNotFoundError,
     JoiningError,
     MergeColumnsNotFoundError,
-    InsufficientDataFramesError,
 )
-
 
 # =============================================================================
 # Join Validation
@@ -34,7 +31,7 @@ def validate_join_columns(
     right_on: list[str] | None = None,
     left_index: bool = False,
     right_index: bool = False,
-    how: str = "inner"
+    how: str = "inner",
 ) -> Result[None, InvalidJoinParametersError | JoinColumnsNotFoundError]:
     """Validate join columns exist.
 
@@ -70,50 +67,60 @@ def validate_join_columns(
     # Validate parameter combinations
     if on is not None:
         if left_on is not None or right_on is not None:
-            return err(InvalidJoinParametersError(
-                reason="Cannot use both 'on' and 'left_on'/'right_on' parameters"
-            ))
+            return err(
+                InvalidJoinParametersError(
+                    reason="Cannot use both 'on' and 'left_on'/'right_on' parameters"
+                )
+            )
         if left_index or right_index:
-            return err(InvalidJoinParametersError(
-                reason="Cannot use 'on' parameter with index flags"
-            ))
+            return err(
+                InvalidJoinParametersError(reason="Cannot use 'on' parameter with index flags")
+            )
 
         # Validate columns exist in both DataFrames
         missing_in_left = [col for col in on if col not in df1.columns]
         missing_in_right = [col for col in on if col not in df2.columns]
 
         if missing_in_left or missing_in_right:
-            return err(JoinColumnsNotFoundError(
-                missing_in_left=missing_in_left,
-                missing_in_right=missing_in_right
-            ))
+            return err(
+                JoinColumnsNotFoundError(
+                    missing_in_left=missing_in_left, missing_in_right=missing_in_right
+                )
+            )
 
     elif left_on is not None or right_on is not None:
         # Both must be specified together
         if left_on is None or right_on is None:
-            return err(InvalidJoinParametersError(
-                reason="Must specify both 'left_on' and 'right_on' together"
-            ))
+            return err(
+                InvalidJoinParametersError(
+                    reason="Must specify both 'left_on' and 'right_on' together"
+                )
+            )
 
         if len(left_on) != len(right_on):
-            return err(InvalidJoinParametersError(
-                reason="'left_on' and 'right_on' must have the same length"
-            ))
+            return err(
+                InvalidJoinParametersError(
+                    reason="'left_on' and 'right_on' must have the same length"
+                )
+            )
 
         if left_index or right_index:
-            return err(InvalidJoinParametersError(
-                reason="Cannot use 'left_on'/'right_on' with index flags"
-            ))
+            return err(
+                InvalidJoinParametersError(
+                    reason="Cannot use 'left_on'/'right_on' with index flags"
+                )
+            )
 
         # Validate columns exist in respective DataFrames
         missing_in_left = [col for col in left_on if col not in df1.columns]
         missing_in_right = [col for col in right_on if col not in df2.columns]
 
         if missing_in_left or missing_in_right:
-            return err(JoinColumnsNotFoundError(
-                missing_in_left=missing_in_left,
-                missing_in_right=missing_in_right
-            ))
+            return err(
+                JoinColumnsNotFoundError(
+                    missing_in_left=missing_in_left, missing_in_right=missing_in_right
+                )
+            )
 
     elif not (left_index and right_index):
         # If no columns specified and not using both indexes, need at least some specification
@@ -123,9 +130,11 @@ def validate_join_columns(
         if not (left_index or right_index) and how != "cross":
             # Check if DataFrames are empty (no columns)
             if len(df1.columns) > 0 or len(df2.columns) > 0:
-                return err(InvalidJoinParametersError(
-                    reason="Must specify join columns ('on', 'left_on'/'right_on', or index flags)"
-                ))
+                return err(
+                    InvalidJoinParametersError(
+                        reason="Must specify join columns ('on', 'left_on'/'right_on', or index flags)"
+                    )
+                )
 
     return ok(None)
 
@@ -144,8 +153,11 @@ def join_dataframes(
     right_on: list[str] | None = None,
     left_index: bool = False,
     right_index: bool = False,
-    suffixes: tuple[str, str] = ("_x", "_y")
-) -> Result[pd.DataFrame, InvalidJoinTypeError | InvalidJoinParametersError | JoinColumnsNotFoundError | JoiningError]:
+    suffixes: tuple[str, str] = ("_x", "_y"),
+) -> Result[
+    pd.DataFrame,
+    InvalidJoinTypeError | InvalidJoinParametersError | JoinColumnsNotFoundError | JoiningError,
+]:
     """Join two DataFrames.
 
     Args:
@@ -183,10 +195,7 @@ def join_dataframes(
 
     # Validate join type
     if how not in valid_join_types:
-        return err(InvalidJoinTypeError(
-            join_type=how,
-            valid_types=valid_join_types
-        ))
+        return err(InvalidJoinTypeError(join_type=how, valid_types=valid_join_types))
 
     # Validate join columns
     validation = validate_join_columns(
@@ -210,15 +219,13 @@ def join_dataframes(
             right_on=right_on,
             left_index=left_index,
             right_index=right_index,
-            suffixes=suffixes
+            suffixes=suffixes,
         )
 
         return ok(result)
 
     except Exception as e:
-        return err(JoiningError(
-            message=f"Join failed: {str(e)}"
-        ))
+        return err(JoiningError(message=f"Join failed: {str(e)}"))
 
 
 # =============================================================================
@@ -230,7 +237,7 @@ def merge_dataframes(
     dataframes: list[pd.DataFrame],
     how: str = "inner",
     on: list[str] | None = None,
-    suffixes: tuple[str, str] = ("_x", "_y")
+    suffixes: tuple[str, str] = ("_x", "_y"),
 ) -> Result[pd.DataFrame, InsufficientDataFramesError | MergeColumnsNotFoundError | JoiningError]:
     """Merge multiple DataFrames sequentially.
 
@@ -261,9 +268,7 @@ def merge_dataframes(
     """
     # Validate we have at least 2 DataFrames
     if len(dataframes) < 2:
-        return err(InsufficientDataFramesError(
-            count=len(dataframes)
-        ))
+        return err(InsufficientDataFramesError(count=len(dataframes)))
 
     # If 'on' specified, validate exists in all DataFrames
     if on is not None:
@@ -274,15 +279,14 @@ def merge_dataframes(
                 missing[i] = missing_cols
 
         if missing:
-            return err(MergeColumnsNotFoundError(
-                missing=missing
-            ))
+            return err(MergeColumnsNotFoundError(missing=missing))
 
     # Sequentially merge DataFrames
     try:
+
         def merge_two(acc, df):
             # Generate unique suffixes for this merge
-            merge_suffixes = (f"_{len(dataframes)}", f"_{len(dataframes)+1}")
+            merge_suffixes = (f"_{len(dataframes)}", f"_{len(dataframes) + 1}")
             result = pd.merge(acc, df, how=how, on=on, suffixes=merge_suffixes)
             return result
 
@@ -291,6 +295,4 @@ def merge_dataframes(
         return ok(result)
 
     except Exception as e:
-        return err(JoiningError(
-            message=f"Merge failed: {str(e)}"
-        ))
+        return err(JoiningError(message=f"Merge failed: {str(e)}"))

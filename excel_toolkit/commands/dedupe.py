@@ -3,25 +3,26 @@
 Remove duplicate rows from a dataset.
 """
 
-from pathlib import Path
-
 import typer
-import pandas as pd
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
-from excel_toolkit.operations.cleaning import remove_duplicates
 from excel_toolkit.commands.common import (
+    display_table,
     read_data_file,
     write_or_display,
-    display_table,
 )
+from excel_toolkit.core import HandlerFactory
+from excel_toolkit.fp import is_err, unwrap, unwrap_err
+from excel_toolkit.operations.cleaning import remove_duplicates
 
 
 def dedupe(
     file_path: str = typer.Argument(..., help="Path to input file"),
-    by: str | None = typer.Option(None, "--by", "-b", help="Columns to use for deduplication (comma-separated)"),
-    keep: str = typer.Option("first", "--keep", "-k", help="Which duplicate to keep: first, last, or none"),
+    by: str | None = typer.Option(
+        None, "--by", "-b", help="Columns to use for deduplication (comma-separated)"
+    ),
+    keep: str = typer.Option(
+        "first", "--keep", "-k", help="Which duplicate to keep: first, last, or none"
+    ),
     output: str | None = typer.Option(None, "--output", "-o", help="Output file path"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Show preview without writing"),
     sheet: str | None = typer.Option(None, "--sheet", "-s", help="Sheet name for Excel files"),

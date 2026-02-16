@@ -1,7 +1,8 @@
 """Unit tests for Result type."""
 
 import pytest
-from excel_toolkit.fp import ok, err, is_ok, is_err, unwrap, unwrap_or, unwrap_or_else, unwrap_err
+
+from excel_toolkit.fp import err, is_err, is_ok, ok, unwrap, unwrap_err, unwrap_or, unwrap_or_else
 
 
 class TestResultConstruction:
@@ -163,9 +164,7 @@ class TestResultAndThen:
     def test_and_then_short_circuit_on_err(self):
         """and_then() should short-circuit on first Err."""
         result = ok(5)
-        chained = result.and_then(lambda x: err("error")).and_then(
-            lambda x: ok(x * 2)
-        )
+        chained = result.and_then(lambda x: err("error")).and_then(lambda x: ok(x * 2))
         assert is_err(chained)
         assert unwrap_err(chained) == "error"
 

@@ -6,17 +6,18 @@ Convert between different file formats.
 from pathlib import Path
 
 import typer
-import pandas as pd
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
 from excel_toolkit.commands.common import read_data_file
+from excel_toolkit.core import HandlerFactory
+from excel_toolkit.fp import is_err, unwrap_err
 
 
 def convert(
     file_path: str = typer.Argument(..., help="Path to input file"),
     output: str = typer.Option(..., "--output", "-o", help="Output file path"),
-    sheet: str | None = typer.Option(None, "--sheet", "-s", help="Sheet name for Excel files (for multi-sheet files)"),
+    sheet: str | None = typer.Option(
+        None, "--sheet", "-s", help="Sheet name for Excel files (for multi-sheet files)"
+    ),
 ) -> None:
     """Convert between different file formats.
 
@@ -34,7 +35,7 @@ def convert(
 
     # 1. Validate output format
     output_ext = output_path.suffix.lower()
-    supported_formats = {'.xlsx', '.xlsm', '.csv', '.json'}
+    supported_formats = {".xlsx", ".xlsm", ".csv", ".json"}
 
     if output_ext not in supported_formats:
         typer.echo(f"Error: Unsupported output format: {output_ext}", err=True)

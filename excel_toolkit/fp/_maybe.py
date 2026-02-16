@@ -6,10 +6,10 @@ Users should not import this module directly - use the functions in maybe.py ins
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TypeVar, Generic, Callable, TypeVar
+from typing import Any, Callable, Generic, TypeVar
 
-T = TypeVar('T')
-U = TypeVar('U')
+T = TypeVar("T")
+U = TypeVar("U")
 
 
 class Maybe(ABC, Generic[T]):
@@ -22,7 +22,7 @@ class Maybe(ABC, Generic[T]):
     """
 
     @abstractmethod
-    def map(self, fn: Callable[[T], U]) -> 'Maybe[U]':
+    def map(self, fn: Callable[[T], U]) -> "Maybe[U]":
         """Apply function if Some, pass through if Nothing.
 
         Args:
@@ -34,7 +34,7 @@ class Maybe(ABC, Generic[T]):
         pass
 
     @abstractmethod
-    def and_then(self, fn: Callable[[T], 'Maybe[U]']) -> 'Maybe[U]':
+    def and_then(self, fn: Callable[[T], "Maybe[U]"]) -> "Maybe[U]":
         """Chain Maybe-returning function.
 
         Args:
@@ -70,11 +70,11 @@ class Some(Maybe[T]):
 
     _value: T
 
-    def map(self, fn: Callable[[T], U]) -> 'Maybe[U]':
+    def map(self, fn: Callable[[T], U]) -> "Maybe[U]":
         """Apply function to the value."""
         return Some(fn(self._value))
 
-    def and_then(self, fn: Callable[[T], 'Maybe[U]']) -> 'Maybe[U]':
+    def and_then(self, fn: Callable[[T], "Maybe[U]"]) -> "Maybe[U]":
         """Chain Maybe-returning function."""
         return fn(self._value)
 
@@ -94,11 +94,11 @@ class Nothing(Maybe[T]):
 
     __slots__ = ()
 
-    def map(self, fn: Callable[[T], U]) -> 'Maybe[U]':
+    def map(self, fn: Callable[[T], U]) -> "Maybe[U]":
         """Return this Nothing, ignore function."""
         return self
 
-    def and_then(self, fn: Callable[[T], 'Maybe[U]']) -> 'Maybe[U]':
+    def and_then(self, fn: Callable[[T], "Maybe[U]"]) -> "Maybe[U]":
         """Return this Nothing, ignore function."""
         return self
 

@@ -3,10 +3,11 @@
 Tests for the tail command that displays the last N rows.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -91,55 +92,37 @@ class TestTailCommand:
 
     def test_tail_specific_sheet(self, sample_data_file: Path):
         """Test tail from specific sheet."""
-        result = runner.invoke(app, [
-            "tail", str(sample_data_file),
-            "--sheet", "Sheet1"
-        ])
+        result = runner.invoke(app, ["tail", str(sample_data_file), "--sheet", "Sheet1"])
 
         assert result.exit_code == 0
 
     def test_tail_show_columns(self, sample_data_file: Path):
         """Test tail showing column information."""
-        result = runner.invoke(app, [
-            "tail", str(sample_data_file),
-            "--show-columns"
-        ])
+        result = runner.invoke(app, ["tail", str(sample_data_file), "--show-columns"])
 
         assert result.exit_code == 0
 
     def test_tail_max_columns(self, sample_data_file: Path):
         """Test tail with limited columns."""
-        result = runner.invoke(app, [
-            "tail", str(sample_data_file),
-            "--max-columns", "2"
-        ])
+        result = runner.invoke(app, ["tail", str(sample_data_file), "--max-columns", "2"])
 
         assert result.exit_code == 0
 
     def test_tail_format_csv(self, sample_data_file: Path):
         """Test tail with CSV output format."""
-        result = runner.invoke(app, [
-            "tail", str(sample_data_file),
-            "--format", "csv"
-        ])
+        result = runner.invoke(app, ["tail", str(sample_data_file), "--format", "csv"])
 
         assert result.exit_code == 0
 
     def test_tail_format_json(self, sample_data_file: Path):
         """Test tail with JSON output format."""
-        result = runner.invoke(app, [
-            "tail", str(sample_data_file),
-            "--format", "json"
-        ])
+        result = runner.invoke(app, ["tail", str(sample_data_file), "--format", "json"])
 
         assert result.exit_code == 0
 
     def test_tail_invalid_format(self, sample_data_file: Path):
         """Test tail with invalid format."""
-        result = runner.invoke(app, [
-            "tail", str(sample_data_file),
-            "--format", "invalid"
-        ])
+        result = runner.invoke(app, ["tail", str(sample_data_file), "--format", "invalid"])
 
         assert result.exit_code == 1
 

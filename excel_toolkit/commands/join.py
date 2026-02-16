@@ -3,23 +3,23 @@
 Join two datasets based on common columns.
 """
 
-from pathlib import Path
-
 import typer
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
-from excel_toolkit.operations.joining import join_dataframes
 from excel_toolkit.commands.common import (
     read_data_file,
     write_or_display,
 )
+from excel_toolkit.core import HandlerFactory
+from excel_toolkit.fp import is_err, unwrap, unwrap_err
+from excel_toolkit.operations.joining import join_dataframes
 
 
 def join(
     left_file: str = typer.Argument(..., help="Path to left input file"),
     right_file: str = typer.Argument(..., help="Path to right input file"),
-    on: str | None = typer.Option(None, "--on", help="Column name to join on (must exist in both files)"),
+    on: str | None = typer.Option(
+        None, "--on", help="Column name to join on (must exist in both files)"
+    ),
     left_on: str | None = typer.Option(None, "--left-on", help="Column name in left file"),
     right_on: str | None = typer.Option(None, "--right-on", help="Column name in right file"),
     how: str = typer.Option("inner", "--how", "-h", help="Join type: inner, left, right, outer"),
@@ -76,7 +76,7 @@ def join(
         on=on_cols,
         left_on=left_on_cols,
         right_on=right_on_cols,
-        suffixes=("_left", "_right")
+        suffixes=("_left", "_right"),
     )
 
     if is_err(result):

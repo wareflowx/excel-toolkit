@@ -3,11 +3,12 @@
 Tests for the stats command that computes statistical summaries.
 """
 
-import pytest
-from pathlib import Path
-from typer.testing import CliRunner
-import pandas as pd
 import json
+from pathlib import Path
+
+import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -58,14 +59,18 @@ def sample_datetime_file(tmp_path: Path) -> Path:
         {
             "id": [1, 2, 3, 4, 5],
             "name": ["Alice", "Bob", "Charlie", "Diana", "Eve"],
-            "date": pd.to_datetime(["2023-01-15", "2023-03-20", "2023-02-10", "2023-04-05", "2023-05-12"]),
-            "timestamp": pd.to_datetime([
-                "2023-01-15 10:30:00",
-                "2023-03-20 14:45:00",
-                "2023-02-10 09:15:00",
-                "2023-04-05 16:20:00",
-                "2023-05-12 11:00:00"
-            ]),
+            "date": pd.to_datetime(
+                ["2023-01-15", "2023-03-20", "2023-02-10", "2023-04-05", "2023-05-12"]
+            ),
+            "timestamp": pd.to_datetime(
+                [
+                    "2023-01-15 10:30:00",
+                    "2023-03-20 14:45:00",
+                    "2023-02-10 09:15:00",
+                    "2023-04-05 16:20:00",
+                    "2023-05-12 11:00:00",
+                ]
+            ),
         }
     )
     file_path = tmp_path / "datetime.xlsx"
@@ -153,11 +158,17 @@ class TestStatsCommand:
 
     def test_stats_custom_percentiles(self, sample_numeric_file: Path):
         """Test statistics with custom percentiles."""
-        result = runner.invoke(app, [
-            "stats", str(sample_numeric_file),
-            "--column", "salary",
-            "--percentiles", "10,25,50,75,90,95,99"
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "stats",
+                str(sample_numeric_file),
+                "--column",
+                "salary",
+                "--percentiles",
+                "10,25,50,75,90,95,99",
+            ],
+        )
 
         assert result.exit_code == 0
         assert "Statistics for column: salary" in result.stdout or "salary" in result.stdout
@@ -171,11 +182,9 @@ class TestStatsCommand:
 
     def test_stats_json_format(self, sample_numeric_file: Path):
         """Test JSON output format."""
-        result = runner.invoke(app, [
-            "stats", str(sample_numeric_file),
-            "--column", "age",
-            "--format", "json"
-        ])
+        result = runner.invoke(
+            app, ["stats", str(sample_numeric_file), "--column", "age", "--format", "json"]
+        )
 
         assert result.exit_code == 0
         # Parse JSON to verify it's valid
@@ -187,11 +196,9 @@ class TestStatsCommand:
 
     def test_stats_csv_format(self, sample_numeric_file: Path):
         """Test CSV output format."""
-        result = runner.invoke(app, [
-            "stats", str(sample_numeric_file),
-            "--column", "age",
-            "--format", "csv"
-        ])
+        result = runner.invoke(
+            app, ["stats", str(sample_numeric_file), "--column", "age", "--format", "csv"]
+        )
 
         assert result.exit_code == 0
         assert "," in result.stdout
@@ -199,11 +206,10 @@ class TestStatsCommand:
     def test_stats_with_output(self, sample_numeric_file: Path, tmp_path: Path):
         """Test statistics with output file."""
         output_path = tmp_path / "stats.json"
-        result = runner.invoke(app, [
-            "stats", str(sample_numeric_file),
-            "--column", "salary",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            ["stats", str(sample_numeric_file), "--column", "salary", "--output", str(output_path)],
+        )
 
         assert result.exit_code == 0
         assert "Written to:" in result.stdout
@@ -211,41 +217,34 @@ class TestStatsCommand:
 
     def test_stats_specific_sheet(self, sample_numeric_file: Path):
         """Test statistics for specific sheet."""
-        result = runner.invoke(app, [
-            "stats", str(sample_numeric_file),
-            "--column", "age",
-            "--sheet", "Sheet1"
-        ])
+        result = runner.invoke(
+            app, ["stats", str(sample_numeric_file), "--column", "age", "--sheet", "Sheet1"]
+        )
 
         assert result.exit_code == 0
 
     def test_stats_include_categorical(self, sample_categorical_file: Path):
         """Test including categorical columns."""
-        result = runner.invoke(app, [
-            "stats", str(sample_categorical_file),
-            "--all-columns",
-            "--include", "categorical"
-        ])
+        result = runner.invoke(
+            app,
+            ["stats", str(sample_categorical_file), "--all-columns", "--include", "categorical"],
+        )
 
         assert result.exit_code == 0
 
     def test_stats_include_datetime(self, sample_datetime_file: Path):
         """Test including datetime columns."""
-        result = runner.invoke(app, [
-            "stats", str(sample_datetime_file),
-            "--all-columns",
-            "--include", "datetime"
-        ])
+        result = runner.invoke(
+            app, ["stats", str(sample_datetime_file), "--all-columns", "--include", "datetime"]
+        )
 
         assert result.exit_code == 0
 
     def test_stats_include_all_types(self, sample_numeric_file: Path):
         """Test including all column types."""
-        result = runner.invoke(app, [
-            "stats", str(sample_numeric_file),
-            "--all-columns",
-            "--include", "all"
-        ])
+        result = runner.invoke(
+            app, ["stats", str(sample_numeric_file), "--all-columns", "--include", "all"]
+        )
 
         assert result.exit_code == 0
 
@@ -276,31 +275,25 @@ class TestStatsCommand:
 
     def test_stats_invalid_percentiles(self, sample_numeric_file: Path):
         """Test statistics with invalid percentiles."""
-        result = runner.invoke(app, [
-            "stats", str(sample_numeric_file),
-            "--column", "age",
-            "--percentiles", "invalid"
-        ])
+        result = runner.invoke(
+            app, ["stats", str(sample_numeric_file), "--column", "age", "--percentiles", "invalid"]
+        )
 
         assert result.exit_code == 1
 
     def test_stats_percentile_out_of_range(self, sample_numeric_file: Path):
         """Test statistics with percentile out of range."""
-        result = runner.invoke(app, [
-            "stats", str(sample_numeric_file),
-            "--column", "age",
-            "--percentiles", "150"
-        ])
+        result = runner.invoke(
+            app, ["stats", str(sample_numeric_file), "--column", "age", "--percentiles", "150"]
+        )
 
         assert result.exit_code == 1
 
     def test_stats_invalid_include_type(self, sample_numeric_file: Path):
         """Test statistics with invalid include type."""
-        result = runner.invoke(app, [
-            "stats", str(sample_numeric_file),
-            "--column", "age",
-            "--include", "invalid"
-        ])
+        result = runner.invoke(
+            app, ["stats", str(sample_numeric_file), "--column", "age", "--include", "invalid"]
+        )
 
         assert result.exit_code == 1
 

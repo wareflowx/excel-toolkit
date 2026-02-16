@@ -6,54 +6,58 @@ Tests for:
 - aggregate_groups()
 """
 
-import pytest
 import pandas as pd
-import numpy as np
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
-from excel_toolkit.operations.aggregating import (
-    parse_aggregation_specs,
-    validate_aggregation_columns,
-    aggregate_groups,
-)
+import pytest
+
+from excel_toolkit.fp import is_err, is_ok, unwrap, unwrap_err
 from excel_toolkit.models.error_types import (
+    AggColumnsNotFoundError,
+    GroupColumnsNotFoundError,
     InvalidFormatError,
     NoValidSpecsError,
-    GroupColumnsNotFoundError,
-    AggColumnsNotFoundError,
     OverlappingColumnsError,
-    AggregationFailedError,
 )
-
+from excel_toolkit.operations.aggregating import (
+    aggregate_groups,
+    parse_aggregation_specs,
+    validate_aggregation_columns,
+)
 
 # =============================================================================
 # Test Data Fixtures
 # =============================================================================
 
+
 @pytest.fixture
 def sales_dataframe():
     """Create a sales DataFrame for testing."""
-    return pd.DataFrame({
-        'Region': ['North', 'North', 'South', 'South', 'East', 'East', 'West', 'West'],
-        'Category': ['A', 'B', 'A', 'B', 'A', 'B', 'A', 'B'],
-        'Sales': [100, 150, 200, 250, 120, 180, 90, 110],
-        'Quantity': [10, 15, 20, 25, 12, 18, 9, 11],
-        'Profit': [20, 30, 40, 50, 24, 36, 18, 22],
-    })
+    return pd.DataFrame(
+        {
+            "Region": ["North", "North", "South", "South", "East", "East", "West", "West"],
+            "Category": ["A", "B", "A", "B", "A", "B", "A", "B"],
+            "Sales": [100, 150, 200, 250, 120, 180, 90, 110],
+            "Quantity": [10, 15, 20, 25, 12, 18, 9, 11],
+            "Profit": [20, 30, 40, 50, 24, 36, 18, 22],
+        }
+    )
 
 
 @pytest.fixture
 def simple_dataframe():
     """Create a simple DataFrame for testing."""
-    return pd.DataFrame({
-        'Group': ['A', 'A', 'B', 'B', 'C', 'C'],
-        'Value1': [10, 20, 30, 40, 50, 60],
-        'Value2': [1, 2, 3, 4, 5, 6],
-    })
+    return pd.DataFrame(
+        {
+            "Group": ["A", "A", "B", "B", "C", "C"],
+            "Value1": [10, 20, 30, 40, 50, 60],
+            "Value2": [1, 2, 3, 4, 5, 6],
+        }
+    )
 
 
 # =============================================================================
 # parse_aggregation_specs() Tests
 # =============================================================================
+
 
 class TestParseAggregationSpecs:
     """Tests for parse_aggregation_specs."""
@@ -88,11 +92,7 @@ class TestParseAggregationSpecs:
 
         assert is_ok(result)
         specs = unwrap(result)
-        assert specs == {
-            "Sales": ["sum", "count"],
-            "Profit": ["mean", "max"],
-            "Quantity": ["sum"]
-        }
+        assert specs == {"Sales": ["sum", "count"], "Profit": ["mean", "max"], "Quantity": ["sum"]}
 
     def test_avg_normalizes_to_mean(self):
         """Test that 'avg' is normalized to 'mean'."""
@@ -173,79 +173,69 @@ class TestParseAggregationSpecs:
 # validate_aggregation_columns() Tests
 # =============================================================================
 
+
 class TestValidateAggregationColumns:
     """Tests for validate_aggregation_columns."""
 
     def test_valid_columns(self, sales_dataframe):
         """Test validation with valid columns."""
         result = validate_aggregation_columns(
-            sales_dataframe,
-            group_columns=['Region'],
-            agg_columns=['Sales']
+            sales_dataframe, group_columns=["Region"], agg_columns=["Sales"]
         )
         assert is_ok(result)
 
     def test_valid_multiple_group_columns(self, sales_dataframe):
         """Test validation with multiple group columns."""
         result = validate_aggregation_columns(
-            sales_dataframe,
-            group_columns=['Region', 'Category'],
-            agg_columns=['Sales']
+            sales_dataframe, group_columns=["Region", "Category"], agg_columns=["Sales"]
         )
         assert is_ok(result)
 
     def test_valid_multiple_agg_columns(self, sales_dataframe):
         """Test validation with multiple aggregation columns."""
         result = validate_aggregation_columns(
-            sales_dataframe,
-            group_columns=['Region'],
-            agg_columns=['Sales', 'Quantity', 'Profit']
+            sales_dataframe, group_columns=["Region"], agg_columns=["Sales", "Quantity", "Profit"]
         )
         assert is_ok(result)
 
     def test_missing_group_column(self, sales_dataframe):
         """Test error when group column doesn't exist."""
         result = validate_aggregation_columns(
-            sales_dataframe,
-            group_columns=['InvalidRegion'],
-            agg_columns=['Sales']
+            sales_dataframe, group_columns=["InvalidRegion"], agg_columns=["Sales"]
         )
 
         assert is_err(result)
         error = unwrap_err(result)
         assert isinstance(error, GroupColumnsNotFoundError)
-        assert error.missing == ['InvalidRegion']
+        assert error.missing == ["InvalidRegion"]
 
     def test_missing_agg_column(self, sales_dataframe):
         """Test error when aggregation column doesn't exist."""
         result = validate_aggregation_columns(
-            sales_dataframe,
-            group_columns=['Region'],
-            agg_columns=['InvalidSales']
+            sales_dataframe, group_columns=["Region"], agg_columns=["InvalidSales"]
         )
 
         assert is_err(result)
         error = unwrap_err(result)
         assert isinstance(error, AggColumnsNotFoundError)
-        assert error.missing == ['InvalidSales']
+        assert error.missing == ["InvalidSales"]
 
     def test_overlapping_columns(self, sales_dataframe):
         """Test error when group and agg columns overlap."""
         result = validate_aggregation_columns(
-            sales_dataframe,
-            group_columns=['Region'],
-            agg_columns=['Region', 'Sales']
+            sales_dataframe, group_columns=["Region"], agg_columns=["Region", "Sales"]
         )
 
         assert is_err(result)
         error = unwrap_err(result)
         assert isinstance(error, OverlappingColumnsError)
-        assert error.overlap == ['Region']
+        assert error.overlap == ["Region"]
 
 
 # =============================================================================
 # aggregate_groups() Tests
 # =============================================================================
+
 
 class TestAggregateGroups:
     """Tests for aggregate_groups."""
@@ -365,25 +355,19 @@ class TestAggregateGroups:
 
     def test_single_group(self):
         """Test aggregation with single group."""
-        df = pd.DataFrame({
-            'Group': ['A', 'A', 'A', 'B', 'B'],
-            'Value': [10, 20, 30, 40, 50]
-        })
+        df = pd.DataFrame({"Group": ["A", "A", "A", "B", "B"], "Value": [10, 20, 30, 40, 50]})
         aggregations = {"Value": ["sum"]}
         result = aggregate_groups(df, ["Group"], aggregations)
 
         assert is_ok(result)
         df_agg = unwrap(result)
         assert len(df_agg) == 2
-        assert df_agg[df_agg['Group'] == 'A']['Value_sum'].iloc[0] == 60
-        assert df_agg[df_agg['Group'] == 'B']['Value_sum'].iloc[0] == 90
+        assert df_agg[df_agg["Group"] == "A"]["Value_sum"].iloc[0] == 60
+        assert df_agg[df_agg["Group"] == "B"]["Value_sum"].iloc[0] == 90
 
     def test_aggregation_with_nan_values(self):
         """Test aggregation with NaN in group column."""
-        df = pd.DataFrame({
-            'Group': ['A', 'A', None, 'B', 'B'],
-            'Value': [10, 20, 30, 40, 50]
-        })
+        df = pd.DataFrame({"Group": ["A", "A", None, "B", "B"], "Value": [10, 20, 30, 40, 50]})
         aggregations = {"Value": ["sum"]}
         result = aggregate_groups(df, ["Group"], aggregations)
 
@@ -397,7 +381,7 @@ class TestAggregateGroups:
         aggregations = {
             "Sales": ["sum", "mean", "count"],
             "Quantity": ["sum"],
-            "Profit": ["mean", "max"]
+            "Profit": ["mean", "max"],
         }
         result = aggregate_groups(sales_dataframe, ["Region", "Category"], aggregations)
 
@@ -415,6 +399,7 @@ class TestAggregateGroups:
 # Integration Tests
 # =============================================================================
 
+
 class TestAggregatingIntegration:
     """Integration tests for aggregating operations."""
 
@@ -429,9 +414,7 @@ class TestAggregatingIntegration:
 
         # Validate columns
         validation_result = validate_aggregation_columns(
-            simple_dataframe,
-            group_columns=["Group"],
-            agg_columns=list(aggregations.keys())
+            simple_dataframe, group_columns=["Group"], agg_columns=list(aggregations.keys())
         )
         assert is_ok(validation_result)
 
@@ -444,10 +427,7 @@ class TestAggregatingIntegration:
 
     def test_complex_workflow(self, sales_dataframe):
         """Test complex aggregation with multiple options."""
-        aggregations = {
-            "Sales": ["sum", "mean"],
-            "Quantity": ["count"]
-        }
+        aggregations = {"Sales": ["sum", "mean"], "Quantity": ["count"]}
 
         result = aggregate_groups(sales_dataframe, ["Region"], aggregations)
 

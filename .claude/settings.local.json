@@ -8,7 +8,12 @@
       "Bash(git commit:*)",
       "Bash(python:*)",
       "Bash(uv build:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(pip:*)",
+      "Bash(gh issue create:*)",
+      "Bash(uv run mypy:*)",
+      "Bash(uv run ruff check:*)",
+      "Bash(uv run ruff format:*)"
     ]
   }
 }

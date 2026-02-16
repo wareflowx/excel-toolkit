@@ -3,10 +3,11 @@
 Tests for the merge command that combines files vertically.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -126,11 +127,9 @@ class TestMergeCommand:
     def test_merge_two_files(self, file1: Path, file2: Path, tmp_path: Path):
         """Test merging two files."""
         output_path = tmp_path / "merged.xlsx"
-        result = runner.invoke(app, [
-            "merge",
-            "--files", f"{file1},{file2}",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app, ["merge", "--files", f"{file1},{file2}", "--output", str(output_path)]
+        )
 
         assert result.exit_code == 0
         assert "Files merged: 2" in result.stdout
@@ -140,11 +139,9 @@ class TestMergeCommand:
     def test_merge_three_files(self, file1: Path, file2: Path, file3: Path, tmp_path: Path):
         """Test merging three files."""
         output_path = tmp_path / "merged.xlsx"
-        result = runner.invoke(app, [
-            "merge",
-            "--files", f"{file1},{file2},{file3}",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app, ["merge", "--files", f"{file1},{file2},{file3}", "--output", str(output_path)]
+        )
 
         assert result.exit_code == 0
         assert "Files merged: 3" in result.stdout
@@ -153,11 +150,9 @@ class TestMergeCommand:
     def test_merge_csv_files(self, csv_file1: Path, csv_file2: Path, tmp_path: Path):
         """Test merging CSV files."""
         output_path = tmp_path / "merged.csv"
-        result = runner.invoke(app, [
-            "merge",
-            "--files", f"{csv_file1},{csv_file2}",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app, ["merge", "--files", f"{csv_file1},{csv_file2}", "--output", str(output_path)]
+        )
 
         assert result.exit_code == 0
         assert output_path.exists()
@@ -169,12 +164,17 @@ class TestMergeCommand:
     def test_merge_with_ignore_index(self, file1: Path, file2: Path, tmp_path: Path):
         """Test merging with index reset."""
         output_path = tmp_path / "merged.xlsx"
-        result = runner.invoke(app, [
-            "merge",
-            "--files", f"{file1},{file2}",
-            "--output", str(output_path),
-            "--ignore-index"
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "merge",
+                "--files",
+                f"{file1},{file2}",
+                "--output",
+                str(output_path),
+                "--ignore-index",
+            ],
+        )
 
         assert result.exit_code == 0
         assert output_path.exists()
@@ -182,11 +182,9 @@ class TestMergeCommand:
     def test_merge_column_mismatch(self, file1: Path, mismatched_file: Path, tmp_path: Path):
         """Test merging files with different columns."""
         output_path = tmp_path / "merged.xlsx"
-        result = runner.invoke(app, [
-            "merge",
-            "--files", f"{file1},{mismatched_file}",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app, ["merge", "--files", f"{file1},{mismatched_file}", "--output", str(output_path)]
+        )
 
         assert result.exit_code == 1
         # Error message is displayed
@@ -195,34 +193,36 @@ class TestMergeCommand:
     def test_merge_with_sheet_parameter(self, file1: Path, file2: Path, tmp_path: Path):
         """Test merging specific sheet."""
         output_path = tmp_path / "merged.xlsx"
-        result = runner.invoke(app, [
-            "merge",
-            "--files", f"{file1},{file2}",
-            "--output", str(output_path),
-            "--sheet", "Sheet1"
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "merge",
+                "--files",
+                f"{file1},{file2}",
+                "--output",
+                str(output_path),
+                "--sheet",
+                "Sheet1",
+            ],
+        )
 
         assert result.exit_code == 0
 
     def test_merge_nonexistent_file(self, file1: Path, tmp_path: Path):
         """Test merging with non-existent file."""
         output_path = tmp_path / "merged.xlsx"
-        result = runner.invoke(app, [
-            "merge",
-            "--files", f"{file1},missing.xlsx",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app, ["merge", "--files", f"{file1},missing.xlsx", "--output", str(output_path)]
+        )
 
         assert result.exit_code == 1
 
     def test_merge_displays_summary(self, file1: Path, file2: Path, tmp_path: Path):
         """Test that merge displays detailed summary."""
         output_path = tmp_path / "merged.xlsx"
-        result = runner.invoke(app, [
-            "merge",
-            "--files", f"{file1},{file2}",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app, ["merge", "--files", f"{file1},{file2}", "--output", str(output_path)]
+        )
 
         assert result.exit_code == 0
         assert "file1.xlsx: 3 rows" in result.stdout
@@ -239,22 +239,16 @@ class TestMergeCommand:
     def test_merge_empty_files(self, empty_file: Path, file1: Path, tmp_path: Path):
         """Test merging with empty file."""
         output_path = tmp_path / "merged.xlsx"
-        result = runner.invoke(app, [
-            "merge",
-            "--files", f"{empty_file},{file1}",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app, ["merge", "--files", f"{empty_file},{file1}", "--output", str(output_path)]
+        )
 
         assert result.exit_code == 0
 
     def test_merge_single_file(self, file1: Path, tmp_path: Path):
         """Test merging a single file (edge case)."""
         output_path = tmp_path / "merged.xlsx"
-        result = runner.invoke(app, [
-            "merge",
-            "--files", str(file1),
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(app, ["merge", "--files", str(file1), "--output", str(output_path)])
 
         assert result.exit_code == 0
         assert "Files merged: 1" in result.stdout

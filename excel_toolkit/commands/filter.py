@@ -3,21 +3,20 @@
 Filters rows from data files based on conditions.
 """
 
-from pathlib import Path
 import typer
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
-from excel_toolkit.operations.filtering import (
-    validate_condition,
-    normalize_condition,
-    apply_filter,
-)
 from excel_toolkit.commands.common import (
-    read_data_file,
-    write_or_display,
     display_table,
+    read_data_file,
     resolve_column_references,
+    write_or_display,
+)
+from excel_toolkit.core import HandlerFactory
+from excel_toolkit.fp import is_err, unwrap, unwrap_err
+from excel_toolkit.operations.filtering import (
+    apply_filter,
+    normalize_condition,
+    validate_condition,
 )
 
 
@@ -26,7 +25,9 @@ def filter(
     condition: str = typer.Argument(..., help="Filter condition (e.g., 'age > 30')"),
     output: str | None = typer.Option(None, "--output", "-o", help="Output file path"),
     rows: int | None = typer.Option(None, "--rows", "-n", help="Limit number of results"),
-    columns: str | None = typer.Option(None, "--columns", "-c", help="Comma-separated columns to keep"),
+    columns: str | None = typer.Option(
+        None, "--columns", "-c", help="Comma-separated columns to keep"
+    ),
     format: str = typer.Option("table", "--format", "-f", help="Output format (table, csv, json)"),
     sheet: str | None = typer.Option(None, "--sheet", "-s", help="Sheet name for Excel files"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Show preview without writing"),

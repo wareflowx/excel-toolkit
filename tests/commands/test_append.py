@@ -3,10 +3,11 @@
 Tests for the append command that concatenates datasets vertically.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -128,10 +129,9 @@ class TestAppendCommand:
     def test_append_single_file(self, main_file: Path, additional_file_1: Path, tmp_path: Path):
         """Test appending a single file."""
         output_path = tmp_path / "output.xlsx"
-        result = runner.invoke(app, [
-            "append", str(main_file), str(additional_file_1),
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app, ["append", str(main_file), str(additional_file_1), "--output", str(output_path)]
+        )
 
         assert result.exit_code == 0
         assert "Main file rows: 3" in result.stdout
@@ -139,13 +139,22 @@ class TestAppendCommand:
         assert "Total rows: 5" in result.stdout
         assert output_path.exists()
 
-    def test_append_multiple_files(self, main_file: Path, additional_file_1: Path, additional_file_2: Path, tmp_path: Path):
+    def test_append_multiple_files(
+        self, main_file: Path, additional_file_1: Path, additional_file_2: Path, tmp_path: Path
+    ):
         """Test appending multiple files."""
         output_path = tmp_path / "output.xlsx"
-        result = runner.invoke(app, [
-            "append", str(main_file), str(additional_file_1), str(additional_file_2),
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "append",
+                str(main_file),
+                str(additional_file_1),
+                str(additional_file_2),
+                "--output",
+                str(output_path),
+            ],
+        )
 
         assert result.exit_code == 0
         assert "Main file rows: 3" in result.stdout
@@ -153,14 +162,22 @@ class TestAppendCommand:
         assert "Total rows: 7" in result.stdout
         assert output_path.exists()
 
-    def test_append_with_ignore_index(self, main_file: Path, additional_file_1: Path, tmp_path: Path):
+    def test_append_with_ignore_index(
+        self, main_file: Path, additional_file_1: Path, tmp_path: Path
+    ):
         """Test append with index reset."""
         output_path = tmp_path / "output.xlsx"
-        result = runner.invoke(app, [
-            "append", str(main_file), str(additional_file_1),
-            "--ignore-index",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "append",
+                str(main_file),
+                str(additional_file_1),
+                "--ignore-index",
+                "--output",
+                str(output_path),
+            ],
+        )
 
         assert result.exit_code == 0
         assert output_path.exists()
@@ -168,11 +185,17 @@ class TestAppendCommand:
     def test_append_with_sort(self, main_file: Path, additional_file_1: Path, tmp_path: Path):
         """Test append with sorting."""
         output_path = tmp_path / "output.xlsx"
-        result = runner.invoke(app, [
-            "append", str(main_file), str(additional_file_1),
-            "--sort",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "append",
+                str(main_file),
+                str(additional_file_1),
+                "--sort",
+                "--output",
+                str(output_path),
+            ],
+        )
 
         assert result.exit_code == 0
         assert output_path.exists()
@@ -180,49 +203,53 @@ class TestAppendCommand:
     def test_append_csv_files(self, csv_main_file: Path, csv_additional_file: Path, tmp_path: Path):
         """Test appending CSV files."""
         output_path = tmp_path / "output.csv"
-        result = runner.invoke(app, [
-            "append", str(csv_main_file), str(csv_additional_file),
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            ["append", str(csv_main_file), str(csv_additional_file), "--output", str(output_path)],
+        )
 
         assert result.exit_code == 0
         assert "Total rows: 4" in result.stdout
         assert output_path.exists()
 
-    def test_append_mismatched_columns(self, main_file: Path, mismatched_columns_file: Path, tmp_path: Path):
+    def test_append_mismatched_columns(
+        self, main_file: Path, mismatched_columns_file: Path, tmp_path: Path
+    ):
         """Test append with mismatched columns."""
         output_path = tmp_path / "output.xlsx"
-        result = runner.invoke(app, [
-            "append", str(main_file), str(mismatched_columns_file),
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            ["append", str(main_file), str(mismatched_columns_file), "--output", str(output_path)],
+        )
 
         assert result.exit_code == 0
-        assert "Column mismatch" in result.stdout or "mismatch" in result.stdout.lower() or output_path.exists()
+        assert (
+            "Column mismatch" in result.stdout
+            or "mismatch" in result.stdout.lower()
+            or output_path.exists()
+        )
 
     def test_append_empty_main_file(self, empty_file: Path, additional_file_1: Path):
         """Test append with empty main file."""
-        result = runner.invoke(app, [
-            "append", str(empty_file), str(additional_file_1)
-        ])
+        result = runner.invoke(app, ["append", str(empty_file), str(additional_file_1)])
 
         assert result.exit_code == 0
         assert "empty" in result.stdout.lower()
 
     def test_append_nonexistent_main_file(self, additional_file_1: Path):
         """Test append with non-existent main file."""
-        result = runner.invoke(app, [
-            "append", "missing.xlsx", str(additional_file_1)
-        ])
+        result = runner.invoke(app, ["append", "missing.xlsx", str(additional_file_1)])
 
         assert result.exit_code == 1
-        assert "Main file not found" in result.stdout or "File not found" in result.stdout or "not found" in result.stderr
+        assert (
+            "Main file not found" in result.stdout
+            or "File not found" in result.stdout
+            or "not found" in result.stderr
+        )
 
     def test_append_nonexistent_additional_file(self, main_file: Path):
         """Test append with non-existent additional file."""
-        result = runner.invoke(app, [
-            "append", str(main_file), "missing.xlsx"
-        ])
+        result = runner.invoke(app, ["append", str(main_file), "missing.xlsx"])
 
         assert result.exit_code == 1
         assert "File not found" in result.stdout or "not found" in result.stderr
@@ -230,11 +257,18 @@ class TestAppendCommand:
     def test_append_specific_sheets(self, main_file: Path, additional_file_1: Path, tmp_path: Path):
         """Test append with specific sheets."""
         output_path = tmp_path / "output.xlsx"
-        result = runner.invoke(app, [
-            "append", str(main_file), str(additional_file_1),
-            "--sheet", "Sheet1",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "append",
+                str(main_file),
+                str(additional_file_1),
+                "--sheet",
+                "Sheet1",
+                "--output",
+                str(output_path),
+            ],
+        )
 
         assert result.exit_code == 0
 

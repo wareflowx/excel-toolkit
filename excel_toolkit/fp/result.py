@@ -11,15 +11,20 @@ Example:
         value = unwrap(result)
 """
 
-from typing import TypeVar, Callable, Any, TypeAlias
-from excel_toolkit.fp._result import Result, Ok, Err
+from typing import TYPE_CHECKING, Any, Callable, TypeVar
 
-T = TypeVar('T')
-E = TypeVar('E')
-U = TypeVar('U')
+from excel_toolkit.fp._result import Err, Ok, Result
+
+if TYPE_CHECKING:
+    from excel_toolkit.fp.maybe import Maybe
+
+T = TypeVar("T")
+E = TypeVar("E")
+U = TypeVar("U")
 
 
 # Constructors
+
 
 def ok(value: T) -> Result[T, Any]:
     """Create an Ok result containing a value.
@@ -55,6 +60,7 @@ def err(error: E) -> Result[Any, E]:
 
 # Predicates
 
+
 def is_ok(result: Result[T, E]) -> bool:
     """Check if result is Ok.
 
@@ -88,6 +94,7 @@ def is_err(result: Result[T, E]) -> bool:
 
 
 # Unwrapping
+
 
 def unwrap(result: Result[T, E]) -> T:
     """Extract the value from an Ok result.
@@ -181,7 +188,8 @@ def unwrap_err(result: Result[T, E]) -> E:
 
 # Conversion
 
-def to_result(value: 'Maybe[T]', error: E) -> Result[T, E]:
+
+def to_result(value: "Maybe[T]", error: E) -> Result[T, E]:
     """Convert Maybe to Result.
 
     Args:
@@ -206,6 +214,7 @@ def to_result(value: 'Maybe[T]', error: E) -> Result[T, E]:
 
 
 # Custom exception
+
 
 class UnwrapError(Exception):
     """Raised when trying to unwrap an Err or Nothing."""

@@ -3,10 +3,11 @@
 Tests for the dedupe command that removes duplicate rows.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -26,8 +27,14 @@ def file_with_duplicates(tmp_path: Path) -> Path:
         {
             "id": [1, 2, 3, 1, 2, 4],
             "name": ["Alice", "Bob", "Charlie", "Alice", "Bob", "Diana"],
-            "email": ["alice@example.com", "bob@example.com", "charlie@example.com",
-                     "alice@example.com", "bob@example.com", "diana@example.com"],
+            "email": [
+                "alice@example.com",
+                "bob@example.com",
+                "charlie@example.com",
+                "alice@example.com",
+                "bob@example.com",
+                "diana@example.com",
+            ],
             "age": [25, 30, 35, 25, 30, 28],
         }
     )
@@ -42,12 +49,30 @@ def file_with_key_duplicates(tmp_path: Path) -> Path:
     df = pd.DataFrame(
         {
             "id": [1, 2, 3, 4, 5, 6],
-            "email": ["alice@example.com", "bob@example.com", "alice@example.com",
-                     "charlie@example.com", "bob@example.com", "diana@example.com"],
-            "name": ["Alice Smith", "Bob Jones", "Alice Smith",
-                    "Charlie Wilson", "Bob Taylor", "Diana Davis"],
-            "timestamp": ["2024-01-01", "2024-01-02", "2024-01-03",
-                         "2024-01-04", "2024-01-05", "2024-01-06"],
+            "email": [
+                "alice@example.com",
+                "bob@example.com",
+                "alice@example.com",
+                "charlie@example.com",
+                "bob@example.com",
+                "diana@example.com",
+            ],
+            "name": [
+                "Alice Smith",
+                "Bob Jones",
+                "Alice Smith",
+                "Charlie Wilson",
+                "Bob Taylor",
+                "Diana Davis",
+            ],
+            "timestamp": [
+                "2024-01-01",
+                "2024-01-02",
+                "2024-01-03",
+                "2024-01-04",
+                "2024-01-05",
+                "2024-01-06",
+            ],
         }
     )
     file_path = tmp_path / "key_duplicates.xlsx"
@@ -62,8 +87,13 @@ def file_no_duplicates(tmp_path: Path) -> Path:
         {
             "id": [1, 2, 3, 4, 5],
             "name": ["Alice", "Bob", "Charlie", "Diana", "Eve"],
-            "email": ["alice@example.com", "bob@example.com", "charlie@example.com",
-                     "diana@example.com", "eve@example.com"],
+            "email": [
+                "alice@example.com",
+                "bob@example.com",
+                "charlie@example.com",
+                "diana@example.com",
+                "eve@example.com",
+            ],
         }
     )
     file_path = tmp_path / "no_duplicates.xlsx"
@@ -150,11 +180,9 @@ class TestDedupeCommand:
 
     def test_dedupe_by_columns(self, file_with_key_duplicates: Path):
         """Test deduplication based on specific columns."""
-        result = runner.invoke(app, [
-            "dedupe", str(file_with_key_duplicates),
-            "--by", "email",
-            "--keep", "first"
-        ])
+        result = runner.invoke(
+            app, ["dedupe", str(file_with_key_duplicates), "--by", "email", "--keep", "first"]
+        )
 
         assert result.exit_code == 0
         assert "Original rows: 6" in result.stdout
@@ -163,11 +191,9 @@ class TestDedupeCommand:
 
     def test_dedupe_by_multiple_columns(self, file_with_key_duplicates: Path):
         """Test deduplication based on multiple columns."""
-        result = runner.invoke(app, [
-            "dedupe", str(file_with_key_duplicates),
-            "--by", "email,name",
-            "--keep", "first"
-        ])
+        result = runner.invoke(
+            app, ["dedupe", str(file_with_key_duplicates), "--by", "email,name", "--keep", "first"]
+        )
 
         assert result.exit_code == 0
         assert "Duplicate rows found: 1" in result.stdout
@@ -183,10 +209,9 @@ class TestDedupeCommand:
     def test_dedupe_with_output(self, file_with_duplicates: Path, tmp_path: Path):
         """Test deduplication with output file."""
         output_path = tmp_path / "deduped.xlsx"
-        result = runner.invoke(app, [
-            "dedupe", str(file_with_duplicates),
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app, ["dedupe", str(file_with_duplicates), "--output", str(output_path)]
+        )
 
         assert result.exit_code == 0
         assert "Written to:" in result.stdout
@@ -198,10 +223,7 @@ class TestDedupeCommand:
 
     def test_dedupe_dry_run(self, file_with_duplicates: Path):
         """Test dry-run mode."""
-        result = runner.invoke(app, [
-            "dedupe", str(file_with_duplicates),
-            "--dry-run"
-        ])
+        result = runner.invoke(app, ["dedupe", str(file_with_duplicates), "--dry-run"])
 
         assert result.exit_code == 0
         assert "Preview" in result.stdout
@@ -217,19 +239,13 @@ class TestDedupeCommand:
 
     def test_dedupe_specific_sheet(self, file_with_duplicates: Path):
         """Test deduplication from specific sheet."""
-        result = runner.invoke(app, [
-            "dedupe", str(file_with_duplicates),
-            "--sheet", "Sheet1"
-        ])
+        result = runner.invoke(app, ["dedupe", str(file_with_duplicates), "--sheet", "Sheet1"])
 
         assert result.exit_code == 0
 
     def test_dedupe_invalid_column(self, file_with_duplicates: Path):
         """Test deduplication with non-existent column."""
-        result = runner.invoke(app, [
-            "dedupe", str(file_with_duplicates),
-            "--by", "invalid_column"
-        ])
+        result = runner.invoke(app, ["dedupe", str(file_with_duplicates), "--by", "invalid_column"])
 
         assert result.exit_code == 1
         # Error goes to stderr
@@ -237,10 +253,7 @@ class TestDedupeCommand:
 
     def test_dedupe_invalid_keep_value(self, file_with_duplicates: Path):
         """Test deduplication with invalid keep value."""
-        result = runner.invoke(app, [
-            "dedupe", str(file_with_duplicates),
-            "--keep", "invalid"
-        ])
+        result = runner.invoke(app, ["dedupe", str(file_with_duplicates), "--keep", "invalid"])
 
         assert result.exit_code == 1
         # Error message mentions the invalid value
@@ -255,10 +268,7 @@ class TestDedupeCommand:
 
     def test_dedupe_all_duplicates_keep_first(self, file_all_duplicates: Path):
         """Test file where all rows are duplicates keeping first."""
-        result = runner.invoke(app, [
-            "dedupe", str(file_all_duplicates),
-            "--keep", "first"
-        ])
+        result = runner.invoke(app, ["dedupe", str(file_all_duplicates), "--keep", "first"])
 
         assert result.exit_code == 0
         assert "Original rows: 3" in result.stdout
@@ -266,10 +276,7 @@ class TestDedupeCommand:
 
     def test_dedupe_all_duplicates_keep_none(self, file_all_duplicates: Path):
         """Test file where all rows are duplicates keeping none."""
-        result = runner.invoke(app, [
-            "dedupe", str(file_all_duplicates),
-            "--keep", "none"
-        ])
+        result = runner.invoke(app, ["dedupe", str(file_all_duplicates), "--keep", "none"])
 
         assert result.exit_code == 0
         assert "Original rows: 3" in result.stdout
@@ -320,11 +327,10 @@ class TestDedupeCommand:
     def test_dedupe_with_output_verify_content(self, file_with_duplicates: Path, tmp_path: Path):
         """Test that output file contains correct deduplicated data."""
         output_path = tmp_path / "deduped_verify.xlsx"
-        result = runner.invoke(app, [
-            "dedupe", str(file_with_duplicates),
-            "--output", str(output_path),
-            "--keep", "first"
-        ])
+        result = runner.invoke(
+            app,
+            ["dedupe", str(file_with_duplicates), "--output", str(output_path), "--keep", "first"],
+        )
 
         assert result.exit_code == 0
 

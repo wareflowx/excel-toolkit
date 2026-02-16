@@ -4,15 +4,16 @@ This module contains shared functions for formatting and displaying data
 across different commands.
 """
 
+import json
 from pathlib import Path
 from typing import Any
+
 import pandas as pd
-import json
 import typer
 from tabulate import tabulate
 
-from excel_toolkit.core import HandlerFactory, ExcelHandler, CSVHandler
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
+from excel_toolkit.core import CSVHandler, ExcelHandler, HandlerFactory
+from excel_toolkit.fp import is_err, is_ok, unwrap, unwrap_err
 
 
 def display_table(
@@ -126,7 +127,9 @@ def _truncate_value(value: Any, max_width: int) -> str:
     return str_val
 
 
-def format_file_info(path: str, sheet: str | None = None, total_rows: int = 0, total_cols: int = 0) -> str:
+def format_file_info(
+    path: str, sheet: str | None = None, total_rows: int = 0, total_cols: int = 0
+) -> str:
     """Format file information string.
 
     Args:
@@ -303,9 +306,11 @@ def resolve_column_reference(
         if idx < 0 or idx >= num_cols:
             typer.echo(
                 f"Error: Column index {col_ref} out of range (file has {num_cols} columns)",
-                err=True
+                err=True,
             )
-            typer.echo(f"Valid range: 1 to {num_cols} (or -1 to -{num_cols} for positions from end)")
+            typer.echo(
+                f"Valid range: 1 to {num_cols} (or -1 to -{num_cols} for positions from end)"
+            )
             raise typer.Exit(1)
 
         return columns[idx]

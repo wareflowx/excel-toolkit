@@ -9,6 +9,7 @@ from dataclasses import asdict, is_dataclass
 from datetime import datetime
 from difflib import get_close_matches
 from typing import Any
+
 import pandas as pd
 
 
@@ -50,7 +51,7 @@ class ErrorSerializable:
             return {
                 "error_type": type(self).__name__,
                 "ERROR_CODE": get_error_code_value(self),
-                "message": str(self)
+                "message": str(self),
             }
 
         # Get the dataclass as a dict
@@ -100,7 +101,7 @@ def error_to_dict(error: Any) -> dict:
         return {
             "error_type": type(error).__name__,
             "ERROR_CODE": get_error_code_value(error),
-            "message": str(error)
+            "message": str(error),
         }
 
     # Get the dataclass as a dict
@@ -202,24 +203,20 @@ def _add_suggestions(error: Any, error_dict: dict) -> dict:
         available = getattr(error, "available", [])
         matches = get_close_matches(column, available, n=3, cutoff=0.6)
         if matches:
-            suggestions.append({
-                "field": "column",
-                "provided": column,
-                "suggestions": matches
-            })
+            suggestions.append({"field": "column", "provided": column, "suggestions": matches})
 
     # ColumnsNotFoundError: suggest similar column names for each missing column
-    elif error_type == "ColumnsNotFoundError" and hasattr(error, "missing") and hasattr(error, "available"):
+    elif (
+        error_type == "ColumnsNotFoundError"
+        and hasattr(error, "missing")
+        and hasattr(error, "available")
+    ):
         missing = getattr(error, "missing", [])
         available = getattr(error, "available", [])
         for column in missing:
             matches = get_close_matches(column, available, n=3, cutoff=0.6)
             if matches:
-                suggestions.append({
-                    "field": "columns",
-                    "provided": column,
-                    "suggestions": matches
-                })
+                suggestions.append({"field": "columns", "provided": column, "suggestions": matches})
 
     # InvalidFunctionError: suggest similar function names
     elif error_type == "InvalidFunctionError" and hasattr(error, "valid_functions"):
@@ -227,11 +224,7 @@ def _add_suggestions(error: Any, error_dict: dict) -> dict:
         valid = getattr(error, "valid_functions", [])
         matches = get_close_matches(function, valid, n=3, cutoff=0.6)
         if matches:
-            suggestions.append({
-                "field": "function",
-                "provided": function,
-                "suggestions": matches
-            })
+            suggestions.append({"field": "function", "provided": function, "suggestions": matches})
 
     # InvalidFillStrategyError: suggest similar strategies
     elif error_type == "InvalidFillStrategyError" and hasattr(error, "valid_strategies"):
@@ -239,11 +232,7 @@ def _add_suggestions(error: Any, error_dict: dict) -> dict:
         valid = getattr(error, "valid_strategies", [])
         matches = get_close_matches(strategy, valid, n=3, cutoff=0.6)
         if matches:
-            suggestions.append({
-                "field": "strategy",
-                "provided": strategy,
-                "suggestions": matches
-            })
+            suggestions.append({"field": "strategy", "provided": strategy, "suggestions": matches})
 
     # InvalidTypeError: suggest similar types
     elif error_type == "InvalidTypeError" and hasattr(error, "valid_types"):
@@ -251,11 +240,7 @@ def _add_suggestions(error: Any, error_dict: dict) -> dict:
         valid = getattr(error, "valid_types", [])
         matches = get_close_matches(type_name, valid, n=3, cutoff=0.6)
         if matches:
-            suggestions.append({
-                "field": "type",
-                "provided": type_name,
-                "suggestions": matches
-            })
+            suggestions.append({"field": "type", "provided": type_name, "suggestions": matches})
 
     # InvalidTransformationError: suggest similar transformations
     elif error_type == "InvalidTransformationError" and hasattr(error, "valid_transformations"):
@@ -263,11 +248,9 @@ def _add_suggestions(error: Any, error_dict: dict) -> dict:
         valid = getattr(error, "valid_transformations", [])
         matches = get_close_matches(transformation, valid, n=3, cutoff=0.6)
         if matches:
-            suggestions.append({
-                "field": "transformation",
-                "provided": transformation,
-                "suggestions": matches
-            })
+            suggestions.append(
+                {"field": "transformation", "provided": transformation, "suggestions": matches}
+            )
 
     # InvalidJoinTypeError: suggest similar join types
     elif error_type == "InvalidJoinTypeError" and hasattr(error, "valid_types"):
@@ -275,14 +258,16 @@ def _add_suggestions(error: Any, error_dict: dict) -> dict:
         valid = getattr(error, "valid_types", [])
         matches = get_close_matches(join_type, valid, n=3, cutoff=0.6)
         if matches:
-            suggestions.append({
-                "field": "join_type",
-                "provided": join_type,
-                "suggestions": matches
-            })
+            suggestions.append(
+                {"field": "join_type", "provided": join_type, "suggestions": matches}
+            )
 
     # InvalidParameterError: suggest similar parameter values
-    elif error_type == "InvalidParameterError" and hasattr(error, "valid_values") and getattr(error, "valid_values"):
+    elif (
+        error_type == "InvalidParameterError"
+        and hasattr(error, "valid_values")
+        and getattr(error, "valid_values")
+    ):
         parameter = getattr(error, "parameter", "")
         value = getattr(error, "value", "")
         valid = getattr(error, "valid_values", [])
@@ -290,11 +275,7 @@ def _add_suggestions(error: Any, error_dict: dict) -> dict:
         if isinstance(value, str):
             matches = get_close_matches(value, valid, n=3, cutoff=0.6)
             if matches:
-                suggestions.append({
-                    "field": parameter,
-                    "provided": value,
-                    "suggestions": matches
-                })
+                suggestions.append({"field": parameter, "provided": value, "suggestions": matches})
 
     # Add suggestions to error_dict if any were found
     if suggestions:

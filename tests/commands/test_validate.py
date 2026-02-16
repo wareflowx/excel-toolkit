@@ -3,11 +3,12 @@
 Tests for the validate command that validates data against rules.
 """
 
-import pytest
-from pathlib import Path
-from typer.testing import CliRunner
-import pandas as pd
 import json
+from pathlib import Path
+
+import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -28,7 +29,13 @@ def sample_data_file(tmp_path: Path) -> Path:
             "id": [1, 2, 3, 4, 5],
             "name": ["Alice", "Bob", "Charlie", "Diana", "Eve"],
             "age": [25, 30, 35, 28, 32],
-            "email": ["alice@example.com", "bob@example.com", "invalid-email", "diana@example.com", "eve@example.com"],
+            "email": [
+                "alice@example.com",
+                "bob@example.com",
+                "invalid-email",
+                "diana@example.com",
+                "eve@example.com",
+            ],
             "salary": [50000, 60000, 70000, 55000, 65000],
         }
     )
@@ -73,7 +80,13 @@ def file_with_duplicates(tmp_path: Path) -> Path:
     df = pd.DataFrame(
         {
             "id": [1, 2, 3, 4, 5],
-            "email": ["alice@example.com", "bob@example.com", "alice@example.com", "diana@example.com", "bob@example.com"],
+            "email": [
+                "alice@example.com",
+                "bob@example.com",
+                "alice@example.com",
+                "diana@example.com",
+                "bob@example.com",
+            ],
             "name": ["Alice", "Bob", "Charlie", "Diana", "Eve"],
         }
     )
@@ -95,18 +108,9 @@ def empty_file(tmp_path: Path) -> Path:
 def rules_file(tmp_path: Path) -> Path:
     """Create a validation rules file."""
     rules = {
-        "age": {
-            "type": "int",
-            "min": 0,
-            "max": 120
-        },
-        "email": {
-            "pattern": "email"
-        },
-        "salary": {
-            "type": "float",
-            "min": 0
-        }
+        "age": {"type": "int", "min": 0, "max": 120},
+        "email": {"pattern": "email"},
+        "salary": {"type": "float", "min": 0},
     }
     file_path = tmp_path / "rules.json"
     with open(file_path, "w") as f:
@@ -130,7 +134,9 @@ class TestValidateCommand:
 
     def test_validate_range_validation(self, file_with_out_of_range: Path):
         """Test range validation."""
-        result = runner.invoke(app, ["validate", str(file_with_out_of_range), "--rules", "age:int:0-120"])
+        result = runner.invoke(
+            app, ["validate", str(file_with_out_of_range), "--rules", "age:int:0-120"]
+        )
 
         assert result.exit_code == 1  # Should fail due to out of range values
         assert "Error" in result.stdout or "error" in result.stdout
@@ -151,45 +157,40 @@ class TestValidateCommand:
 
     def test_validate_unique_constraint(self, file_with_duplicates: Path):
         """Test uniqueness validation."""
-        result = runner.invoke(app, ["validate", str(file_with_duplicates), "--rules", "email:unique"])
+        result = runner.invoke(
+            app, ["validate", str(file_with_duplicates), "--rules", "email:unique"]
+        )
 
         assert result.exit_code == 1  # Should fail due to duplicates
         assert "duplicate" in result.stdout.lower()
 
     def test_validate_multiple_columns(self, sample_data_file: Path):
         """Test validation of multiple columns."""
-        result = runner.invoke(app, [
-            "validate", str(sample_data_file),
-            "--rules", "age:int:0-100;email:email"
-        ])
+        result = runner.invoke(
+            app, ["validate", str(sample_data_file), "--rules", "age:int:0-100;email:email"]
+        )
 
         assert result.exit_code == 1  # Should fail due to invalid email
 
     def test_validate_with_rules_file(self, sample_data_file: Path, rules_file: Path):
         """Test validation with rules file."""
-        result = runner.invoke(app, [
-            "validate", str(sample_data_file),
-            "--rules-file", str(rules_file)
-        ])
+        result = runner.invoke(
+            app, ["validate", str(sample_data_file), "--rules-file", str(rules_file)]
+        )
 
         assert result.exit_code == 1  # Should fail due to invalid email
 
     def test_validate_specific_columns(self, sample_data_file: Path):
         """Test validation of specific columns only."""
-        result = runner.invoke(app, [
-            "validate", str(sample_data_file),
-            "--columns", "age",
-            "--rules", "age:int:0-100"
-        ])
+        result = runner.invoke(
+            app, ["validate", str(sample_data_file), "--columns", "age", "--rules", "age:int:0-100"]
+        )
 
         assert result.exit_code == 0
 
     def test_validate_wildcard(self, sample_data_file: Path):
         """Test validation with wildcard rule."""
-        result = runner.invoke(app, [
-            "validate", str(sample_data_file),
-            "--rules", "*"
-        ])
+        result = runner.invoke(app, ["validate", str(sample_data_file), "--rules", "*"])
 
         # Should validate all columns with basic validation
         assert result.exit_code == 0
@@ -197,11 +198,10 @@ class TestValidateCommand:
     def test_validate_with_output(self, sample_data_file: Path, tmp_path: Path):
         """Test validation with JSON report output."""
         output_path = tmp_path / "report.json"
-        result = runner.invoke(app, [
-            "validate", str(sample_data_file),
-            "--rules", "age:int",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            ["validate", str(sample_data_file), "--rules", "age:int", "--output", str(output_path)],
+        )
 
         assert result.exit_code == 0
         assert "Report written to:" in result.stdout
@@ -216,11 +216,16 @@ class TestValidateCommand:
 
     def test_validate_fail_fast(self, file_with_out_of_range: Path):
         """Test fail-fast mode."""
-        result = runner.invoke(app, [
-            "validate", str(file_with_out_of_range),
-            "--rules", "age:int:0-120;score:int:0-100",
-            "--fail-fast"
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "validate",
+                str(file_with_out_of_range),
+                "--rules",
+                "age:int:0-120;score:int:0-100",
+                "--fail-fast",
+            ],
+        )
 
         assert result.exit_code == 1
 
@@ -245,39 +250,47 @@ class TestValidateCommand:
 
     def test_validate_both_rules_and_file(self, sample_data_file: Path, rules_file: Path):
         """Test that both --rules and --rules-file cannot be specified."""
-        result = runner.invoke(app, [
-            "validate", str(sample_data_file),
-            "--rules", "age:int",
-            "--rules-file", str(rules_file)
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "validate",
+                str(sample_data_file),
+                "--rules",
+                "age:int",
+                "--rules-file",
+                str(rules_file),
+            ],
+        )
 
         assert result.exit_code == 1
 
     def test_validate_invalid_rules_file(self, sample_data_file: Path, tmp_path: Path):
         """Test with non-existent rules file."""
-        result = runner.invoke(app, [
-            "validate", str(sample_data_file),
-            "--rules-file", "nonexistent.json"
-        ])
+        result = runner.invoke(
+            app, ["validate", str(sample_data_file), "--rules-file", "nonexistent.json"]
+        )
 
         assert result.exit_code == 1
 
     def test_validate_invalid_column(self, sample_data_file: Path):
         """Test validation with non-existent column."""
-        result = runner.invoke(app, [
-            "validate", str(sample_data_file),
-            "--columns", "nonexistent",
-            "--rules", "nonexistent:int"
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "validate",
+                str(sample_data_file),
+                "--columns",
+                "nonexistent",
+                "--rules",
+                "nonexistent:int",
+            ],
+        )
 
         assert result.exit_code == 1
 
     def test_validate_csv_input(self, tmp_path: Path):
         """Test validation of CSV file."""
-        df = pd.DataFrame({
-            "id": [1, 2, 3],
-            "age": [25, 30, 35]
-        })
+        df = pd.DataFrame({"id": [1, 2, 3], "age": [25, 30, 35]})
         file_path = tmp_path / "data.csv"
         df.to_csv(file_path, index=False)
 
@@ -287,20 +300,15 @@ class TestValidateCommand:
 
     def test_validate_specific_sheet(self, sample_data_file: Path):
         """Test validation of specific sheet."""
-        result = runner.invoke(app, [
-            "validate", str(sample_data_file),
-            "--rules", "age:int",
-            "--sheet", "Sheet1"
-        ])
+        result = runner.invoke(
+            app, ["validate", str(sample_data_file), "--rules", "age:int", "--sheet", "Sheet1"]
+        )
 
         assert result.exit_code == 0
 
     def test_validate_all_warnings(self, file_with_nulls: Path):
         """Test validation with only warnings (no errors)."""
-        result = runner.invoke(app, [
-            "validate", str(file_with_nulls),
-            "--rules", "value:int"
-        ])
+        result = runner.invoke(app, ["validate", str(file_with_nulls), "--rules", "value:int"])
 
         # Should pass (exit code 0) but show warnings
         assert result.exit_code == 0

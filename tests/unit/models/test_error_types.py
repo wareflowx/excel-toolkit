@@ -8,42 +8,43 @@ Tests all error ADTs for:
 """
 
 import pytest
+
 from excel_toolkit.models.error_types import (
-    # Validation errors
-    DangerousPatternError,
-    ConditionTooLongError,
-    UnbalancedParenthesesError,
-    UnbalancedBracketsError,
-    UnbalancedQuotesError,
-    InvalidFunctionError,
-    NoColumnsError,
-    NoRowsError,
-    NoValuesError,
-    ColumnNotFoundError,
-    ColumnsNotFoundError,
-    OverlappingColumnsError,
-    # Filter errors
-    QueryFailedError,
-    ColumnMismatchError,
-    # Sort errors
-    NotComparableError,
-    SortFailedError,
-    # Pivot errors
-    RowColumnsNotFoundError,
-    ColumnColumnsNotFoundError,
-    ValueColumnsNotFoundError,
-    PivotFailedError,
-    # Parse errors
-    InvalidFormatError,
-    NoValidSpecsError,
-    # Aggregation errors
-    GroupColumnsNotFoundError,
     AggColumnsNotFoundError,
     AggregationFailedError,
+    ColumnColumnsNotFoundError,
+    ColumnMismatchError,
+    ColumnNotFoundError,
+    ColumnsNotFoundError,
+    ComparisonFailedError,
+    ConditionTooLongError,
+    # Validation errors
+    DangerousPatternError,
+    # Aggregation errors
+    GroupColumnsNotFoundError,
+    # Parse errors
+    InvalidFormatError,
+    InvalidFunctionError,
     # Compare errors
     KeyColumnsNotFoundError,
     KeyColumnsNotFoundError2,
-    ComparisonFailedError,
+    NoColumnsError,
+    NoRowsError,
+    # Sort errors
+    NotComparableError,
+    NoValidSpecsError,
+    NoValuesError,
+    OverlappingColumnsError,
+    PivotFailedError,
+    # Filter errors
+    QueryFailedError,
+    # Pivot errors
+    RowColumnsNotFoundError,
+    SortFailedError,
+    UnbalancedBracketsError,
+    UnbalancedParenthesesError,
+    UnbalancedQuotesError,
+    ValueColumnsNotFoundError,
 )
 
 
@@ -59,6 +60,7 @@ class TestDangerousPatternError:
         """Test that DangerousPatternError is immutable."""
         error = DangerousPatternError(pattern="exec")
         from dataclasses import FrozenInstanceError
+
         with pytest.raises(FrozenInstanceError):
             error.pattern = "other"
 
@@ -82,6 +84,7 @@ class TestConditionTooLongError:
         """Test that ConditionTooLongError is immutable."""
         error = ConditionTooLongError(length=1500, max_length=1000)
         from dataclasses import FrozenInstanceError
+
         with pytest.raises(FrozenInstanceError):
             error.length = 1000
 
@@ -104,6 +107,7 @@ class TestUnbalancedParenthesesError:
         """Test immutability."""
         error = UnbalancedParenthesesError(open_count=3, close_count=2)
         from dataclasses import FrozenInstanceError
+
         with pytest.raises(FrozenInstanceError):
             error.open_count = 2
 
@@ -140,20 +144,17 @@ class TestInvalidFunctionError:
     def test_create_error(self):
         """Test creating an InvalidFunctionError."""
         error = InvalidFunctionError(
-            function="invalid_func",
-            valid_functions=["sum", "mean", "count"]
+            function="invalid_func", valid_functions=["sum", "mean", "count"]
         )
         assert error.function == "invalid_func"
         assert error.valid_functions == ["sum", "mean", "count"]
 
     def test_immutability_list(self):
         """Test that the list is also immutable."""
-        error = InvalidFunctionError(
-            function="invalid",
-            valid_functions=["sum", "mean"]
-        )
+        error = InvalidFunctionError(function="invalid", valid_functions=["sum", "mean"])
         # The dataclass itself is frozen
         from dataclasses import FrozenInstanceError
+
         with pytest.raises(FrozenInstanceError):
             error.valid_functions = ["other"]
 
@@ -190,20 +191,15 @@ class TestColumnNotFoundError:
 
     def test_create_error(self):
         """Test creating a ColumnNotFoundError."""
-        error = ColumnNotFoundError(
-            column="missing_col",
-            available=["col1", "col2", "col3"]
-        )
+        error = ColumnNotFoundError(column="missing_col", available=["col1", "col2", "col3"])
         assert error.column == "missing_col"
         assert error.available == ["col1", "col2", "col3"]
 
     def test_immutability(self):
         """Test immutability."""
-        error = ColumnNotFoundError(
-            column="missing",
-            available=["col1"]
-        )
+        error = ColumnNotFoundError(column="missing", available=["col1"])
         from dataclasses import FrozenInstanceError
+
         with pytest.raises(FrozenInstanceError):
             error.column = "other"
 
@@ -213,10 +209,7 @@ class TestColumnsNotFoundError:
 
     def test_create_error(self):
         """Test creating a ColumnsNotFoundError."""
-        error = ColumnsNotFoundError(
-            missing=["col1", "col2"],
-            available=["col3", "col4"]
-        )
+        error = ColumnsNotFoundError(missing=["col1", "col2"], available=["col3", "col4"])
         assert error.missing == ["col1", "col2"]
         assert error.available == ["col3", "col4"]
 
@@ -235,10 +228,7 @@ class TestQueryFailedError:
 
     def test_create_error(self):
         """Test creating a QueryFailedError."""
-        error = QueryFailedError(
-            message="Invalid syntax",
-            condition="age >"
-        )
+        error = QueryFailedError(message="Invalid syntax", condition="age >")
         assert error.message == "Invalid syntax"
         assert error.condition == "age >"
 
@@ -248,10 +238,7 @@ class TestColumnMismatchError:
 
     def test_create_error(self):
         """Test creating a ColumnMismatchError."""
-        error = ColumnMismatchError(
-            message="Type mismatch",
-            condition="age > 'text'"
-        )
+        error = ColumnMismatchError(message="Type mismatch", condition="age > 'text'")
         assert error.message == "Type mismatch"
         assert error.condition == "age > 'text'"
 
@@ -261,10 +248,7 @@ class TestNotComparableError:
 
     def test_create_error(self):
         """Test creating a NotComparableError."""
-        error = NotComparableError(
-            column="mixed_col",
-            message="Cannot compare mixed types"
-        )
+        error = NotComparableError(column="mixed_col", message="Cannot compare mixed types")
         assert error.column == "mixed_col"
         assert error.message == "Cannot compare mixed types"
 
@@ -283,10 +267,7 @@ class TestRowColumnsNotFoundError:
 
     def test_create_error(self):
         """Test creating a RowColumnsNotFoundError."""
-        error = RowColumnsNotFoundError(
-            missing=["row1"],
-            available=["col1", "col2"]
-        )
+        error = RowColumnsNotFoundError(missing=["row1"], available=["col1", "col2"])
         assert error.missing == ["row1"]
         assert error.available == ["col1", "col2"]
 
@@ -296,10 +277,7 @@ class TestColumnColumnsNotFoundError:
 
     def test_create_error(self):
         """Test creating a ColumnColumnsNotFoundError."""
-        error = ColumnColumnsNotFoundError(
-            missing=["col1"],
-            available=["col2", "col3"]
-        )
+        error = ColumnColumnsNotFoundError(missing=["col1"], available=["col2", "col3"])
         assert error.missing == ["col1"]
         assert error.available == ["col2", "col3"]
 
@@ -309,10 +287,7 @@ class TestValueColumnsNotFoundError:
 
     def test_create_error(self):
         """Test creating a ValueColumnsNotFoundError."""
-        error = ValueColumnsNotFoundError(
-            missing=["val1"],
-            available=["val2", "val3"]
-        )
+        error = ValueColumnsNotFoundError(missing=["val1"], available=["val2", "val3"])
         assert error.missing == ["val1"]
         assert error.available == ["val2", "val3"]
 
@@ -331,10 +306,7 @@ class TestInvalidFormatError:
 
     def test_create_error(self):
         """Test creating an InvalidFormatError."""
-        error = InvalidFormatError(
-            spec="invalid_spec",
-            expected_format="column:func1,func2"
-        )
+        error = InvalidFormatError(spec="invalid_spec", expected_format="column:func1,func2")
         assert error.spec == "invalid_spec"
         assert error.expected_format == "column:func1,func2"
 
@@ -353,10 +325,7 @@ class TestGroupColumnsNotFoundError:
 
     def test_create_error(self):
         """Test creating a GroupColumnsNotFoundError."""
-        error = GroupColumnsNotFoundError(
-            missing=["group1"],
-            available=["col1", "col2"]
-        )
+        error = GroupColumnsNotFoundError(missing=["group1"], available=["col1", "col2"])
         assert error.missing == ["group1"]
         assert error.available == ["col1", "col2"]
 
@@ -366,10 +335,7 @@ class TestAggColumnsNotFoundError:
 
     def test_create_error(self):
         """Test creating an AggColumnsNotFoundError."""
-        error = AggColumnsNotFoundError(
-            missing=["agg1"],
-            available=["agg2", "agg3"]
-        )
+        error = AggColumnsNotFoundError(missing=["agg1"], available=["agg2", "agg3"])
         assert error.missing == ["agg1"]
         assert error.available == ["agg2", "agg3"]
 
@@ -388,10 +354,7 @@ class TestKeyColumnsNotFoundError:
 
     def test_create_error(self):
         """Test creating a KeyColumnsNotFoundError."""
-        error = KeyColumnsNotFoundError(
-            missing=["key1"],
-            available=["col1", "col2"]
-        )
+        error = KeyColumnsNotFoundError(missing=["key1"], available=["col1", "col2"])
         assert error.missing == ["key1"]
         assert error.available == ["col1", "col2"]
 
@@ -401,10 +364,7 @@ class TestKeyColumnsNotFoundError2:
 
     def test_create_error(self):
         """Test creating a KeyColumnsNotFoundError2."""
-        error = KeyColumnsNotFoundError2(
-            missing=["key1"],
-            available=["col1", "col2"]
-        )
+        error = KeyColumnsNotFoundError2(missing=["key1"], available=["col1", "col2"])
         assert error.missing == ["key1"]
         assert error.available == ["col1", "col2"]
 
@@ -423,10 +383,7 @@ class TestErrorTypeHierarchy:
 
     def test_column_not_found_error_type(self):
         """Test type checking for ColumnNotFoundError."""
-        error = ColumnNotFoundError(
-            column="missing",
-            available=["col1"]
-        )
+        error = ColumnNotFoundError(column="missing", available=["col1"])
         assert isinstance(error, ColumnNotFoundError)
 
     def test_all_errors_are_frozen(self):

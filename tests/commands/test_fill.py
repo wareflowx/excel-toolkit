@@ -3,11 +3,11 @@
 Tests for the fill command that fills missing values.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
-import numpy as np
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -116,11 +116,9 @@ class TestFillCommand:
 
     def test_fill_with_constant_value(self, file_with_nulls: Path):
         """Test filling with constant value."""
-        result = runner.invoke(app, [
-            "fill", str(file_with_nulls),
-            "--columns", "age",
-            "--value", "0"
-        ])
+        result = runner.invoke(
+            app, ["fill", str(file_with_nulls), "--columns", "age", "--value", "0"]
+        )
 
         assert result.exit_code == 0
         assert "Missing values before:" in result.stdout
@@ -128,11 +126,9 @@ class TestFillCommand:
 
     def test_fill_mean_strategy(self, numeric_file_with_nulls: Path):
         """Test filling with mean strategy."""
-        result = runner.invoke(app, [
-            "fill", str(numeric_file_with_nulls),
-            "--columns", "price",
-            "--strategy", "mean"
-        ])
+        result = runner.invoke(
+            app, ["fill", str(numeric_file_with_nulls), "--columns", "price", "--strategy", "mean"]
+        )
 
         assert result.exit_code == 0
         assert "Strategy: mean" in result.stdout
@@ -140,87 +136,71 @@ class TestFillCommand:
 
     def test_fill_median_strategy(self, numeric_file_with_nulls: Path):
         """Test filling with median strategy."""
-        result = runner.invoke(app, [
-            "fill", str(numeric_file_with_nulls),
-            "--columns", "quantity",
-            "--strategy", "median"
-        ])
+        result = runner.invoke(
+            app,
+            ["fill", str(numeric_file_with_nulls), "--columns", "quantity", "--strategy", "median"],
+        )
 
         assert result.exit_code == 0
         assert "Strategy: median" in result.stdout
 
     def test_fill_mode_strategy(self, file_with_nulls: Path):
         """Test filling with mode strategy."""
-        result = runner.invoke(app, [
-            "fill", str(file_with_nulls),
-            "--columns", "name",
-            "--strategy", "mode"
-        ])
+        result = runner.invoke(
+            app, ["fill", str(file_with_nulls), "--columns", "name", "--strategy", "mode"]
+        )
 
         assert result.exit_code == 0
         assert "Strategy: mode" in result.stdout
 
     def test_fill_min_strategy(self, numeric_file_with_nulls: Path):
         """Test filling with min strategy."""
-        result = runner.invoke(app, [
-            "fill", str(numeric_file_with_nulls),
-            "--columns", "price",
-            "--strategy", "min"
-        ])
+        result = runner.invoke(
+            app, ["fill", str(numeric_file_with_nulls), "--columns", "price", "--strategy", "min"]
+        )
 
         assert result.exit_code == 0
         assert "Strategy: min" in result.stdout
 
     def test_fill_max_strategy(self, numeric_file_with_nulls: Path):
         """Test filling with max strategy."""
-        result = runner.invoke(app, [
-            "fill", str(numeric_file_with_nulls),
-            "--columns", "price",
-            "--strategy", "max"
-        ])
+        result = runner.invoke(
+            app, ["fill", str(numeric_file_with_nulls), "--columns", "price", "--strategy", "max"]
+        )
 
         assert result.exit_code == 0
         assert "Strategy: max" in result.stdout
 
     def test_fill_ffill_strategy(self, file_for_ffill_bfill: Path):
         """Test forward fill strategy."""
-        result = runner.invoke(app, [
-            "fill", str(file_for_ffill_bfill),
-            "--columns", "value",
-            "--strategy", "ffill"
-        ])
+        result = runner.invoke(
+            app, ["fill", str(file_for_ffill_bfill), "--columns", "value", "--strategy", "ffill"]
+        )
 
         assert result.exit_code == 0
         assert "Strategy: ffill" in result.stdout
 
     def test_fill_bfill_strategy(self, file_for_ffill_bfill: Path):
         """Test backward fill strategy."""
-        result = runner.invoke(app, [
-            "fill", str(file_for_ffill_bfill),
-            "--columns", "value",
-            "--strategy", "bfill"
-        ])
+        result = runner.invoke(
+            app, ["fill", str(file_for_ffill_bfill), "--columns", "value", "--strategy", "bfill"]
+        )
 
         assert result.exit_code == 0
         assert "Strategy: bfill" in result.stdout
 
     def test_fill_multiple_columns(self, file_with_nulls: Path):
         """Test filling multiple columns."""
-        result = runner.invoke(app, [
-            "fill", str(file_with_nulls),
-            "--columns", "age,salary",
-            "--value", "0"
-        ])
+        result = runner.invoke(
+            app, ["fill", str(file_with_nulls), "--columns", "age,salary", "--value", "0"]
+        )
 
         assert result.exit_code == 0
         assert "Columns: age, salary" in result.stdout
 
     def test_fill_all_columns(self, file_with_nulls: Path):
         """Test filling all columns with missing values."""
-        result = runner.invoke(app, [
-            "fill", str(file_with_nulls),
-            "--strategy", "mean"
-        ])
+        result = runner.invoke(app, ["fill", str(file_with_nulls), "--strategy", "mean"])
 
         assert result.exit_code == 0
         assert "all columns with missing values" in result.stdout
@@ -228,12 +208,19 @@ class TestFillCommand:
     def test_fill_with_output(self, file_with_nulls: Path, tmp_path: Path):
         """Test filling with output file."""
         output_path = tmp_path / "filled.xlsx"
-        result = runner.invoke(app, [
-            "fill", str(file_with_nulls),
-            "--columns", "age",
-            "--value", "30",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "fill",
+                str(file_with_nulls),
+                "--columns",
+                "age",
+                "--value",
+                "30",
+                "--output",
+                str(output_path),
+            ],
+        )
 
         assert result.exit_code == 0
         assert "Written to:" in result.stdout
@@ -241,55 +228,44 @@ class TestFillCommand:
 
     def test_fill_dry_run(self, file_with_nulls: Path):
         """Test dry-run mode."""
-        result = runner.invoke(app, [
-            "fill", str(file_with_nulls),
-            "--columns", "age",
-            "--value", "30",
-            "--dry-run"
-        ])
+        result = runner.invoke(
+            app, ["fill", str(file_with_nulls), "--columns", "age", "--value", "30", "--dry-run"]
+        )
 
         assert result.exit_code == 0
         assert "Preview" in result.stdout
 
     def test_fill_csv_input(self, csv_file_with_nulls: Path):
         """Test filling from CSV file."""
-        result = runner.invoke(app, [
-            "fill", str(csv_file_with_nulls),
-            "--columns", "value",
-            "--value", "0"
-        ])
+        result = runner.invoke(
+            app, ["fill", str(csv_file_with_nulls), "--columns", "value", "--value", "0"]
+        )
 
         assert result.exit_code == 0
         assert "Values filled:" in result.stdout
 
     def test_fill_specific_sheet(self, file_with_nulls: Path):
         """Test filling from specific sheet."""
-        result = runner.invoke(app, [
-            "fill", str(file_with_nulls),
-            "--columns", "age",
-            "--value", "0",
-            "--sheet", "Sheet1"
-        ])
+        result = runner.invoke(
+            app,
+            ["fill", str(file_with_nulls), "--columns", "age", "--value", "0", "--sheet", "Sheet1"],
+        )
 
         assert result.exit_code == 0
 
     def test_fill_invalid_column(self, file_with_nulls: Path):
         """Test filling with non-existent column."""
-        result = runner.invoke(app, [
-            "fill", str(file_with_nulls),
-            "--columns", "invalid_column",
-            "--value", "0"
-        ])
+        result = runner.invoke(
+            app, ["fill", str(file_with_nulls), "--columns", "invalid_column", "--value", "0"]
+        )
 
         assert result.exit_code == 1
 
     def test_fill_invalid_strategy(self, file_with_nulls: Path):
         """Test filling with invalid strategy."""
-        result = runner.invoke(app, [
-            "fill", str(file_with_nulls),
-            "--columns", "age",
-            "--strategy", "invalid"
-        ])
+        result = runner.invoke(
+            app, ["fill", str(file_with_nulls), "--columns", "age", "--strategy", "invalid"]
+        )
 
         assert result.exit_code == 1
 
@@ -301,43 +277,40 @@ class TestFillCommand:
 
     def test_fill_both_value_and_strategy(self, file_with_nulls: Path):
         """Test fill with both value and strategy specified."""
-        result = runner.invoke(app, [
-            "fill", str(file_with_nulls),
-            "--columns", "age",
-            "--value", "0",
-            "--strategy", "mean"
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "fill",
+                str(file_with_nulls),
+                "--columns",
+                "age",
+                "--value",
+                "0",
+                "--strategy",
+                "mean",
+            ],
+        )
 
         assert result.exit_code == 1
 
     def test_fill_empty_file(self, empty_file: Path):
         """Test fill on empty file."""
-        result = runner.invoke(app, [
-            "fill", str(empty_file),
-            "--columns", "age",
-            "--value", "0"
-        ])
+        result = runner.invoke(app, ["fill", str(empty_file), "--columns", "age", "--value", "0"])
 
         assert result.exit_code == 0
         assert "empty" in result.stdout.lower()
 
     def test_fill_no_nulls(self, file_no_nulls: Path):
         """Test fill on file with no missing values."""
-        result = runner.invoke(app, [
-            "fill", str(file_no_nulls),
-            "--columns", "age",
-            "--value", "0"
-        ])
+        result = runner.invoke(
+            app, ["fill", str(file_no_nulls), "--columns", "age", "--value", "0"]
+        )
 
         assert result.exit_code == 0
 
     def test_fill_nonexistent_file(self):
         """Test fill on non-existent file."""
-        result = runner.invoke(app, [
-            "fill", "missing.xlsx",
-            "--columns", "age",
-            "--value", "0"
-        ])
+        result = runner.invoke(app, ["fill", "missing.xlsx", "--columns", "age", "--value", "0"])
 
         assert result.exit_code == 1
 
@@ -352,11 +325,9 @@ class TestFillCommand:
 
     def test_fill_numeric_string_conversion(self, file_with_nulls: Path):
         """Test that numeric values are properly converted."""
-        result = runner.invoke(app, [
-            "fill", str(file_with_nulls),
-            "--columns", "age",
-            "--value", "25"
-        ])
+        result = runner.invoke(
+            app, ["fill", str(file_with_nulls), "--columns", "age", "--value", "25"]
+        )
 
         assert result.exit_code == 0
         assert "Values filled:" in result.stdout

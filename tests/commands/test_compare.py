@@ -3,10 +3,11 @@
 Tests for the compare command that compares two files or sheets.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -226,8 +227,10 @@ class TestCompareCommand:
                 "compare",
                 str(baseline_file),
                 str(modified_file),
-                "--sheet1", "Sheet1",
-                "--sheet2", "Sheet1",
+                "--sheet1",
+                "Sheet1",
+                "--sheet2",
+                "Sheet1",
             ],
         )
 
@@ -277,7 +280,8 @@ class TestCompareCommand:
     def test_compare_invalid_key_column_file1(self, baseline_file: Path, modified_file: Path):
         """Test comparing with invalid key column in file1."""
         result = runner.invoke(
-            app, ["compare", str(baseline_file), str(modified_file), "--key-columns", "invalid_column"]
+            app,
+            ["compare", str(baseline_file), str(modified_file), "--key-columns", "invalid_column"],
         )
 
         assert result.exit_code == 1
@@ -293,7 +297,9 @@ class TestCompareCommand:
 
     def test_compare_shows_diff_status(self, baseline_file: Path, modified_file: Path):
         """Test that result shows diff status column."""
-        result = runner.invoke(app, ["compare", str(baseline_file), str(modified_file), "--key-columns", "id"])
+        result = runner.invoke(
+            app, ["compare", str(baseline_file), str(modified_file), "--key-columns", "id"]
+        )
 
         assert result.exit_code == 0
         # Should have some differences

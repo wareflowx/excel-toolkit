@@ -3,10 +3,11 @@
 Tests for the aggregate command that performs custom aggregations on grouped data.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -100,7 +101,15 @@ class TestAggregateCommand:
     def test_aggregate_single_function(self, sales_data_for_aggregate: Path):
         """Test aggregation with single function."""
         result = runner.invoke(
-            app, ["aggregate", str(sales_data_for_aggregate), "--group", "region", "--functions", "amount:sum"]
+            app,
+            [
+                "aggregate",
+                str(sales_data_for_aggregate),
+                "--group",
+                "region",
+                "--functions",
+                "amount:sum",
+            ],
         )
 
         assert result.exit_code == 0
@@ -114,8 +123,10 @@ class TestAggregateCommand:
             [
                 "aggregate",
                 str(sales_data_for_aggregate),
-                "--group", "region",
-                "--functions", "amount:sum,amount:min,amount:max",
+                "--group",
+                "region",
+                "--functions",
+                "amount:sum,amount:min,amount:max",
             ],
         )
 
@@ -129,8 +140,10 @@ class TestAggregateCommand:
             [
                 "aggregate",
                 str(sales_data_for_aggregate),
-                "--group", "region",
-                "--functions", "amount:sum,amount:mean,quantity:count",
+                "--group",
+                "region",
+                "--functions",
+                "amount:sum,amount:mean,quantity:count",
             ],
         )
 
@@ -139,7 +152,15 @@ class TestAggregateCommand:
     def test_aggregate_mean_function(self, sales_data_for_aggregate: Path):
         """Test mean aggregation."""
         result = runner.invoke(
-            app, ["aggregate", str(sales_data_for_aggregate), "--group", "product", "--functions", "amount:mean"]
+            app,
+            [
+                "aggregate",
+                str(sales_data_for_aggregate),
+                "--group",
+                "product",
+                "--functions",
+                "amount:mean",
+            ],
         )
 
         assert result.exit_code == 0
@@ -147,7 +168,15 @@ class TestAggregateCommand:
     def test_aggregate_avg_synonym(self, sales_data_for_aggregate: Path):
         """Test that avg is treated as mean."""
         result = runner.invoke(
-            app, ["aggregate", str(sales_data_for_aggregate), "--group", "region", "--functions", "amount:avg"]
+            app,
+            [
+                "aggregate",
+                str(sales_data_for_aggregate),
+                "--group",
+                "region",
+                "--functions",
+                "amount:avg",
+            ],
         )
 
         assert result.exit_code == 0
@@ -155,7 +184,15 @@ class TestAggregateCommand:
     def test_aggregate_count_function(self, sales_data_for_aggregate: Path):
         """Test count aggregation."""
         result = runner.invoke(
-            app, ["aggregate", str(sales_data_for_aggregate), "--group", "product", "--functions", "amount:count"]
+            app,
+            [
+                "aggregate",
+                str(sales_data_for_aggregate),
+                "--group",
+                "product",
+                "--functions",
+                "amount:count",
+            ],
         )
 
         assert result.exit_code == 0
@@ -163,7 +200,15 @@ class TestAggregateCommand:
     def test_aggregate_min_function(self, sales_data_for_aggregate: Path):
         """Test min aggregation."""
         result = runner.invoke(
-            app, ["aggregate", str(sales_data_for_aggregate), "--group", "region", "--functions", "amount:min"]
+            app,
+            [
+                "aggregate",
+                str(sales_data_for_aggregate),
+                "--group",
+                "region",
+                "--functions",
+                "amount:min",
+            ],
         )
 
         assert result.exit_code == 0
@@ -171,7 +216,15 @@ class TestAggregateCommand:
     def test_aggregate_max_function(self, sales_data_for_aggregate: Path):
         """Test max aggregation."""
         result = runner.invoke(
-            app, ["aggregate", str(sales_data_for_aggregate), "--group", "region", "--functions", "amount:max"]
+            app,
+            [
+                "aggregate",
+                str(sales_data_for_aggregate),
+                "--group",
+                "region",
+                "--functions",
+                "amount:max",
+            ],
         )
 
         assert result.exit_code == 0
@@ -179,7 +232,15 @@ class TestAggregateCommand:
     def test_aggregate_median_function(self, sales_data_for_aggregate: Path):
         """Test median aggregation."""
         result = runner.invoke(
-            app, ["aggregate", str(sales_data_for_aggregate), "--group", "product", "--functions", "amount:median"]
+            app,
+            [
+                "aggregate",
+                str(sales_data_for_aggregate),
+                "--group",
+                "product",
+                "--functions",
+                "amount:median",
+            ],
         )
 
         assert result.exit_code == 0
@@ -187,7 +248,15 @@ class TestAggregateCommand:
     def test_aggregate_std_function(self, sales_data_for_aggregate: Path):
         """Test standard deviation aggregation."""
         result = runner.invoke(
-            app, ["aggregate", str(sales_data_for_aggregate), "--group", "region", "--functions", "amount:std"]
+            app,
+            [
+                "aggregate",
+                str(sales_data_for_aggregate),
+                "--group",
+                "region",
+                "--functions",
+                "amount:std",
+            ],
         )
 
         assert result.exit_code == 0
@@ -195,7 +264,15 @@ class TestAggregateCommand:
     def test_aggregate_var_function(self, sales_data_for_aggregate: Path):
         """Test variance aggregation."""
         result = runner.invoke(
-            app, ["aggregate", str(sales_data_for_aggregate), "--group", "region", "--functions", "amount:var"]
+            app,
+            [
+                "aggregate",
+                str(sales_data_for_aggregate),
+                "--group",
+                "region",
+                "--functions",
+                "amount:var",
+            ],
         )
 
         assert result.exit_code == 0
@@ -203,7 +280,15 @@ class TestAggregateCommand:
     def test_aggregate_first_function(self, sales_data_for_aggregate: Path):
         """Test first aggregation."""
         result = runner.invoke(
-            app, ["aggregate", str(sales_data_for_aggregate), "--group", "region", "--functions", "amount:first"]
+            app,
+            [
+                "aggregate",
+                str(sales_data_for_aggregate),
+                "--group",
+                "region",
+                "--functions",
+                "amount:first",
+            ],
         )
 
         assert result.exit_code == 0
@@ -211,7 +296,15 @@ class TestAggregateCommand:
     def test_aggregate_last_function(self, sales_data_for_aggregate: Path):
         """Test last aggregation."""
         result = runner.invoke(
-            app, ["aggregate", str(sales_data_for_aggregate), "--group", "region", "--functions", "amount:last"]
+            app,
+            [
+                "aggregate",
+                str(sales_data_for_aggregate),
+                "--group",
+                "region",
+                "--functions",
+                "amount:last",
+            ],
         )
 
         assert result.exit_code == 0
@@ -223,8 +316,10 @@ class TestAggregateCommand:
             [
                 "aggregate",
                 str(multi_column_agg_file),
-                "--group", "year,quarter",
-                "--functions", "sales:sum,profit:mean",
+                "--group",
+                "year,quarter",
+                "--functions",
+                "sales:sum,profit:mean",
             ],
         )
 
@@ -238,8 +333,10 @@ class TestAggregateCommand:
             [
                 "aggregate",
                 str(sales_data_for_aggregate),
-                "--group", "region",
-                "--functions", "amount:sum,amount:mean,amount:min,amount:max,amount:median,amount:count",
+                "--group",
+                "region",
+                "--functions",
+                "amount:sum,amount:mean,amount:min,amount:max,amount:median,amount:count",
             ],
         )
 
@@ -253,9 +350,12 @@ class TestAggregateCommand:
             [
                 "aggregate",
                 str(sales_data_for_aggregate),
-                "--group", "region",
-                "--functions", "amount:sum",
-                "--output", str(output_path),
+                "--group",
+                "region",
+                "--functions",
+                "amount:sum",
+                "--output",
+                str(output_path),
             ],
         )
 
@@ -270,8 +370,10 @@ class TestAggregateCommand:
             [
                 "aggregate",
                 str(sales_data_for_aggregate),
-                "--group", "region",
-                "--functions", "amount:sum",
+                "--group",
+                "region",
+                "--functions",
+                "amount:sum",
                 "--dry-run",
             ],
         )
@@ -282,7 +384,15 @@ class TestAggregateCommand:
     def test_aggregate_csv_input(self, csv_file_for_aggregate: Path):
         """Test aggregation from CSV file."""
         result = runner.invoke(
-            app, ["aggregate", str(csv_file_for_aggregate), "--group", "category", "--functions", "value:sum"]
+            app,
+            [
+                "aggregate",
+                str(csv_file_for_aggregate),
+                "--group",
+                "category",
+                "--functions",
+                "value:sum",
+            ],
         )
 
         assert result.exit_code == 0
@@ -294,9 +404,12 @@ class TestAggregateCommand:
             [
                 "aggregate",
                 str(sales_data_for_aggregate),
-                "--group", "region",
-                "--functions", "amount:sum",
-                "--sheet", "Sheet1",
+                "--group",
+                "region",
+                "--functions",
+                "amount:sum",
+                "--sheet",
+                "Sheet1",
             ],
         )
 
@@ -306,7 +419,14 @@ class TestAggregateCommand:
         """Test aggregation with non-existent group column."""
         result = runner.invoke(
             app,
-            ["aggregate", str(sales_data_for_aggregate), "--group", "invalid_column", "--functions", "amount:sum"],
+            [
+                "aggregate",
+                str(sales_data_for_aggregate),
+                "--group",
+                "invalid_column",
+                "--functions",
+                "amount:sum",
+            ],
         )
 
         assert result.exit_code == 1
@@ -315,7 +435,14 @@ class TestAggregateCommand:
         """Test aggregation with non-existent aggregate column."""
         result = runner.invoke(
             app,
-            ["aggregate", str(sales_data_for_aggregate), "--group", "region", "--functions", "invalid_column:sum"],
+            [
+                "aggregate",
+                str(sales_data_for_aggregate),
+                "--group",
+                "region",
+                "--functions",
+                "invalid_column:sum",
+            ],
         )
 
         assert result.exit_code == 1
@@ -324,27 +451,46 @@ class TestAggregateCommand:
         """Test aggregation with invalid function."""
         result = runner.invoke(
             app,
-            ["aggregate", str(sales_data_for_aggregate), "--group", "region", "--functions", "amount:invalid_func"],
+            [
+                "aggregate",
+                str(sales_data_for_aggregate),
+                "--group",
+                "region",
+                "--functions",
+                "amount:invalid_func",
+            ],
         )
 
         assert result.exit_code == 1
 
     def test_aggregate_missing_group_parameter(self, sales_data_for_aggregate: Path):
         """Test aggregate without --group parameter."""
-        result = runner.invoke(app, ["aggregate", str(sales_data_for_aggregate), "--functions", "amount:sum"])
+        result = runner.invoke(
+            app, ["aggregate", str(sales_data_for_aggregate), "--functions", "amount:sum"]
+        )
 
         assert result.exit_code == 1
 
     def test_aggregate_missing_functions_parameter(self, sales_data_for_aggregate: Path):
         """Test aggregate without --functions parameter."""
-        result = runner.invoke(app, ["aggregate", str(sales_data_for_aggregate), "--group", "region"])
+        result = runner.invoke(
+            app, ["aggregate", str(sales_data_for_aggregate), "--group", "region"]
+        )
 
         assert result.exit_code == 1
 
     def test_aggregate_same_column_for_group_and_aggregate(self, sales_data_for_aggregate: Path):
         """Test that same column cannot be used for grouping and aggregation."""
         result = runner.invoke(
-            app, ["aggregate", str(sales_data_for_aggregate), "--group", "region", "--functions", "region:sum"]
+            app,
+            [
+                "aggregate",
+                str(sales_data_for_aggregate),
+                "--group",
+                "region",
+                "--functions",
+                "region:sum",
+            ],
         )
 
         assert result.exit_code == 1
@@ -360,7 +506,9 @@ class TestAggregateCommand:
 
     def test_aggregate_nonexistent_file(self):
         """Test aggregate on non-existent file."""
-        result = runner.invoke(app, ["aggregate", "missing.xlsx", "--group", "region", "--functions", "amount:sum"])
+        result = runner.invoke(
+            app, ["aggregate", "missing.xlsx", "--group", "region", "--functions", "amount:sum"]
+        )
 
         assert result.exit_code == 1
 
@@ -376,7 +524,15 @@ class TestAggregateCommand:
     def test_aggregate_invalid_format(self, sales_data_for_aggregate: Path):
         """Test invalid function format (missing colon)."""
         result = runner.invoke(
-            app, ["aggregate", str(sales_data_for_aggregate), "--group", "region", "--functions", "amount"]
+            app,
+            [
+                "aggregate",
+                str(sales_data_for_aggregate),
+                "--group",
+                "region",
+                "--functions",
+                "amount",
+            ],
         )
 
         assert result.exit_code == 1
@@ -388,8 +544,10 @@ class TestAggregateCommand:
             [
                 "aggregate",
                 str(sales_data_for_aggregate),
-                "--group", "region",
-                "--functions", "amount:sum,amount:sum",
+                "--group",
+                "region",
+                "--functions",
+                "amount:sum,amount:sum",
             ],
         )
 
@@ -398,7 +556,8 @@ class TestAggregateCommand:
     def test_aggregate_with_nulls(self, file_with_nulls_agg: Path):
         """Test aggregation with null values."""
         result = runner.invoke(
-            app, ["aggregate", str(file_with_nulls_agg), "--group", "group", "--functions", "value:sum"]
+            app,
+            ["aggregate", str(file_with_nulls_agg), "--group", "group", "--functions", "value:sum"],
         )
 
         assert result.exit_code == 0

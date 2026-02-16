@@ -7,48 +7,50 @@ Tests for:
 - _extract_column_name()
 """
 
-import pytest
 import pandas as pd
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
-from excel_toolkit.operations.filtering import (
-    validate_condition,
-    normalize_condition,
-    apply_filter,
-    _extract_column_name,
-    MAX_CONDITION_LENGTH,
-)
-from excel_toolkit.models.error_types import (
-    DangerousPatternError,
-    ConditionTooLongError,
-    UnbalancedParenthesesError,
-    UnbalancedBracketsError,
-    UnbalancedQuotesError,
-    ColumnNotFoundError,
-    QueryFailedError,
-    ColumnMismatchError,
-    ColumnsNotFoundError,
-)
+import pytest
 
+from excel_toolkit.fp import is_err, is_ok, unwrap, unwrap_err
+from excel_toolkit.models.error_types import (
+    ColumnNotFoundError,
+    ColumnsNotFoundError,
+    ConditionTooLongError,
+    DangerousPatternError,
+    UnbalancedBracketsError,
+    UnbalancedParenthesesError,
+    UnbalancedQuotesError,
+)
+from excel_toolkit.operations.filtering import (
+    MAX_CONDITION_LENGTH,
+    _extract_column_name,
+    apply_filter,
+    normalize_condition,
+    validate_condition,
+)
 
 # =============================================================================
 # Test Data Fixtures
 # =============================================================================
 
+
 @pytest.fixture
 def sample_dataframe():
     """Create a sample DataFrame for testing."""
-    return pd.DataFrame({
-        'name': ['Alice', 'Bob', 'Charlie', 'David', 'Eve'],
-        'age': [25, 30, 35, 28, 32],
-        'city': ['Paris', 'London', 'Paris', 'Berlin', 'London'],
-        'salary': [50000, 60000, 70000, 55000, 65000],
-        'active': [True, False, True, True, False],
-    })
+    return pd.DataFrame(
+        {
+            "name": ["Alice", "Bob", "Charlie", "David", "Eve"],
+            "age": [25, 30, 35, 28, 32],
+            "city": ["Paris", "London", "Paris", "Berlin", "London"],
+            "salary": [50000, 60000, 70000, 55000, 65000],
+            "active": [True, False, True, True, False],
+        }
+    )
 
 
 # =============================================================================
 # validate_condition() Tests
 # =============================================================================
+
 
 class TestValidateCondition:
     """Tests for validate_condition function."""
@@ -196,6 +198,7 @@ class TestValidateCondition:
 # normalize_condition() Tests
 # =============================================================================
 
+
 class TestNormalizeCondition:
     """Tests for normalize_condition function."""
 
@@ -245,6 +248,7 @@ class TestNormalizeCondition:
 # _extract_column_name() Tests
 # =============================================================================
 
+
 class TestExtractColumnName:
     """Tests for _extract_column_name helper function."""
 
@@ -271,6 +275,7 @@ class TestExtractColumnName:
 # apply_filter() Tests
 # =============================================================================
 
+
 class TestApplyFilter:
     """Tests for apply_filter function."""
 
@@ -281,7 +286,7 @@ class TestApplyFilter:
         assert is_ok(result)
         df_filtered = unwrap(result)
         assert len(df_filtered) == 2  # Charlie (35) and Eve (32)
-        assert all(df_filtered['age'] > 30)
+        assert all(df_filtered["age"] > 30)
 
     def test_filter_numeric_less_than(self, sample_dataframe):
         """Test filtering with numeric < comparison."""
@@ -290,7 +295,7 @@ class TestApplyFilter:
         assert is_ok(result)
         df_filtered = unwrap(result)
         assert len(df_filtered) == 2  # Alice (25) and David (28)
-        assert df_filtered.iloc[0]['name'] == 'Alice'
+        assert df_filtered.iloc[0]["name"] == "Alice"
 
     def test_filter_string_equality(self, sample_dataframe):
         """Test filtering with string == comparison."""
@@ -299,7 +304,7 @@ class TestApplyFilter:
         assert is_ok(result)
         df_filtered = unwrap(result)
         assert len(df_filtered) == 2
-        assert all(df_filtered['city'] == 'Paris')
+        assert all(df_filtered["city"] == "Paris")
 
     def test_filter_with_and(self, sample_dataframe):
         """Test filtering with AND logic."""
@@ -309,9 +314,9 @@ class TestApplyFilter:
         df_filtered = unwrap(result)
         # Only Charlie (35, Paris) qualifies (Alice has age 25 which is not > 25)
         assert len(df_filtered) == 1
-        assert df_filtered.iloc[0]['name'] == 'Charlie'
-        assert all(df_filtered['age'] > 25)
-        assert all(df_filtered['city'] == 'Paris')
+        assert df_filtered.iloc[0]["name"] == "Charlie"
+        assert all(df_filtered["age"] > 25)
+        assert all(df_filtered["city"] == "Paris")
 
     def test_filter_with_or(self, sample_dataframe):
         """Test filtering with OR logic."""
@@ -323,11 +328,7 @@ class TestApplyFilter:
 
     def test_filter_with_columns(self, sample_dataframe):
         """Test filtering with column selection."""
-        result = apply_filter(
-            sample_dataframe,
-            "age > 30",
-            columns=["name", "age"]
-        )
+        result = apply_filter(sample_dataframe, "age > 30", columns=["name", "age"])
 
         assert is_ok(result)
         df_filtered = unwrap(result)
@@ -336,11 +337,7 @@ class TestApplyFilter:
 
     def test_filter_with_columns_all_missing(self, sample_dataframe):
         """Test filtering with all selected columns missing."""
-        result = apply_filter(
-            sample_dataframe,
-            "age > 30",
-            columns=["missing1", "missing2"]
-        )
+        result = apply_filter(sample_dataframe, "age > 30", columns=["missing1", "missing2"])
 
         assert is_err(result)
         error = unwrap_err(result)
@@ -350,11 +347,7 @@ class TestApplyFilter:
 
     def test_filter_with_columns_partial_missing(self, sample_dataframe):
         """Test filtering with some selected columns missing."""
-        result = apply_filter(
-            sample_dataframe,
-            "age > 30",
-            columns=["name", "missing", "age"]
-        )
+        result = apply_filter(sample_dataframe, "age > 30", columns=["name", "missing", "age"])
 
         assert is_err(result)
         error = unwrap_err(result)
@@ -363,11 +356,7 @@ class TestApplyFilter:
 
     def test_filter_with_limit(self, sample_dataframe):
         """Test filtering with row limit."""
-        result = apply_filter(
-            sample_dataframe,
-            "age > 25",
-            limit=2
-        )
+        result = apply_filter(sample_dataframe, "age > 25", limit=2)
 
         assert is_ok(result)
         df_filtered = unwrap(result)
@@ -401,12 +390,7 @@ class TestApplyFilter:
 
     def test_filter_with_columns_and_limit(self, sample_dataframe):
         """Test filtering with both column selection and limit."""
-        result = apply_filter(
-            sample_dataframe,
-            "age > 25",
-            columns=["name", "city"],
-            limit=3
-        )
+        result = apply_filter(sample_dataframe, "age > 25", columns=["name", "city"], limit=3)
 
         assert is_ok(result)
         df_filtered = unwrap(result)
@@ -417,6 +401,7 @@ class TestApplyFilter:
 # =============================================================================
 # Integration Tests
 # =============================================================================
+
 
 class TestFilteringIntegration:
     """Integration tests for filtering operations."""
@@ -438,14 +423,16 @@ class TestFilteringIntegration:
 
         df_filtered = unwrap(filter_result)
         assert len(df_filtered) == 1
-        assert df_filtered.iloc[0]['name'] == 'Charlie'
+        assert df_filtered.iloc[0]["name"] == "Charlie"
 
     def test_condition_with_none_filtering(self):
         """Test filtering with None values."""
-        df = pd.DataFrame({
-            'name': ['Alice', 'Bob', 'Charlie'],
-            'age': [25, None, 35],
-        })
+        df = pd.DataFrame(
+            {
+                "name": ["Alice", "Bob", "Charlie"],
+                "age": [25, None, 35],
+            }
+        )
 
         # Normalize 'age is None'
         normalized = normalize_condition("age is None")
@@ -455,7 +442,7 @@ class TestFilteringIntegration:
 
         df_filtered = unwrap(result)
         assert len(df_filtered) == 1
-        assert pd.isna(df_filtered.iloc[0]['age'])
+        assert pd.isna(df_filtered.iloc[0]["age"])
 
     def test_complex_filter_workflow(self, sample_dataframe):
         """Test complex filtering with column selection and limit."""
@@ -467,10 +454,7 @@ class TestFilteringIntegration:
 
         # Filter with column selection and limit
         result = apply_filter(
-            sample_dataframe,
-            condition,
-            columns=["name", "age", "salary"],
-            limit=2
+            sample_dataframe, condition, columns=["name", "age", "salary"], limit=2
         )
 
         assert is_ok(result)

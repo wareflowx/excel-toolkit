@@ -15,14 +15,15 @@ Error types are organized by category:
 """
 
 from dataclasses import field
-from excel_toolkit.fp.immutable import immutable, dataclass
-from typing import Any, Callable
-from excel_toolkit.models.error_codes import ErrorCode
+from typing import Any
 
+from excel_toolkit.fp.immutable import dataclass, immutable
+from excel_toolkit.models.error_codes import ErrorCode
 
 # =============================================================================
 # Validation Errors
 # =============================================================================
+
 
 @dataclass
 @immutable
@@ -32,6 +33,7 @@ class DangerousPatternError:
     Attributes:
         pattern: The dangerous pattern that was detected
     """
+
     pattern: str
     ERROR_CODE: int = ErrorCode.DANGEROUS_PATTERN
 
@@ -45,6 +47,7 @@ class ConditionTooLongError:
         length: The actual length of the condition
         max_length: The maximum allowed length
     """
+
     length: int
     max_length: int
     ERROR_CODE: int = ErrorCode.CONDITION_TOO_LONG
@@ -59,6 +62,7 @@ class UnbalancedParenthesesError:
         open_count: Number of opening parentheses
         close_count: Number of closing parentheses
     """
+
     open_count: int
     close_count: int
     ERROR_CODE: int = ErrorCode.UNBALANCED_PARENTHESES
@@ -73,6 +77,7 @@ class UnbalancedBracketsError:
         open_count: Number of opening brackets
         close_count: Number of closing brackets
     """
+
     open_count: int
     close_count: int
     ERROR_CODE: int = ErrorCode.UNBALANCED_BRACKETS
@@ -87,6 +92,7 @@ class UnbalancedQuotesError:
         quote_type: The type of quote (' or ")
         count: The number of quotes (should be even)
     """
+
     quote_type: str
     count: int
     ERROR_CODE: int = ErrorCode.UNBALANCED_QUOTES
@@ -101,6 +107,7 @@ class InvalidFunctionError:
         function: The invalid function name provided
         valid_functions: List of valid function names
     """
+
     function: str
     valid_functions: list[str]
     ERROR_CODE: int = ErrorCode.INVALID_FUNCTION
@@ -110,6 +117,7 @@ class InvalidFunctionError:
 @immutable
 class NoColumnsError:
     """No columns specified for an operation."""
+
     pass
     ERROR_CODE: int = ErrorCode.NO_COLUMNS
 
@@ -118,6 +126,7 @@ class NoColumnsError:
 @immutable
 class NoRowsError:
     """No row columns specified for pivot operation."""
+
     pass
     ERROR_CODE: int = ErrorCode.NO_ROWS
 
@@ -126,6 +135,7 @@ class NoRowsError:
 @immutable
 class NoValuesError:
     """No value columns specified for pivot operation."""
+
     pass
     ERROR_CODE: int = ErrorCode.NO_VALUES
 
@@ -150,6 +160,7 @@ class ColumnNotFoundError:
         column: The column name that was not found
         available: List of available column names
     """
+
     column: str
     available: list[str]
     ERROR_CODE: int = ErrorCode.COLUMN_NOT_FOUND
@@ -164,6 +175,7 @@ class ColumnsNotFoundError:
         missing: List of column names that were not found
         available: List of available column names
     """
+
     missing: list[str]
     available: list[str]
     ERROR_CODE: int = ErrorCode.COLUMNS_NOT_FOUND
@@ -177,6 +189,7 @@ class OverlappingColumnsError:
     Attributes:
         overlap: List of column names that appear in both groups
     """
+
     overlap: list[str]
     ERROR_CODE: int = ErrorCode.OVERLAPPING_COLUMNS
 
@@ -184,6 +197,7 @@ class OverlappingColumnsError:
 # =============================================================================
 # Filter Errors
 # =============================================================================
+
 
 @dataclass
 @immutable
@@ -194,6 +208,7 @@ class QueryFailedError:
         message: The error message
         condition: The condition that caused the error
     """
+
     message: str
     condition: str
     ERROR_CODE: int = ErrorCode.QUERY_FAILED
@@ -208,6 +223,7 @@ class ColumnMismatchError:
         message: The error message
         condition: The condition that caused the error
     """
+
     message: str
     condition: str
     ERROR_CODE: int = ErrorCode.COLUMN_MISMATCH
@@ -216,6 +232,7 @@ class ColumnMismatchError:
 # =============================================================================
 # Sort Errors
 # =============================================================================
+
 
 @dataclass
 @immutable
@@ -226,6 +243,7 @@ class NotComparableError:
         column: The column name
         message: The error message
     """
+
     column: str
     message: str
     ERROR_CODE: int = ErrorCode.NOT_COMPARABLE
@@ -239,6 +257,7 @@ class SortFailedError:
     Attributes:
         message: The error message
     """
+
     message: str
     ERROR_CODE: int = ErrorCode.SORT_FAILED
 
@@ -246,6 +265,7 @@ class SortFailedError:
 # =============================================================================
 # Pivot Errors
 # =============================================================================
+
 
 @dataclass
 @immutable
@@ -256,6 +276,7 @@ class RowColumnsNotFoundError:
         missing: List of missing column names
         available: List of available column names
     """
+
     missing: list[str]
     available: list[str]
     ERROR_CODE: int = ErrorCode.ROW_COLUMNS_NOT_FOUND
@@ -270,6 +291,7 @@ class ColumnColumnsNotFoundError:
         missing: List of missing column names
         available: List of available column names
     """
+
     missing: list[str]
     available: list[str]
     ERROR_CODE: int = ErrorCode.COLUMN_COLUMNS_NOT_FOUND
@@ -284,6 +306,7 @@ class ValueColumnsNotFoundError:
         missing: List of missing column names
         available: List of available column names
     """
+
     missing: list[str]
     available: list[str]
     ERROR_CODE: int = ErrorCode.VALUE_COLUMNS_NOT_FOUND
@@ -297,6 +320,7 @@ class PivotFailedError:
     Attributes:
         message: The error message
     """
+
     message: str
     ERROR_CODE: int = ErrorCode.PIVOT_FAILED
 
@@ -304,6 +328,7 @@ class PivotFailedError:
 # =============================================================================
 # Parse Errors
 # =============================================================================
+
 
 @dataclass
 @immutable
@@ -314,6 +339,7 @@ class InvalidFormatError:
         spec: The specification that failed to parse
         expected_format: Description of expected format
     """
+
     spec: str
     expected_format: str
     ERROR_CODE: int = ErrorCode.INVALID_FORMAT
@@ -323,6 +349,7 @@ class InvalidFormatError:
 @immutable
 class NoValidSpecsError:
     """No valid specifications found."""
+
     pass
     ERROR_CODE: int = ErrorCode.NO_VALID_SPECS
 
@@ -330,6 +357,7 @@ class NoValidSpecsError:
 # =============================================================================
 # Aggregation Errors
 # =============================================================================
+
 
 @dataclass
 @immutable
@@ -340,6 +368,7 @@ class GroupColumnsNotFoundError:
         missing: List of missing column names
         available: List of available column names
     """
+
     missing: list[str]
     available: list[str]
     ERROR_CODE: int = ErrorCode.GROUP_COLUMNS_NOT_FOUND
@@ -354,6 +383,7 @@ class AggColumnsNotFoundError:
         missing: List of missing column names
         available: List of available column names
     """
+
     missing: list[str]
     available: list[str]
     ERROR_CODE: int = ErrorCode.AGG_COLUMNS_NOT_FOUND
@@ -367,6 +397,7 @@ class AggregationFailedError:
     Attributes:
         message: The error message
     """
+
     message: str
     ERROR_CODE: int = ErrorCode.AGGREGATION_FAILED
 
@@ -374,6 +405,7 @@ class AggregationFailedError:
 # =============================================================================
 # Compare Errors
 # =============================================================================
+
 
 @dataclass
 @immutable
@@ -384,6 +416,7 @@ class KeyColumnsNotFoundError:
         missing: List of missing column names
         available: List of available column names
     """
+
     missing: list[str]
     available: list[str]
     ERROR_CODE: int = ErrorCode.KEY_COLUMNS_NOT_FOUND
@@ -398,6 +431,7 @@ class KeyColumnsNotFoundError2:
         missing: List of missing column names
         available: List of available column names
     """
+
     missing: list[str]
     available: list[str]
     ERROR_CODE: int = ErrorCode.KEY_COLUMNS_NOT_FOUND_2
@@ -411,6 +445,7 @@ class ComparisonFailedError:
     Attributes:
         message: The error message
     """
+
     message: str
     ERROR_CODE: int = ErrorCode.COMPARISON_FAILED
 
@@ -421,27 +456,22 @@ class ComparisonFailedError:
 
 # Validation errors can be any of the validation-specific errors
 ValidationError = (
-    DangerousPatternError |
-    ConditionTooLongError |
-    UnbalancedParenthesesError |
-    UnbalancedBracketsError |
-    UnbalancedQuotesError |
-    InvalidFunctionError |
-    NoColumnsError |
-    NoRowsError |
-    NoValuesError |
-    ColumnNotFoundError |
-    ColumnsNotFoundError |
-    OverlappingColumnsError
+    DangerousPatternError
+    | ConditionTooLongError
+    | UnbalancedParenthesesError
+    | UnbalancedBracketsError
+    | UnbalancedQuotesError
+    | InvalidFunctionError
+    | NoColumnsError
+    | NoRowsError
+    | NoValuesError
+    | ColumnNotFoundError
+    | ColumnsNotFoundError
+    | OverlappingColumnsError
 )
 
 # Filter operation errors
-FilterError = (
-    ColumnNotFoundError |
-    QueryFailedError |
-    ColumnMismatchError |
-    ColumnsNotFoundError
-)
+FilterError = ColumnNotFoundError | QueryFailedError | ColumnMismatchError | ColumnsNotFoundError
 
 # Sort operation errors
 SortValidationError = NoColumnsError | ColumnNotFoundError
@@ -449,41 +479,33 @@ SortError = NotComparableError | SortFailedError
 
 # Pivot operation errors
 PivotValidationError = (
-    InvalidFunctionError |
-    NoRowsError |
-    NoColumnsError |
-    NoValuesError |
-    RowColumnsNotFoundError |
-    ColumnColumnsNotFoundError |
-    ValueColumnsNotFoundError
+    InvalidFunctionError
+    | NoRowsError
+    | NoColumnsError
+    | NoValuesError
+    | RowColumnsNotFoundError
+    | ColumnColumnsNotFoundError
+    | ValueColumnsNotFoundError
 )
 PivotError = PivotFailedError
 
 # Parse errors for aggregation specifications
-ParseError = (
-    InvalidFormatError |
-    InvalidFunctionError |
-    NoValidSpecsError
-)
+ParseError = InvalidFormatError | InvalidFunctionError | NoValidSpecsError
 
 # Aggregation operation errors
 AggregationValidationError = (
-    GroupColumnsNotFoundError |
-    AggColumnsNotFoundError |
-    OverlappingColumnsError
+    GroupColumnsNotFoundError | AggColumnsNotFoundError | OverlappingColumnsError
 )
 AggregationError = AggregationFailedError
 
 # Comparison operation errors
-ComparisonValidationError = (
-    KeyColumnsNotFoundError |
-    KeyColumnsNotFoundError2
-)
+ComparisonValidationError = KeyColumnsNotFoundError | KeyColumnsNotFoundError2
 CompareError = ComparisonFailedError
 
 # =============================================================================
 # Phase 2: Support Operations Error Types
 # =============================================================================
+
 
 # Cleaning operation errors
 @dataclass
@@ -493,15 +515,17 @@ class CleaningError:
 
     message: str
     ERROR_CODE: int = ErrorCode.CLEANING_FAILED
+
+
 @dataclass
 @immutable
 class InvalidFillStrategyError:
     """Invalid fill strategy specified."""
 
     strategy: str
-    valid_strategies: list[str] = field(default_factory=lambda: [
-        "forward", "backward", "mean", "median", "constant", "drop"
-    ])
+    valid_strategies: list[str] = field(
+        default_factory=lambda: ["forward", "backward", "mean", "median", "constant", "drop"]
+    )
     ERROR_CODE: int = ErrorCode.INVALID_FILL_STRATEGY
 
 
@@ -532,9 +556,9 @@ class InvalidTypeError:
     """Invalid type specified for casting."""
 
     type_name: str
-    valid_types: list[str] = field(default_factory=lambda: [
-        "int", "float", "str", "bool", "datetime", "category"
-    ])
+    valid_types: list[str] = field(
+        default_factory=lambda: ["int", "float", "str", "bool", "datetime", "category"]
+    )
     ERROR_CODE: int = ErrorCode.INVALID_TYPE
 
 
@@ -564,9 +588,9 @@ class InvalidTransformationError:
     """Invalid transformation name."""
 
     transformation: str
-    valid_transformations: list[str] = field(default_factory=lambda: [
-        "log", "sqrt", "abs", "exp", "standardize", "normalize"
-    ])
+    valid_transformations: list[str] = field(
+        default_factory=lambda: ["log", "sqrt", "abs", "exp", "standardize", "normalize"]
+    )
     ERROR_CODE: int = ErrorCode.INVALID_TRANSFORMATION
 
 
@@ -577,9 +601,9 @@ class InvalidJoinTypeError:
     """Invalid join type specified."""
 
     join_type: str
-    valid_types: list[str] = field(default_factory=lambda: [
-        "inner", "left", "right", "outer", "cross"
-    ])
+    valid_types: list[str] = field(
+        default_factory=lambda: ["inner", "left", "right", "outer", "cross"]
+    )
     ERROR_CODE: int = ErrorCode.INVALID_JOIN_TYPE
 
 
@@ -607,7 +631,9 @@ class JoinColumnsNotFoundError:
 class MergeColumnsNotFoundError:
     """Merge columns not found in all DataFrames."""
 
-    missing: dict[int, list[str]] = field(default_factory=lambda: {})  # DataFrame index -> missing columns
+    missing: dict[int, list[str]] = field(
+        default_factory=lambda: {}
+    )  # DataFrame index -> missing columns
     ERROR_CODE: int = ErrorCode.MERGE_COLUMNS_NOT_FOUND
 
 
@@ -695,7 +721,7 @@ class ValidationReport:
         passed: int,
         failed: int,
         errors: list[dict] | None = None,
-        warnings: list[dict] | None = None
+        warnings: list[dict] | None = None,
     ):
         self.passed = passed
         self.failed = failed

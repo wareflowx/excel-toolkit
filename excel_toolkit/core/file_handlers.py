@@ -5,33 +5,33 @@ All handlers follow the same interface and return Result types for
 explicit error handling.
 """
 
-from pathlib import Path
-from typing import Any, Callable
 import sys
+from pathlib import Path
+from typing import Any
 
-from excel_toolkit.fp import ok, err, is_ok, unwrap, is_err
-from excel_toolkit.fp._result import Result
 from excel_toolkit.core.const import (
+    DEFAULT_CSV_DELIMITER,
+    DEFAULT_CSV_ENCODING,
+    DEFAULT_EXCEL_ENGINE,
+    DEFAULT_SHEET_NAME,
+    DELIMITER_CANDIDATES,
+    ENCODING_DETECTION_ORDER,
+    MAX_FILE_SIZE_MB,
     SUPPORTED_READ_FORMATS,
     SUPPORTED_WRITE_FORMATS,
-    DEFAULT_SHEET_NAME,
-    DEFAULT_CSV_ENCODING,
-    DEFAULT_CSV_DELIMITER,
-    DEFAULT_EXCEL_ENGINE,
-    MAX_FILE_SIZE_MB,
     WARNING_FILE_SIZE_MB,
-    ENCODING_DETECTION_ORDER,
-    DELIMITER_CANDIDATES,
 )
 from excel_toolkit.core.exceptions import (
+    EncodingError,
+    FileAccessError,
     FileHandlerError,
     FileNotFoundError,
-    FileAccessError,
-    UnsupportedFormatError,
-    InvalidFileError,
     FileSizeError,
-    EncodingError,
+    InvalidFileError,
+    UnsupportedFormatError,
 )
+from excel_toolkit.fp import err, is_err, ok, unwrap
+from excel_toolkit.fp._result import Result
 
 # Import pandas with lazy loading pattern
 try:
@@ -97,7 +97,9 @@ class ExcelHandler:
         # Check file size
         file_size_mb = path.stat().st_size / (1024 * 1024)
         if file_size_mb > MAX_FILE_SIZE_MB:
-            return err(FileSizeError(f"File too large: {file_size_mb:.1f}MB (max: {MAX_FILE_SIZE_MB}MB)"))
+            return err(
+                FileSizeError(f"File too large: {file_size_mb:.1f}MB (max: {MAX_FILE_SIZE_MB}MB)")
+            )
 
         if file_size_mb > WARNING_FILE_SIZE_MB:
             print(f"Warning: Large file ({file_size_mb:.1f}MB)", file=sys.stderr)
@@ -117,7 +119,9 @@ class ExcelHandler:
                 return err(FileAccessError(f"File access error: {error_msg}"))
             return err(InvalidFileError(f"Failed to read Excel file: {error_msg}"))
 
-    def read_all_sheets(self, path: Path, **kwargs: Any) -> Result[dict[str, "pd.DataFrame"], FileHandlerError]:
+    def read_all_sheets(
+        self, path: Path, **kwargs: Any
+    ) -> Result[dict[str, "pd.DataFrame"], FileHandlerError]:
         """Read all sheets from Excel file.
 
         Args:
@@ -142,11 +146,15 @@ class ExcelHandler:
         # Check file size
         file_size_mb = path.stat().st_size / (1024 * 1024)
         if file_size_mb > MAX_FILE_SIZE_MB:
-            return err(FileSizeError(f"File too large: {file_size_mb:.1f}MB (max: {MAX_FILE_SIZE_MB}MB)"))
+            return err(
+                FileSizeError(f"File too large: {file_size_mb:.1f}MB (max: {MAX_FILE_SIZE_MB}MB)")
+            )
 
         # Try reading all sheets
         try:
-            sheets_dict = pd.read_excel(path, sheet_name=None, engine=DEFAULT_EXCEL_ENGINE, **kwargs)
+            sheets_dict = pd.read_excel(
+                path, sheet_name=None, engine=DEFAULT_EXCEL_ENGINE, **kwargs
+            )
             return ok(sheets_dict)  # type: ignore
         except PermissionError as e:
             return err(FileAccessError(f"Permission denied: {path} - {str(e)}"))
@@ -187,7 +195,9 @@ class ExcelHandler:
 
         # Try writing
         try:
-            df.to_excel(path, sheet_name=sheet_name, index=index, engine=DEFAULT_EXCEL_ENGINE, **kwargs)
+            df.to_excel(
+                path, sheet_name=sheet_name, index=index, engine=DEFAULT_EXCEL_ENGINE, **kwargs
+            )
             return ok(None)
         except PermissionError as e:
             return err(FileAccessError(f"Permission denied: {path} - {str(e)}"))
@@ -306,7 +316,9 @@ class CSVHandler:
         # Check file size
         file_size_mb = path.stat().st_size / (1024 * 1024)
         if file_size_mb > MAX_FILE_SIZE_MB:
-            return err(FileSizeError(f"File too large: {file_size_mb:.1f}MB (max: {MAX_FILE_SIZE_MB}MB)"))
+            return err(
+                FileSizeError(f"File too large: {file_size_mb:.1f}MB (max: {MAX_FILE_SIZE_MB}MB)")
+            )
 
         # Try reading
         try:
@@ -384,14 +396,16 @@ class CSVHandler:
                 with open(path, "r", encoding=encoding) as f:
                     f.read(1024)  # Try reading first 1KB
                 return ok(encoding)
-            except (UnicodeDecodeError, LookupError):
+            except UnicodeDecodeError, LookupError:
                 continue
             except Exception as e:
                 return err(FileAccessError(f"Cannot read file: {str(e)}"))
 
         return err(EncodingError("Could not detect file encoding"))
 
-    def detect_delimiter(self, path: Path, encoding: str = DEFAULT_CSV_ENCODING) -> Result[str, FileHandlerError]:
+    def detect_delimiter(
+        self, path: Path, encoding: str = DEFAULT_CSV_ENCODING
+    ) -> Result[str, FileHandlerError]:
         """Auto-detect CSV delimiter.
 
         Analyzes the first line to determine the most likely delimiter.
@@ -477,7 +491,9 @@ class HandlerFactory:
         handler = unwrap(handler_result)
         return handler.read(path, **kwargs)
 
-    def write_file(self, df: "pd.DataFrame", path: Path, **kwargs: Any) -> Result[None, FileHandlerError]:
+    def write_file(
+        self, df: "pd.DataFrame", path: Path, **kwargs: Any
+    ) -> Result[None, FileHandlerError]:
         """Write file using appropriate handler.
 
         Convenience method that combines handler selection and writing.

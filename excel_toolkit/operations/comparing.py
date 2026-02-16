@@ -5,22 +5,20 @@ All functions return Result types for explicit error handling.
 """
 
 from dataclasses import dataclass
-from typing import Any
 
 import pandas as pd
 
-from excel_toolkit.fp import ok, err, is_ok, is_err, unwrap, unwrap_err, Result
-from excel_toolkit.fp.immutable import immutable
+from excel_toolkit.fp import Result, err, is_err, ok, unwrap, unwrap_err
 from excel_toolkit.models.error_types import (
-    KeyColumnsNotFoundError,
-    ComparisonFailedError,
     CompareError,
+    ComparisonFailedError,
+    KeyColumnsNotFoundError,
 )
-
 
 # =============================================================================
 # Data Structures
 # =============================================================================
+
 
 @dataclass
 class DifferencesResult:
@@ -31,6 +29,7 @@ class DifferencesResult:
         only_df2: Set of indices only in df2 (added rows)
         modified_rows: List of indices with different values (modified rows)
     """
+
     only_df1: set
     only_df2: set
     modified_rows: list
@@ -46,6 +45,7 @@ class ComparisonResult:
         deleted_count: Number of rows only in df1 (deleted)
         modified_count: Number of rows with different values (modified)
     """
+
     df_result: pd.DataFrame
     added_count: int
     deleted_count: int
@@ -58,9 +58,7 @@ class ComparisonResult:
 
 
 def validate_key_columns(
-    df1: pd.DataFrame,
-    df2: pd.DataFrame,
-    key_columns: list[str] | None
+    df1: pd.DataFrame, df2: pd.DataFrame, key_columns: list[str] | None
 ) -> Result[list[str], CompareError]:
     """Validate key columns for comparison.
 
@@ -95,15 +93,9 @@ def validate_key_columns(
     if all_missing:
         # Report missing from df1 if any, otherwise from df2
         if missing_df1:
-            return err(KeyColumnsNotFoundError(
-                missing=all_missing,
-                available=list(df1.columns)
-            ))
+            return err(KeyColumnsNotFoundError(missing=all_missing, available=list(df1.columns)))
         else:
-            return err(KeyColumnsNotFoundError(
-                missing=all_missing,
-                available=list(df2.columns)
-            ))
+            return err(KeyColumnsNotFoundError(missing=all_missing, available=list(df2.columns)))
 
     return ok(key_columns)
 
@@ -158,9 +150,7 @@ def compare_rows(row1: pd.Series, row2: pd.Series) -> bool:
 
 
 def find_differences(
-    df1: pd.DataFrame,
-    df2: pd.DataFrame,
-    key_columns: list[str]
+    df1: pd.DataFrame, df2: pd.DataFrame, key_columns: list[str]
 ) -> DifferencesResult:
     """Find differences between two DataFrames.
 
@@ -212,18 +202,11 @@ def find_differences(
         if not compare_rows(row1, row2):
             modified_rows.append(idx)
 
-    return DifferencesResult(
-        only_df1=only_df1,
-        only_df2=only_df2,
-        modified_rows=modified_rows
-    )
+    return DifferencesResult(only_df1=only_df1, only_df2=only_df2, modified_rows=modified_rows)
 
 
 def build_comparison_result(
-    df1: pd.DataFrame,
-    df2: pd.DataFrame,
-    differences: DifferencesResult,
-    key_columns: list[str]
+    df1: pd.DataFrame, df2: pd.DataFrame, differences: DifferencesResult, key_columns: list[str]
 ) -> pd.DataFrame:
     """Build comparison result DataFrame.
 
@@ -271,7 +254,7 @@ def build_comparison_result(
                     row_dict[col] = idx[i]
             else:
                 row_dict[key_columns[0]] = idx
-        row_dict['_diff_status'] = 'deleted'
+        row_dict["_diff_status"] = "deleted"
         result_rows.append(row_dict)
 
     # Add added rows (only in df2)
@@ -285,13 +268,12 @@ def build_comparison_result(
                     row_dict[col] = idx[i]
             else:
                 row_dict[key_columns[0]] = idx
-        row_dict['_diff_status'] = 'added'
+        row_dict["_diff_status"] = "added"
         result_rows.append(row_dict)
 
     # Find unchanged rows and add modified rows
     common_indices = set(df1_indexed.index) & set(df2_indexed.index)
     for idx in common_indices:
-        row1 = df1_indexed.loc[idx]
         row2 = df2_indexed.loc[idx]
 
         # Use df2 values (current state)
@@ -305,9 +287,9 @@ def build_comparison_result(
                 row_dict[key_columns[0]] = idx
 
         if idx in differences.modified_rows:
-            row_dict['_diff_status'] = 'modified'
+            row_dict["_diff_status"] = "modified"
         else:
-            row_dict['_diff_status'] = 'unchanged'
+            row_dict["_diff_status"] = "unchanged"
 
         result_rows.append(row_dict)
 
@@ -317,14 +299,16 @@ def build_comparison_result(
     if df_result.empty:
         # Handle empty result
         if key_columns:
-            df_result = pd.DataFrame(columns=list(key_columns) + ['_diff_status'])
+            df_result = pd.DataFrame(columns=list(key_columns) + ["_diff_status"])
         else:
-            df_result = pd.DataFrame(columns=['_diff_status'])
+            df_result = pd.DataFrame(columns=["_diff_status"])
 
     # Reorder columns: keys first, then _diff_status, then other columns
     if not df_result.empty:
-        other_columns = [col for col in df_result.columns if col != '_diff_status' and col not in key_columns]
-        column_order = list(key_columns) + ['_diff_status'] + other_columns
+        other_columns = [
+            col for col in df_result.columns if col != "_diff_status" and col not in key_columns
+        ]
+        column_order = list(key_columns) + ["_diff_status"] + other_columns
         df_result = df_result[column_order]
 
     return df_result
@@ -336,9 +320,7 @@ def build_comparison_result(
 
 
 def compare_dataframes(
-    df1: pd.DataFrame,
-    df2: pd.DataFrame,
-    key_columns: list[str] | None = None
+    df1: pd.DataFrame, df2: pd.DataFrame, key_columns: list[str] | None = None
 ) -> Result[ComparisonResult, CompareError]:
     """Compare two DataFrames.
 
@@ -367,10 +349,12 @@ def compare_dataframes(
     validation_result = validate_key_columns(df1, df2, key_columns)
     if is_err(validation_result):
         error = unwrap_err(validation_result)
-        return err(ComparisonFailedError(
-            f"Key columns not found: {', '.join(error.missing)}. "
-            f"Available in df1: {', '.join(error.available)}"
-        ))
+        return err(
+            ComparisonFailedError(
+                f"Key columns not found: {', '.join(error.missing)}. "
+                f"Available in df1: {', '.join(error.available)}"
+            )
+        )
 
     validated_keys = unwrap(validation_result)
 
@@ -391,7 +375,7 @@ def compare_dataframes(
         df_result=df_result,
         added_count=len(differences.only_df2),
         deleted_count=len(differences.only_df1),
-        modified_count=len(differences.modified_rows)
+        modified_count=len(differences.modified_rows),
     )
 
     return ok(result)

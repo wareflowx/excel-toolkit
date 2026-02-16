@@ -3,10 +3,11 @@
 Tests for the unique command that extracts unique values.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -81,31 +82,25 @@ class TestUniqueCommand:
 
     def test_unique_single_column(self, sample_data_file: Path):
         """Test extracting unique values from single column."""
-        result = runner.invoke(app, [
-            "unique", str(sample_data_file),
-            "--columns", "category"
-        ])
+        result = runner.invoke(app, ["unique", str(sample_data_file), "--columns", "category"])
 
         assert result.exit_code == 0
         assert "Unique rows: 4" in result.stdout  # A, B, C, D
 
     def test_unique_multiple_columns(self, sample_data_file: Path):
         """Test extracting unique rows from multiple columns."""
-        result = runner.invoke(app, [
-            "unique", str(sample_data_file),
-            "--columns", "category,product"
-        ])
+        result = runner.invoke(
+            app, ["unique", str(sample_data_file), "--columns", "category,product"]
+        )
 
         assert result.exit_code == 0
         assert "Unique rows:" in result.stdout
 
     def test_unique_with_count(self, sample_data_file: Path):
         """Test unique values with count."""
-        result = runner.invoke(app, [
-            "unique", str(sample_data_file),
-            "--columns", "category",
-            "--count"
-        ])
+        result = runner.invoke(
+            app, ["unique", str(sample_data_file), "--columns", "category", "--count"]
+        )
 
         assert result.exit_code == 0
         # Should show count for each category
@@ -113,11 +108,17 @@ class TestUniqueCommand:
     def test_unique_with_output(self, sample_data_file: Path, tmp_path: Path):
         """Test unique with output file."""
         output_path = tmp_path / "unique.xlsx"
-        result = runner.invoke(app, [
-            "unique", str(sample_data_file),
-            "--columns", "category",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "unique",
+                str(sample_data_file),
+                "--columns",
+                "category",
+                "--output",
+                str(output_path),
+            ],
+        )
 
         assert result.exit_code == 0
         assert "Written to:" in result.stdout
@@ -125,41 +126,33 @@ class TestUniqueCommand:
 
     def test_unique_dry_run(self, sample_data_file: Path):
         """Test dry-run mode."""
-        result = runner.invoke(app, [
-            "unique", str(sample_data_file),
-            "--columns", "category",
-            "--dry-run"
-        ])
+        result = runner.invoke(
+            app, ["unique", str(sample_data_file), "--columns", "category", "--dry-run"]
+        )
 
         assert result.exit_code == 0
         assert "Preview" in result.stdout
 
     def test_unique_csv_input(self, csv_file_for_unique: Path):
         """Test unique from CSV file."""
-        result = runner.invoke(app, [
-            "unique", str(csv_file_for_unique),
-            "--columns", "region"
-        ])
+        result = runner.invoke(app, ["unique", str(csv_file_for_unique), "--columns", "region"])
 
         assert result.exit_code == 0
         assert "Unique rows:" in result.stdout
 
     def test_unique_specific_sheet(self, sample_data_file: Path):
         """Test unique from specific sheet."""
-        result = runner.invoke(app, [
-            "unique", str(sample_data_file),
-            "--columns", "category",
-            "--sheet", "Sheet1"
-        ])
+        result = runner.invoke(
+            app, ["unique", str(sample_data_file), "--columns", "category", "--sheet", "Sheet1"]
+        )
 
         assert result.exit_code == 0
 
     def test_unique_invalid_column(self, sample_data_file: Path):
         """Test unique with non-existent column."""
-        result = runner.invoke(app, [
-            "unique", str(sample_data_file),
-            "--columns", "invalid_column"
-        ])
+        result = runner.invoke(
+            app, ["unique", str(sample_data_file), "--columns", "invalid_column"]
+        )
 
         assert result.exit_code == 1
 
@@ -171,40 +164,29 @@ class TestUniqueCommand:
 
     def test_unique_empty_file(self, empty_file: Path):
         """Test unique on empty file."""
-        result = runner.invoke(app, [
-            "unique", str(empty_file),
-            "--columns", "category"
-        ])
+        result = runner.invoke(app, ["unique", str(empty_file), "--columns", "category"])
 
         assert result.exit_code == 0
         assert "empty" in result.stdout.lower()
 
     def test_unique_with_nulls(self, file_with_nulls: Path):
         """Test unique with null values."""
-        result = runner.invoke(app, [
-            "unique", str(file_with_nulls),
-            "--columns", "id"
-        ])
+        result = runner.invoke(app, ["unique", str(file_with_nulls), "--columns", "id"])
 
         assert result.exit_code == 0
         assert "Unique rows:" in result.stdout
 
     def test_unique_multiple_columns_with_count(self, sample_data_file: Path):
         """Test unique rows from multiple columns with count."""
-        result = runner.invoke(app, [
-            "unique", str(sample_data_file),
-            "--columns", "category,product",
-            "--count"
-        ])
+        result = runner.invoke(
+            app, ["unique", str(sample_data_file), "--columns", "category,product", "--count"]
+        )
 
         assert result.exit_code == 0
 
     def test_unique_nonexistent_file(self):
         """Test unique on non-existent file."""
-        result = runner.invoke(app, [
-            "unique", "missing.xlsx",
-            "--columns", "category"
-        ])
+        result = runner.invoke(app, ["unique", "missing.xlsx", "--columns", "category"])
 
         assert result.exit_code == 1
 
@@ -218,10 +200,7 @@ class TestUniqueCommand:
 
     def test_unique_all_unique_values(self, sample_data_file: Path):
         """Test when all values are already unique."""
-        result = runner.invoke(app, [
-            "unique", str(sample_data_file),
-            "--columns", "value"
-        ])
+        result = runner.invoke(app, ["unique", str(sample_data_file), "--columns", "value"])
 
         assert result.exit_code == 0
         assert "Unique rows: 8" in result.stdout  # All 8 values are unique

@@ -12,36 +12,43 @@ Example:
 """
 
 # Result API - functions only
-from excel_toolkit.fp.result import (
-    ok,
-    err,
-    is_ok,
-    is_err,
-    unwrap,
-    unwrap_or,
-    unwrap_or_else,
-    unwrap_err,
-    to_result as result_to_result,
-    UnwrapError,
-)
-
 # Result type for type hints
 from excel_toolkit.fp._result import Result
 
-# Maybe API - functions only
-from excel_toolkit.fp.maybe import (
-    some,
-    nothing,
-    is_some,
-    is_nothing,
-    unwrap as unwrap_maybe,
-    unwrap_or as unwrap_or_maybe,
-    unwrap_or_else as unwrap_or_else_maybe,
-    to_maybe,
-)
-
 # Immutable utilities
 from excel_toolkit.fp.immutable import immutable
+
+# Maybe API - functions only
+from excel_toolkit.fp.maybe import (
+    is_nothing,
+    is_some,
+    nothing,
+    some,
+    to_maybe,
+)
+from excel_toolkit.fp.maybe import (
+    unwrap as unwrap_maybe,
+)
+from excel_toolkit.fp.maybe import (
+    unwrap_or as unwrap_or_maybe,
+)
+from excel_toolkit.fp.maybe import (
+    unwrap_or_else as unwrap_or_else_maybe,
+)
+from excel_toolkit.fp.result import (
+    UnwrapError,
+    err,
+    is_err,
+    is_ok,
+    ok,
+    unwrap,
+    unwrap_err,
+    unwrap_or,
+    unwrap_or_else,
+)
+from excel_toolkit.fp.result import (
+    to_result as result_to_result,
+)
 
 __all__ = [
     # Result

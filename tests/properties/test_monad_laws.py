@@ -6,9 +6,10 @@ These tests verify that Result type satisfies the monad laws:
 3. Associativity: m.and_then(f).and_then(g) == m.and_then(lambda x: f(x).and_then(g))
 """
 
-from hypothesis import given, strategies as st
-import pytest
-from excel_toolkit.fp import ok, err
+from hypothesis import given
+from hypothesis import strategies as st
+
+from excel_toolkit.fp import err, ok
 
 
 class TestResultMonadLaws:
@@ -17,8 +18,10 @@ class TestResultMonadLaws:
     @given(st.integers(), st.integers())
     def test_result_left_identity(self, x, y):
         """return(x).and_then(f) == f(x)"""
+
         # Define function f
-        f = lambda n: ok(n + y)
+        def f(n):
+            return ok(n + y)
 
         # Left side: return(x).and_then(f)
         left = ok(x).and_then(f)
@@ -53,8 +56,11 @@ class TestResultMonadLaws:
         m = ok(x)
 
         # Define functions
-        f = lambda n: ok(n + y)
-        g = lambda n: ok(n * z)
+        def f(n):
+            return ok(n + y)
+
+        def g(n):
+            return ok(n * z)
 
         # Left side: (m.and_then(f)).and_then(g)
         left = m.and_then(f).and_then(g)
@@ -69,8 +75,11 @@ class TestResultMonadLaws:
         """Err should short-circuit through and_then"""
         m = err("error")
 
-        f = lambda n: ok(n + x)
-        g = lambda n: ok(n * y)
+        def f(n):
+            return ok(n + x)
+
+        def g(n):
+            return ok(n * y)
 
         # and_then on Err should always return Err
         assert m.and_then(f) == m
@@ -105,13 +114,14 @@ class TestResultPracticalUsage:
             .and_then(lambda n: ok(n + 10))
         )
 
-        from excel_toolkit.fp import is_ok, is_err
+        from excel_toolkit.fp import is_err, is_ok
 
         if x < 25:
             assert is_ok(result)
         else:
             assert is_err(result)
             from excel_toolkit.fp import unwrap_err
+
             assert unwrap_err(result) == "too large"
 
     @given(st.integers(), st.integers())
@@ -122,6 +132,7 @@ class TestResultPracticalUsage:
         # map preserves Err
         mapped = result.map(lambda n: n + x)
         from excel_toolkit.fp import is_err
+
         assert is_err(mapped)
 
         # and_then preserves Err
@@ -135,6 +146,7 @@ class TestResultPracticalUsage:
 
         # Ok ignores or_else
         from excel_toolkit.fp import unwrap_or
+
         assert unwrap_or(result, y) == x
 
         result_err = err("error")
@@ -153,6 +165,7 @@ class TestResultPracticalUsage:
 
         # Ok should not evaluate the function
         from excel_toolkit.fp import unwrap_or_else
+
         assert unwrap_or_else(result, expensive_computation) == x
         assert counter[0] == 0
 

@@ -3,25 +3,24 @@
 Perform calculations on columns (cumulative, growth, etc.).
 """
 
-from pathlib import Path
-
-import typer
 import pandas as pd
+import typer
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
 from excel_toolkit.commands.common import (
-    read_data_file,
-    write_or_display,
     display_table,
+    read_data_file,
     resolve_column_reference,
+    write_or_display,
 )
+from excel_toolkit.core import HandlerFactory
 
 
 def calculate(
     file_path: str = typer.Argument(..., help="Path to input file"),
     column: str = typer.Option(..., "--column", "-c", help="Column to calculate on"),
-    operation: str = typer.Option(..., "--operation", "-op", help="Operation: cumsum, cummean, growth, growth_pct, diff"),
+    operation: str = typer.Option(
+        ..., "--operation", "-op", help="Operation: cumsum, cummean, growth, growth_pct, diff"
+    ),
     output: str | None = typer.Option(None, "--output", "-o", help="Output file path"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Show preview without writing"),
     sheet: str | None = typer.Option(None, "--sheet", "-s", help="Sheet name for Excel files"),

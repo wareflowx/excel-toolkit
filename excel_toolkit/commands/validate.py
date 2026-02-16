@@ -3,30 +3,31 @@
 Validates data quality against various rules.
 """
 
-from pathlib import Path
 import typer
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
-from excel_toolkit.operations.validation import (
-    validate_column_exists,
-    validate_column_type,
-    validate_value_range,
-    validate_unique,
-    check_null_values,
-    validate_dataframe,
-    ValidationReport,
-)
 from excel_toolkit.commands.common import read_data_file
+from excel_toolkit.fp import is_err, unwrap, unwrap_err
+from excel_toolkit.operations.validation import (
+    ValidationReport,
+    validate_dataframe,
+)
 
 
 def validate(
     file_path: str = typer.Argument(..., help="Path to input file"),
-    columns: str | None = typer.Option(None, "--columns", "-c", help="Comma-separated columns to check"),
-    types: str | None = typer.Option(None, "--types", "-t", help="Type checks (format: col:type,col:type)"),
-    range: str | None = typer.Option(None, "--range", "-r", help="Range check (format: col:min:max)"),
+    columns: str | None = typer.Option(
+        None, "--columns", "-c", help="Comma-separated columns to check"
+    ),
+    types: str | None = typer.Option(
+        None, "--types", "-t", help="Type checks (format: col:type,col:type)"
+    ),
+    range: str | None = typer.Option(
+        None, "--range", "-r", help="Range check (format: col:min:max)"
+    ),
     unique: str | None = typer.Option(None, "--unique", "-u", help="Check uniqueness of column(s)"),
-    null_threshold: float | None = typer.Option(None, "--null-threshold", help="Max null percentage (0-1)"),
+    null_threshold: float | None = typer.Option(
+        None, "--null-threshold", help="Max null percentage (0-1)"
+    ),
     min_value: float | None = typer.Option(None, "--min", help="Minimum value for range check"),
     max_value: float | None = typer.Option(None, "--max", help="Maximum value for range check"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show detailed validation info"),
@@ -58,10 +59,7 @@ def validate(
     # Column existence rule
     if columns:
         col_list = [c.strip() for c in columns.split(",")]
-        rules.append({
-            "type": "column_exists",
-            "columns": col_list
-        })
+        rules.append({"type": "column_exists", "columns": col_list})
 
     # Type validation rule
     if types:
@@ -69,10 +67,7 @@ def validate(
         for spec in types.split(","):
             col, col_type = spec.split(":")
             type_dict[col.strip()] = col_type.strip()
-        rules.append({
-            "type": "column_type",
-            "column_types": type_dict
-        })
+        rules.append({"type": "column_type", "column_types": type_dict})
 
     # Range validation rule
     if range or (min_value is not None or max_value is not None):
@@ -91,33 +86,27 @@ def validate(
             range_min = min_value
             range_max = max_value
 
-        rules.append({
-            "type": "value_range",
-            "column": range_col,
-            "min": range_min,
-            "max": range_max
-        })
+        rules.append(
+            {"type": "value_range", "column": range_col, "min": range_min, "max": range_max}
+        )
 
     # Uniqueness rule
     if unique:
         unique_cols = [c.strip() for c in unique.split(",")]
-        rules.append({
-            "type": "unique",
-            "columns": unique_cols
-        })
+        rules.append({"type": "unique", "columns": unique_cols})
 
     # Null threshold rule
     if null_threshold is not None:
         cols_to_check = [c.strip() for c in columns.split(",")] if columns else None
-        rules.append({
-            "type": "null_threshold",
-            "columns": cols_to_check,
-            "threshold": null_threshold
-        })
+        rules.append(
+            {"type": "null_threshold", "columns": cols_to_check, "threshold": null_threshold}
+        )
 
     # If no rules specified, check all columns exist and have no nulls
     if not rules:
-        typer.echo("No validation rules specified. Use --columns, --types, --range, --unique, or --null-threshold")
+        typer.echo(
+            "No validation rules specified. Use --columns, --types, --range, --unique, or --null-threshold"
+        )
         typer.echo("Run 'xl validate --help' for examples")
         raise typer.Exit(0)
 

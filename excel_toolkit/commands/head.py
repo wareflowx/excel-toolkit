@@ -6,17 +6,14 @@ Displays the first N rows of a data file in various formats.
 from pathlib import Path
 
 import typer
-import pandas as pd
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
 from excel_toolkit.commands.common import (
-    read_data_file,
-    display_table,
+    display_column_types,
     display_csv,
     display_json,
-    display_column_types,
+    display_table,
     format_file_info,
+    read_data_file,
 )
 
 
@@ -24,7 +21,9 @@ def head(
     file_path: str,
     rows: int = typer.Option(5, "--rows", "-n", help="Number of rows to display"),
     sheet: str | None = typer.Option(None, "--sheet", "-s", help="Sheet name for Excel files"),
-    show_columns: bool = typer.Option(False, "--show-columns", "-c", help="Show column information"),
+    show_columns: bool = typer.Option(
+        False, "--show-columns", "-c", help="Show column information"
+    ),
     max_columns: int | None = typer.Option(None, "--max-columns", help="Limit columns displayed"),
     format: str = typer.Option("table", "--format", "-f", help="Output format (table, csv, json)"),
 ) -> None:

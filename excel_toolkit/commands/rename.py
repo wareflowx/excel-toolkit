@@ -3,23 +3,21 @@
 Rename columns in a dataset.
 """
 
-from pathlib import Path
-
 import typer
-import pandas as pd
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
 from excel_toolkit.commands.common import (
+    display_table,
     read_data_file,
     write_or_display,
-    display_table,
 )
+from excel_toolkit.core import HandlerFactory
 
 
 def rename(
     file_path: str = typer.Argument(..., help="Path to input file"),
-    mapping: str = typer.Option(..., "--mapping", "-m", help="Column rename mapping: old:new (comma-separated)"),
+    mapping: str = typer.Option(
+        ..., "--mapping", "-m", help="Column rename mapping: old:new (comma-separated)"
+    ),
     output: str | None = typer.Option(None, "--output", "-o", help="Output file path"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Show preview without writing"),
     sheet: str | None = typer.Option(None, "--sheet", "-s", help="Sheet name for Excel files"),
@@ -74,7 +72,6 @@ def rename(
     # 3. Read file
     df = read_data_file(file_path, sheet)
     original_count = len(df)
-    original_cols = len(df.columns)
 
     # 4. Handle empty file
     if df.empty:
@@ -93,7 +90,10 @@ def rename(
     new_names = set(rename_dict.values())
     overlap = existing_cols & (new_names - set(rename_dict.keys()))
     if overlap:
-        typer.echo(f"Error: New column names conflict with existing columns: {', '.join(overlap)}", err=True)
+        typer.echo(
+            f"Error: New column names conflict with existing columns: {', '.join(overlap)}",
+            err=True,
+        )
         raise typer.Exit(1)
 
     # 6. Apply rename

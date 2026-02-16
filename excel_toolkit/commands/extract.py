@@ -3,26 +3,29 @@
 Extract date/time components from datetime columns.
 """
 
-from pathlib import Path
-
-import typer
 import pandas as pd
+import typer
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
 from excel_toolkit.commands.common import (
+    display_table,
     read_data_file,
     write_or_display,
-    display_table,
-    resolve_column_references,
 )
+from excel_toolkit.core import HandlerFactory
 
 
 def extract(
     file_path: str = typer.Argument(..., help="Path to input file"),
     column: str = typer.Option(..., "--column", "-c", help="Datetime column to extract from"),
-    parts: str = typer.Option(..., "--parts", "-p", help="Parts to extract (comma-separated): year, month, day, hour, minute, second, quarter, dayofweek, weekofyear"),
-    suffix: str | None = typer.Option(None, "--suffix", help="Suffix for new columns (default: _part)"),
+    parts: str = typer.Option(
+        ...,
+        "--parts",
+        "-p",
+        help="Parts to extract (comma-separated): year, month, day, hour, minute, second, quarter, dayofweek, weekofyear",
+    ),
+    suffix: str | None = typer.Option(
+        None, "--suffix", help="Suffix for new columns (default: _part)"
+    ),
     output: str | None = typer.Option(None, "--output", "-o", help="Output file path"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Show preview without writing"),
     sheet: str | None = typer.Option(None, "--sheet", "-s", help="Sheet name for Excel files"),
@@ -47,8 +50,15 @@ def extract(
     """
     # 1. Validate parts
     valid_parts = {
-        "year", "month", "day", "hour", "minute", "second",
-        "quarter", "dayofweek", "weekofyear"
+        "year",
+        "month",
+        "day",
+        "hour",
+        "minute",
+        "second",
+        "quarter",
+        "dayofweek",
+        "weekofyear",
     }
     parts_list = [p.strip().lower() for p in parts.split(",")]
     invalid_parts = [p for p in parts_list if p not in valid_parts]
@@ -69,6 +79,7 @@ def extract(
 
     # 4. Resolve column reference (supports both name and index)
     from excel_toolkit.commands.common import resolve_column_reference
+
     resolved_column = resolve_column_reference(column, df)
 
     # 5. Validate column is datetime

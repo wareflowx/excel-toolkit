@@ -3,30 +3,34 @@
 Select specific columns from a dataset.
 """
 
-from pathlib import Path
-
-import typer
-import pandas as pd
 import numpy as np
+import typer
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
 from excel_toolkit.commands.common import (
-    read_data_file,
-    write_or_display,
     display_table,
+    read_data_file,
     resolve_column_references,
+    write_or_display,
 )
+from excel_toolkit.core import HandlerFactory
 
 
 def select(
     file_path: str = typer.Argument(..., help="Path to input file"),
-    columns: str | None = typer.Option(None, "--columns", "-c", help="Columns to select (comma-separated)"),
-    exclude: str | None = typer.Option(None, "--exclude", "-e", help="Columns to exclude (comma-separated)"),
+    columns: str | None = typer.Option(
+        None, "--columns", "-c", help="Columns to select (comma-separated)"
+    ),
+    exclude: str | None = typer.Option(
+        None, "--exclude", "-e", help="Columns to exclude (comma-separated)"
+    ),
     only_numeric: bool = typer.Option(False, "--only-numeric", help="Select only numeric columns"),
     only_string: bool = typer.Option(False, "--only-string", help="Select only string columns"),
-    only_datetime: bool = typer.Option(False, "--only-datetime", help="Select only datetime columns"),
-    only_non_empty: bool = typer.Option(False, "--only-non-empty", help="Select only columns with no empty values"),
+    only_datetime: bool = typer.Option(
+        False, "--only-datetime", help="Select only datetime columns"
+    ),
+    only_non_empty: bool = typer.Option(
+        False, "--only-non-empty", help="Select only columns with no empty values"
+    ),
     output: str | None = typer.Option(None, "--output", "-o", help="Output file path"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Show preview without writing"),
     sheet: str | None = typer.Option(None, "--sheet", "-s", help="Sheet name for Excel files"),
@@ -55,17 +59,21 @@ def select(
         only_numeric,
         only_string,
         only_datetime,
-        only_non_empty
+        only_non_empty,
     ]
 
     if sum(selection_options) == 0:
         typer.echo("Error: At least one selection option must be specified", err=True)
-        typer.echo("Available options: --columns, --exclude, --only-numeric, --only-string, --only-datetime, --only-non-empty")
+        typer.echo(
+            "Available options: --columns, --exclude, --only-numeric, --only-string, --only-datetime, --only-non-empty"
+        )
         raise typer.Exit(1)
 
     if sum(selection_options) > 1:
         typer.echo("Error: Cannot combine multiple selection options", err=True)
-        typer.echo("Use only one of: --columns, --exclude, --only-numeric, --only-string, --only-datetime, --only-non-empty")
+        typer.echo(
+            "Use only one of: --columns, --exclude, --only-numeric, --only-string, --only-datetime, --only-non-empty"
+        )
         raise typer.Exit(1)
 
     # 2. Read file
@@ -94,9 +102,9 @@ def select(
     elif only_numeric:
         selected_columns = df.select_dtypes(include=[np.number]).columns.tolist()
     elif only_string:
-        selected_columns = df.select_dtypes(include=['object']).columns.tolist()
+        selected_columns = df.select_dtypes(include=["object"]).columns.tolist()
     elif only_datetime:
-        selected_columns = df.select_dtypes(include=['datetime64']).columns.tolist()
+        selected_columns = df.select_dtypes(include=["datetime64"]).columns.tolist()
     elif only_non_empty:
         selected_columns = [col for col in df.columns if df[col].notna().all()]
 

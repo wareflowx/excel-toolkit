@@ -5,9 +5,10 @@ These tests verify that Result and Maybe types satisfy the functor laws:
 2. Composition: map(f ∘ g) == map(f) ∘ map(g)
 """
 
-from hypothesis import given, strategies as st
-import pytest
-from excel_toolkit.fp import ok, err, some, nothing
+from hypothesis import given
+from hypothesis import strategies as st
+
+from excel_toolkit.fp import err, nothing, ok, some
 
 
 class TestResultFunctorLaws:
@@ -30,9 +31,14 @@ class TestResultFunctorLaws:
         result = ok(x)
 
         # Compose f(g(x))
-        f = lambda n: n + y
-        g = lambda n: n * z
-        compose_f_g = lambda n: f(g(n))
+        def f(n):
+            return n + y
+
+        def g(n):
+            return n * z
+
+        def compose_f_g(n):
+            return f(g(n))
 
         # Left side: map(f ∘ g)
         left = result.map(compose_f_g)
@@ -74,9 +80,14 @@ class TestMaybeFunctorLaws:
         maybe = some(x)
 
         # Compose f(g(x))
-        f = lambda n: n + y
-        g = lambda n: n * z
-        compose_f_g = lambda n: f(g(n))
+        def f(n):
+            return n + y
+
+        def g(n):
+            return n * z
+
+        def compose_f_g(n):
+            return f(g(n))
 
         # Left side: map(f ∘ g)
         left = maybe.map(compose_f_g)

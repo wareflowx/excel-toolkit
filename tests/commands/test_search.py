@@ -3,10 +3,11 @@
 Tests for the search command that searches for patterns.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -68,83 +69,64 @@ class TestSearchCommand:
 
     def test_search_literal_pattern(self, sample_data_file: Path):
         """Test searching for literal pattern."""
-        result = runner.invoke(app, [
-            "search", str(sample_data_file),
-            "--pattern", "ERROR"
-        ])
+        result = runner.invoke(app, ["search", str(sample_data_file), "--pattern", "ERROR"])
 
         assert result.exit_code == 0
         assert "Matches found:" in result.stdout
 
     def test_search_in_specific_column(self, sample_data_file: Path):
         """Test searching in specific column."""
-        result = runner.invoke(app, [
-            "search", str(sample_data_file),
-            "--pattern", "active",
-            "--columns", "status"
-        ])
+        result = runner.invoke(
+            app, ["search", str(sample_data_file), "--pattern", "active", "--columns", "status"]
+        )
 
         assert result.exit_code == 0
         assert "Columns: status" in result.stdout
 
     def test_search_multiple_columns(self, sample_data_file: Path):
         """Test searching in multiple columns."""
-        result = runner.invoke(app, [
-            "search", str(sample_data_file),
-            "--pattern", "OK",
-            "--columns", "status,message"
-        ])
+        result = runner.invoke(
+            app, ["search", str(sample_data_file), "--pattern", "OK", "--columns", "status,message"]
+        )
 
         assert result.exit_code == 0
 
     def test_search_case_sensitive(self, sample_data_file: Path):
         """Test case-sensitive search."""
-        result = runner.invoke(app, [
-            "search", str(sample_data_file),
-            "--pattern", "ERROR",
-            "--case-sensitive"
-        ])
+        result = runner.invoke(
+            app, ["search", str(sample_data_file), "--pattern", "ERROR", "--case-sensitive"]
+        )
 
         assert result.exit_code == 0
 
     def test_search_case_insensitive_default(self, sample_data_file: Path):
         """Test case-insensitive search (default)."""
-        result = runner.invoke(app, [
-            "search", str(sample_data_file),
-            "--pattern", "error"
-        ])
+        result = runner.invoke(app, ["search", str(sample_data_file), "--pattern", "error"])
 
         assert result.exit_code == 0
         # Should find both "ERROR" and "error"
 
     def test_search_regex_pattern(self, sample_data_file: Path):
         """Test searching with regex pattern."""
-        result = runner.invoke(app, [
-            "search", str(sample_data_file),
-            "--pattern", "^A",
-            "--regex",
-            "--columns", "name"
-        ])
+        result = runner.invoke(
+            app,
+            ["search", str(sample_data_file), "--pattern", "^A", "--regex", "--columns", "name"],
+        )
 
         assert result.exit_code == 0
         # Should find "Alice"
 
     def test_search_regex_or_pattern(self, sample_data_file: Path):
         """Test regex with OR pattern."""
-        result = runner.invoke(app, [
-            "search", str(sample_data_file),
-            "--pattern", "ERROR|error",
-            "--regex"
-        ])
+        result = runner.invoke(
+            app, ["search", str(sample_data_file), "--pattern", "ERROR|error", "--regex"]
+        )
 
         assert result.exit_code == 0
 
     def test_search_no_matches(self, sample_data_file: Path):
         """Test search with no matches."""
-        result = runner.invoke(app, [
-            "search", str(sample_data_file),
-            "--pattern", "NOTFOUND"
-        ])
+        result = runner.invoke(app, ["search", str(sample_data_file), "--pattern", "NOTFOUND"])
 
         assert result.exit_code == 0
         assert "No matches found" in result.stdout
@@ -152,11 +134,9 @@ class TestSearchCommand:
     def test_search_with_output(self, sample_data_file: Path, tmp_path: Path):
         """Test search with output file."""
         output_path = tmp_path / "search_results.xlsx"
-        result = runner.invoke(app, [
-            "search", str(sample_data_file),
-            "--pattern", "OK",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app, ["search", str(sample_data_file), "--pattern", "OK", "--output", str(output_path)]
+        )
 
         assert result.exit_code == 0
         assert "Written to:" in result.stdout
@@ -164,60 +144,48 @@ class TestSearchCommand:
 
     def test_search_csv_input(self, csv_file_for_search: Path):
         """Test search from CSV file."""
-        result = runner.invoke(app, [
-            "search", str(csv_file_for_search),
-            "--pattern", "Electronics"
-        ])
+        result = runner.invoke(
+            app, ["search", str(csv_file_for_search), "--pattern", "Electronics"]
+        )
 
         assert result.exit_code == 0
         assert "Matches found:" in result.stdout
 
     def test_search_specific_sheet(self, sample_data_file: Path):
         """Test search from specific sheet."""
-        result = runner.invoke(app, [
-            "search", str(sample_data_file),
-            "--pattern", "OK",
-            "--sheet", "Sheet1"
-        ])
+        result = runner.invoke(
+            app, ["search", str(sample_data_file), "--pattern", "OK", "--sheet", "Sheet1"]
+        )
 
         assert result.exit_code == 0
 
     def test_search_invalid_column(self, sample_data_file: Path):
         """Test search with non-existent column."""
-        result = runner.invoke(app, [
-            "search", str(sample_data_file),
-            "--pattern", "test",
-            "--columns", "invalid_column"
-        ])
+        result = runner.invoke(
+            app,
+            ["search", str(sample_data_file), "--pattern", "test", "--columns", "invalid_column"],
+        )
 
         assert result.exit_code == 1
 
     def test_search_invalid_regex(self, sample_data_file: Path):
         """Test search with invalid regex."""
-        result = runner.invoke(app, [
-            "search", str(sample_data_file),
-            "--pattern", "[invalid",
-            "--regex"
-        ])
+        result = runner.invoke(
+            app, ["search", str(sample_data_file), "--pattern", "[invalid", "--regex"]
+        )
 
         assert result.exit_code == 1
 
     def test_search_empty_file(self, empty_file: Path):
         """Test search on empty file."""
-        result = runner.invoke(app, [
-            "search", str(empty_file),
-            "--pattern", "test"
-        ])
+        result = runner.invoke(app, ["search", str(empty_file), "--pattern", "test"])
 
         assert result.exit_code == 0
         assert "empty" in result.stdout.lower()
 
     def test_search_nonexistent_file(self):
         """Test search on non-existent file."""
-        result = runner.invoke(app, [
-            "search", "missing.xlsx",
-            "--pattern", "test"
-        ])
+        result = runner.invoke(app, ["search", "missing.xlsx", "--pattern", "test"])
 
         assert result.exit_code == 1
 
@@ -231,10 +199,7 @@ class TestSearchCommand:
 
     def test_search_default_all_columns(self, sample_data_file: Path):
         """Test that search defaults to all columns."""
-        result = runner.invoke(app, [
-            "search", str(sample_data_file),
-            "--pattern", "ERROR"
-        ])
+        result = runner.invoke(app, ["search", str(sample_data_file), "--pattern", "ERROR"])
 
         assert result.exit_code == 0
         assert "Columns: all columns" in result.stdout

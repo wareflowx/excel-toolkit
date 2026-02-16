@@ -3,10 +3,11 @@
 Tests for the join command that joins two datasets.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -26,7 +27,12 @@ def left_file(tmp_path: Path) -> Path:
         {
             "customer_id": [1, 2, 3, 4],
             "customer_name": ["Alice", "Bob", "Charlie", "Diana"],
-            "email": ["alice@example.com", "bob@example.com", "charlie@example.com", "diana@example.com"],
+            "email": [
+                "alice@example.com",
+                "bob@example.com",
+                "charlie@example.com",
+                "diana@example.com",
+            ],
         }
     )
     file_path = tmp_path / "left.xlsx"
@@ -111,10 +117,9 @@ class TestJoinCommand:
 
     def test_join_inner_default(self, left_file: Path, right_file: Path, tmp_path: Path):
         """Test inner join (default)."""
-        result = runner.invoke(app, [
-            "join", str(left_file), str(right_file),
-            "--on", "customer_id"
-        ])
+        result = runner.invoke(
+            app, ["join", str(left_file), str(right_file), "--on", "customer_id"]
+        )
 
         assert result.exit_code == 0
         assert "Join type: inner" in result.stdout
@@ -122,11 +127,9 @@ class TestJoinCommand:
 
     def test_join_left(self, left_file: Path, right_file: Path, tmp_path: Path):
         """Test left join."""
-        result = runner.invoke(app, [
-            "join", str(left_file), str(right_file),
-            "--on", "customer_id",
-            "--how", "left"
-        ])
+        result = runner.invoke(
+            app, ["join", str(left_file), str(right_file), "--on", "customer_id", "--how", "left"]
+        )
 
         assert result.exit_code == 0
         assert "Join type: left" in result.stdout
@@ -134,11 +137,9 @@ class TestJoinCommand:
 
     def test_join_right(self, left_file: Path, right_file: Path, tmp_path: Path):
         """Test right join."""
-        result = runner.invoke(app, [
-            "join", str(left_file), str(right_file),
-            "--on", "customer_id",
-            "--how", "right"
-        ])
+        result = runner.invoke(
+            app, ["join", str(left_file), str(right_file), "--on", "customer_id", "--how", "right"]
+        )
 
         assert result.exit_code == 0
         assert "Join type: right" in result.stdout
@@ -146,23 +147,30 @@ class TestJoinCommand:
 
     def test_join_outer(self, left_file: Path, right_file: Path, tmp_path: Path):
         """Test outer join."""
-        result = runner.invoke(app, [
-            "join", str(left_file), str(right_file),
-            "--on", "customer_id",
-            "--how", "outer"
-        ])
+        result = runner.invoke(
+            app, ["join", str(left_file), str(right_file), "--on", "customer_id", "--how", "outer"]
+        )
 
         assert result.exit_code == 0
         assert "Join type: outer" in result.stdout
         assert "Joined rows: 5" in result.stdout  # All rows from both
 
-    def test_join_with_different_keys(self, left_file: Path, different_keys_file: Path, tmp_path: Path):
+    def test_join_with_different_keys(
+        self, left_file: Path, different_keys_file: Path, tmp_path: Path
+    ):
         """Test joining with different column names."""
-        result = runner.invoke(app, [
-            "join", str(left_file), str(different_keys_file),
-            "--left-on", "customer_id",
-            "--right-on", "id"
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "join",
+                str(left_file),
+                str(different_keys_file),
+                "--left-on",
+                "customer_id",
+                "--right-on",
+                "id",
+            ],
+        )
 
         assert result.exit_code == 0
         assert "Left on: customer_id" in result.stdout
@@ -171,11 +179,18 @@ class TestJoinCommand:
     def test_join_with_output(self, left_file: Path, right_file: Path, tmp_path: Path):
         """Test join with output file."""
         output_path = tmp_path / "joined.xlsx"
-        result = runner.invoke(app, [
-            "join", str(left_file), str(right_file),
-            "--on", "customer_id",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "join",
+                str(left_file),
+                str(right_file),
+                "--on",
+                "customer_id",
+                "--output",
+                str(output_path),
+            ],
+        )
 
         assert result.exit_code == 0
         assert "Written to:" in result.stdout
@@ -183,106 +198,108 @@ class TestJoinCommand:
 
     def test_join_csv_files(self, csv_left_file: Path, csv_right_file: Path, tmp_path: Path):
         """Test joining CSV files."""
-        result = runner.invoke(app, [
-            "join", str(csv_left_file), str(csv_right_file),
-            "--on", "user_id"
-        ])
+        result = runner.invoke(
+            app, ["join", str(csv_left_file), str(csv_right_file), "--on", "user_id"]
+        )
 
         assert result.exit_code == 0
         assert "Joined rows:" in result.stdout
 
     def test_join_specific_sheets(self, left_file: Path, right_file: Path, tmp_path: Path):
         """Test joining specific sheets."""
-        result = runner.invoke(app, [
-            "join", str(left_file), str(right_file),
-            "--on", "customer_id",
-            "--left-sheet", "Sheet1",
-            "--right-sheet", "Sheet1"
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "join",
+                str(left_file),
+                str(right_file),
+                "--on",
+                "customer_id",
+                "--left-sheet",
+                "Sheet1",
+                "--right-sheet",
+                "Sheet1",
+            ],
+        )
 
         assert result.exit_code == 0
 
     def test_join_invalid_join_type(self, left_file: Path, right_file: Path):
         """Test join with invalid join type."""
-        result = runner.invoke(app, [
-            "join", str(left_file), str(right_file),
-            "--on", "customer_id",
-            "--how", "invalid"
-        ])
+        result = runner.invoke(
+            app,
+            ["join", str(left_file), str(right_file), "--on", "customer_id", "--how", "invalid"],
+        )
 
         assert result.exit_code == 1
 
     def test_join_no_join_columns(self, left_file: Path, right_file: Path):
         """Test join without specifying join columns."""
-        result = runner.invoke(app, [
-            "join", str(left_file), str(right_file)
-        ])
+        result = runner.invoke(app, ["join", str(left_file), str(right_file)])
 
         assert result.exit_code == 1
 
     def test_join_on_with_left_on(self, left_file: Path, right_file: Path):
         """Test join with both --on and --left-on specified."""
-        result = runner.invoke(app, [
-            "join", str(left_file), str(right_file),
-            "--on", "customer_id",
-            "--left-on", "id"
-        ])
+        result = runner.invoke(
+            app, ["join", str(left_file), str(right_file), "--on", "customer_id", "--left-on", "id"]
+        )
 
         assert result.exit_code == 1
 
     def test_join_incomplete_key_specification(self, left_file: Path, right_file: Path):
         """Test join with only --left-on specified."""
-        result = runner.invoke(app, [
-            "join", str(left_file), str(right_file),
-            "--left-on", "customer_id"
-        ])
+        result = runner.invoke(
+            app, ["join", str(left_file), str(right_file), "--left-on", "customer_id"]
+        )
 
         assert result.exit_code == 1
 
     def test_join_invalid_column_left(self, left_file: Path, right_file: Path):
         """Test join with non-existent column in left file."""
-        result = runner.invoke(app, [
-            "join", str(left_file), str(right_file),
-            "--on", "invalid_column"
-        ])
+        result = runner.invoke(
+            app, ["join", str(left_file), str(right_file), "--on", "invalid_column"]
+        )
 
         assert result.exit_code == 1
 
     def test_join_invalid_column_right(self, left_file: Path, right_file: Path):
         """Test join with non-existent column in right file."""
-        result = runner.invoke(app, [
-            "join", str(left_file), str(right_file),
-            "--left-on", "customer_id",
-            "--right-on", "invalid_column"
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "join",
+                str(left_file),
+                str(right_file),
+                "--left-on",
+                "customer_id",
+                "--right-on",
+                "invalid_column",
+            ],
+        )
 
         assert result.exit_code == 1
 
     def test_join_empty_left_file(self, empty_file: Path, right_file: Path):
         """Test join with empty left file."""
-        result = runner.invoke(app, [
-            "join", str(empty_file), str(right_file),
-            "--on", "customer_id"
-        ])
+        result = runner.invoke(
+            app, ["join", str(empty_file), str(right_file), "--on", "customer_id"]
+        )
 
         assert result.exit_code == 0
         assert "empty" in result.stdout.lower()
 
     def test_join_nonexistent_left_file(self, right_file: Path):
         """Test join with non-existent left file."""
-        result = runner.invoke(app, [
-            "join", "missing.xlsx", str(right_file),
-            "--on", "customer_id"
-        ])
+        result = runner.invoke(
+            app, ["join", "missing.xlsx", str(right_file), "--on", "customer_id"]
+        )
 
         assert result.exit_code == 1
 
     def test_join_nonexistent_right_file(self, left_file: Path):
         """Test join with non-existent right file."""
-        result = runner.invoke(app, [
-            "join", str(left_file), "missing.xlsx",
-            "--on", "customer_id"
-        ])
+        result = runner.invoke(app, ["join", str(left_file), "missing.xlsx", "--on", "customer_id"])
 
         assert result.exit_code == 1
 

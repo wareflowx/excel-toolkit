@@ -3,10 +3,11 @@
 Tests for the group command that groups and aggregates data.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -100,11 +101,9 @@ class TestGroupCommand:
 
     def test_group_single_column_sum(self, sales_data_file: Path):
         """Test grouping by single column with sum aggregation."""
-        result = runner.invoke(app, [
-            "group", str(sales_data_file),
-            "--by", "region",
-            "--aggregate", "amount:sum"
-        ])
+        result = runner.invoke(
+            app, ["group", str(sales_data_file), "--by", "region", "--aggregate", "amount:sum"]
+        )
 
         assert result.exit_code == 0
         assert "Grouped by: region" in result.stdout
@@ -112,83 +111,83 @@ class TestGroupCommand:
 
     def test_group_single_column_mean(self, sales_data_file: Path):
         """Test grouping with mean aggregation."""
-        result = runner.invoke(app, [
-            "group", str(sales_data_file),
-            "--by", "product",
-            "--aggregate", "amount:mean"
-        ])
+        result = runner.invoke(
+            app, ["group", str(sales_data_file), "--by", "product", "--aggregate", "amount:mean"]
+        )
 
         assert result.exit_code == 0
         assert "Grouped by: product" in result.stdout
 
     def test_group_avg_synonym(self, sales_data_file: Path):
         """Test that avg is treated as mean."""
-        result = runner.invoke(app, [
-            "group", str(sales_data_file),
-            "--by", "region",
-            "--aggregate", "amount:avg"
-        ])
+        result = runner.invoke(
+            app, ["group", str(sales_data_file), "--by", "region", "--aggregate", "amount:avg"]
+        )
 
         assert result.exit_code == 0
 
     def test_group_multiple_aggregations(self, sales_data_file: Path):
         """Test grouping with multiple aggregations."""
-        result = runner.invoke(app, [
-            "group", str(sales_data_file),
-            "--by", "region",
-            "--aggregate", "amount:sum,quantity:mean,discount:min"
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "group",
+                str(sales_data_file),
+                "--by",
+                "region",
+                "--aggregate",
+                "amount:sum,quantity:mean,discount:min",
+            ],
+        )
 
         assert result.exit_code == 0
         assert "Aggregations: amount:sum,quantity:mean,discount:min" in result.stdout
 
     def test_group_median_aggregation(self, sales_data_file: Path):
         """Test median aggregation."""
-        result = runner.invoke(app, [
-            "group", str(sales_data_file),
-            "--by", "region",
-            "--aggregate", "amount:median"
-        ])
+        result = runner.invoke(
+            app, ["group", str(sales_data_file), "--by", "region", "--aggregate", "amount:median"]
+        )
 
         assert result.exit_code == 0
 
     def test_group_count_aggregation(self, sales_data_file: Path):
         """Test count aggregation."""
-        result = runner.invoke(app, [
-            "group", str(sales_data_file),
-            "--by", "product",
-            "--aggregate", "amount:count"
-        ])
+        result = runner.invoke(
+            app, ["group", str(sales_data_file), "--by", "product", "--aggregate", "amount:count"]
+        )
 
         assert result.exit_code == 0
 
     def test_group_std_aggregation(self, sales_data_file: Path):
         """Test standard deviation aggregation."""
-        result = runner.invoke(app, [
-            "group", str(sales_data_file),
-            "--by", "region",
-            "--aggregate", "amount:std"
-        ])
+        result = runner.invoke(
+            app, ["group", str(sales_data_file), "--by", "region", "--aggregate", "amount:std"]
+        )
 
         assert result.exit_code == 0
 
     def test_group_var_aggregation(self, sales_data_file: Path):
         """Test variance aggregation."""
-        result = runner.invoke(app, [
-            "group", str(sales_data_file),
-            "--by", "region",
-            "--aggregate", "amount:var"
-        ])
+        result = runner.invoke(
+            app, ["group", str(sales_data_file), "--by", "region", "--aggregate", "amount:var"]
+        )
 
         assert result.exit_code == 0
 
     def test_group_multiple_columns(self, multi_column_group_file: Path):
         """Test grouping by multiple columns."""
-        result = runner.invoke(app, [
-            "group", str(multi_column_group_file),
-            "--by", "year,quarter",
-            "--aggregate", "sales:sum,profit:mean"
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "group",
+                str(multi_column_group_file),
+                "--by",
+                "year,quarter",
+                "--aggregate",
+                "sales:sum,profit:mean",
+            ],
+        )
 
         assert result.exit_code == 0
         assert "Grouped by: year, quarter" in result.stdout
@@ -196,12 +195,19 @@ class TestGroupCommand:
     def test_group_with_output(self, sales_data_file: Path, tmp_path: Path):
         """Test grouping with output file."""
         output_path = tmp_path / "grouped.xlsx"
-        result = runner.invoke(app, [
-            "group", str(sales_data_file),
-            "--by", "region",
-            "--aggregate", "amount:sum",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "group",
+                str(sales_data_file),
+                "--by",
+                "region",
+                "--aggregate",
+                "amount:sum",
+                "--output",
+                str(output_path),
+            ],
+        )
 
         assert result.exit_code == 0
         assert "Written to:" in result.stdout
@@ -209,113 +215,108 @@ class TestGroupCommand:
 
     def test_group_dry_run(self, sales_data_file: Path):
         """Test dry-run mode."""
-        result = runner.invoke(app, [
-            "group", str(sales_data_file),
-            "--by", "region",
-            "--aggregate", "amount:sum",
-            "--dry-run"
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "group",
+                str(sales_data_file),
+                "--by",
+                "region",
+                "--aggregate",
+                "amount:sum",
+                "--dry-run",
+            ],
+        )
 
         assert result.exit_code == 0
         assert "Preview" in result.stdout
 
     def test_group_csv_input(self, csv_file_for_group: Path):
         """Test grouping from CSV file."""
-        result = runner.invoke(app, [
-            "group", str(csv_file_for_group),
-            "--by", "category",
-            "--aggregate", "value:sum"
-        ])
+        result = runner.invoke(
+            app, ["group", str(csv_file_for_group), "--by", "category", "--aggregate", "value:sum"]
+        )
 
         assert result.exit_code == 0
 
     def test_group_specific_sheet(self, sales_data_file: Path):
         """Test grouping from specific sheet."""
-        result = runner.invoke(app, [
-            "group", str(sales_data_file),
-            "--by", "region",
-            "--aggregate", "amount:sum",
-            "--sheet", "Sheet1"
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "group",
+                str(sales_data_file),
+                "--by",
+                "region",
+                "--aggregate",
+                "amount:sum",
+                "--sheet",
+                "Sheet1",
+            ],
+        )
 
         assert result.exit_code == 0
 
     def test_group_invalid_group_column(self, sales_data_file: Path):
         """Test grouping with non-existent group column."""
-        result = runner.invoke(app, [
-            "group", str(sales_data_file),
-            "--by", "invalid_column",
-            "--aggregate", "amount:sum"
-        ])
+        result = runner.invoke(
+            app,
+            ["group", str(sales_data_file), "--by", "invalid_column", "--aggregate", "amount:sum"],
+        )
 
         assert result.exit_code == 1
 
     def test_group_invalid_aggregate_column(self, sales_data_file: Path):
         """Test grouping with non-existent aggregate column."""
-        result = runner.invoke(app, [
-            "group", str(sales_data_file),
-            "--by", "region",
-            "--aggregate", "invalid_column:sum"
-        ])
+        result = runner.invoke(
+            app,
+            ["group", str(sales_data_file), "--by", "region", "--aggregate", "invalid_column:sum"],
+        )
 
         assert result.exit_code == 1
 
     def test_group_invalid_function(self, sales_data_file: Path):
         """Test grouping with invalid aggregation function."""
-        result = runner.invoke(app, [
-            "group", str(sales_data_file),
-            "--by", "region",
-            "--aggregate", "amount:invalid"
-        ])
+        result = runner.invoke(
+            app, ["group", str(sales_data_file), "--by", "region", "--aggregate", "amount:invalid"]
+        )
 
         assert result.exit_code == 1
 
     def test_group_missing_by_parameter(self, sales_data_file: Path):
         """Test group without --by parameter."""
-        result = runner.invoke(app, [
-            "group", str(sales_data_file),
-            "--aggregate", "amount:sum"
-        ])
+        result = runner.invoke(app, ["group", str(sales_data_file), "--aggregate", "amount:sum"])
 
         assert result.exit_code == 1
 
     def test_group_missing_aggregate_parameter(self, sales_data_file: Path):
         """Test group without --aggregate parameter."""
-        result = runner.invoke(app, [
-            "group", str(sales_data_file),
-            "--by", "region"
-        ])
+        result = runner.invoke(app, ["group", str(sales_data_file), "--by", "region"])
 
         assert result.exit_code == 1
 
     def test_group_same_column_for_by_and_aggregate(self, sales_data_file: Path):
         """Test that same column cannot be used for grouping and aggregation."""
-        result = runner.invoke(app, [
-            "group", str(sales_data_file),
-            "--by", "region",
-            "--aggregate", "region:sum"
-        ])
+        result = runner.invoke(
+            app, ["group", str(sales_data_file), "--by", "region", "--aggregate", "region:sum"]
+        )
 
         assert result.exit_code == 1
 
     def test_group_empty_file(self, empty_file: Path):
         """Test group on empty file."""
-        result = runner.invoke(app, [
-            "group", str(empty_file),
-            "--by", "column",
-            "--aggregate", "value:sum"
-        ])
+        result = runner.invoke(
+            app, ["group", str(empty_file), "--by", "column", "--aggregate", "value:sum"]
+        )
 
         assert result.exit_code == 0
         assert "empty" in result.stdout.lower()
 
     def test_group_nonexistent_file(self):
         """Test group on non-existent file."""
-        result = runner.invoke(app, [
-            "group", "missing.xlsx",
-            "--by", "region",
-            "--aggregate", "amount:sum"
-        ])
+        result = runner.invoke(
+            app, ["group", "missing.xlsx", "--by", "region", "--aggregate", "amount:sum"]
+        )
 
         assert result.exit_code == 1
 
@@ -330,30 +331,32 @@ class TestGroupCommand:
 
     def test_group_invalid_aggregate_format(self, sales_data_file: Path):
         """Test invalid aggregate format (missing colon)."""
-        result = runner.invoke(app, [
-            "group", str(sales_data_file),
-            "--by", "region",
-            "--aggregate", "amount"
-        ])
+        result = runner.invoke(
+            app, ["group", str(sales_data_file), "--by", "region", "--aggregate", "amount"]
+        )
 
         assert result.exit_code == 1
 
     def test_group_duplicate_aggregate_column(self, sales_data_file: Path):
         """Test duplicate column in aggregations."""
-        result = runner.invoke(app, [
-            "group", str(sales_data_file),
-            "--by", "region",
-            "--aggregate", "amount:sum,amount:mean"
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "group",
+                str(sales_data_file),
+                "--by",
+                "region",
+                "--aggregate",
+                "amount:sum,amount:mean",
+            ],
+        )
 
         assert result.exit_code == 1
 
     def test_group_with_nulls(self, file_with_nulls: Path):
         """Test grouping with null values."""
-        result = runner.invoke(app, [
-            "group", str(file_with_nulls),
-            "--by", "group",
-            "--aggregate", "value:sum"
-        ])
+        result = runner.invoke(
+            app, ["group", str(file_with_nulls), "--by", "group", "--aggregate", "value:sum"]
+        )
 
         assert result.exit_code == 0

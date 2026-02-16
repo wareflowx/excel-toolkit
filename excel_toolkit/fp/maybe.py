@@ -11,15 +11,17 @@ Example:
         value = unwrap(maybe)
 """
 
-from typing import TypeVar, Callable, Any
-from excel_toolkit.fp._maybe import Maybe, Some, Nothing, _NOTHING
-from excel_toolkit.fp.result import Result, ok, err
+from typing import Any, Callable, TypeVar
 
-T = TypeVar('T')
-U = TypeVar('U')
+from excel_toolkit.fp._maybe import _NOTHING, Maybe, Nothing, Some
+from excel_toolkit.fp.result import Result
+
+T = TypeVar("T")
+U = TypeVar("U")
 
 
 # Constructors
+
 
 def some(value: T) -> Maybe[T]:
     """Create a Some containing a value.
@@ -50,6 +52,7 @@ def nothing() -> Maybe[Any]:
 
 
 # Predicates
+
 
 def is_some(maybe: Maybe[T]) -> bool:
     """Check if maybe has a value.
@@ -84,6 +87,7 @@ def is_nothing(maybe: Maybe[T]) -> bool:
 
 
 # Unwrapping
+
 
 def unwrap(maybe: Maybe[T]) -> T:
     """Extract the value from a Some.
@@ -154,6 +158,7 @@ def unwrap_or_else(maybe: Maybe[T], fn: Callable[[], T]) -> T:
 
 # Conversion
 
+
 def to_maybe(result: Result[T, Any]) -> Maybe[T]:
     """Convert Result to Maybe.
 
@@ -181,9 +186,11 @@ def to_maybe(result: Result[T, Any]) -> Maybe[T]:
 
 # Custom exception
 
+
 class UnwrapError(Exception):
     """Raised when trying to unwrap a Nothing.
 
     Reused from result.py for consistency.
     """
+
     pass

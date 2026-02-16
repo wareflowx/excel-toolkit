@@ -3,25 +3,25 @@
 Search for patterns in a dataset.
 """
 
-from pathlib import Path
-
-import typer
-import pandas as pd
 import re
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
+import pandas as pd
+import typer
+
 from excel_toolkit.commands.common import (
+    display_table,
     read_data_file,
     write_or_display,
-    display_table,
 )
+from excel_toolkit.core import HandlerFactory
 
 
 def search(
     file_path: str = typer.Argument(..., help="Path to input file"),
     pattern: str = typer.Option(..., "--pattern", "-p", help="Search pattern (supports regex)"),
-    columns: str | None = typer.Option(None, "--columns", "-c", help="Columns to search (comma-separated, default: all)"),
+    columns: str | None = typer.Option(
+        None, "--columns", "-c", help="Columns to search (comma-separated, default: all)"
+    ),
     case_sensitive: bool = typer.Option(False, "--case-sensitive", help="Case-sensitive search"),
     regex: bool = typer.Option(False, "--regex", help="Treat pattern as regular expression"),
     output: str | None = typer.Option(None, "--output", "-o", help="Output file path"),
@@ -44,7 +44,6 @@ def search(
 
     # 2. Read file
     df = read_data_file(file_path, sheet)
-    original_count = len(df)
 
     # 3. Handle empty file
     if df.empty:
@@ -93,11 +92,7 @@ def search(
         if len(matching_rows) > 0:
             # Add column info
             for idx, row in matching_rows.iterrows():
-                matches.append({
-                    'row': idx,
-                    'column': col,
-                    'value': row[col]
-                })
+                matches.append({"row": idx, "column": col, "value": row[col]})
 
     match_count = len(matches)
 
@@ -109,7 +104,7 @@ def search(
     df_results = pd.DataFrame(matches)
 
     # Get matching rows (unique rows that have at least one match)
-    matching_row_indices = df_results['row'].unique()
+    matching_row_indices = df_results["row"].unique()
     df_matched = df.loc[matching_row_indices].reset_index(drop=True)
 
     # 8. Display summary
@@ -117,7 +112,7 @@ def search(
     if columns:
         typer.echo(f"Columns: {', '.join(search_columns)}")
     else:
-        typer.echo(f"Columns: all columns")
+        typer.echo("Columns: all columns")
     typer.echo(f"Matches found: {match_count}")
     typer.echo(f"Rows with matches: {len(matching_row_indices)}")
     typer.echo(f"Case sensitive: {case_sensitive}")

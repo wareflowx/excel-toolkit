@@ -3,10 +3,11 @@
 Tests for the export command that converts data to various formats.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -70,11 +71,9 @@ class TestExportCommand:
     def test_export_to_csv(self, sample_data_file: Path, tmp_path: Path):
         """Test export to CSV format."""
         output_path = tmp_path / "output.csv"
-        result = runner.invoke(app, [
-            "export", str(sample_data_file),
-            "--format", "csv",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app, ["export", str(sample_data_file), "--format", "csv", "--output", str(output_path)]
+        )
 
         assert result.exit_code == 0
         assert "Exported 3 rows to" in result.stdout
@@ -84,11 +83,9 @@ class TestExportCommand:
     def test_export_to_json(self, sample_data_file: Path, tmp_path: Path):
         """Test export to JSON format."""
         output_path = tmp_path / "output.json"
-        result = runner.invoke(app, [
-            "export", str(sample_data_file),
-            "--format", "json",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app, ["export", str(sample_data_file), "--format", "json", "--output", str(output_path)]
+        )
 
         assert result.exit_code == 0
         assert "Exported 3 rows to" in result.stdout
@@ -98,11 +95,9 @@ class TestExportCommand:
     def test_export_to_tsv(self, sample_data_file: Path, tmp_path: Path):
         """Test export to TSV format."""
         output_path = tmp_path / "output.tsv"
-        result = runner.invoke(app, [
-            "export", str(sample_data_file),
-            "--format", "tsv",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app, ["export", str(sample_data_file), "--format", "tsv", "--output", str(output_path)]
+        )
 
         assert result.exit_code == 0
         assert "Exported 3 rows to" in result.stdout
@@ -112,11 +107,9 @@ class TestExportCommand:
     def test_export_to_html(self, sample_data_file: Path, tmp_path: Path):
         """Test export to HTML format."""
         output_path = tmp_path / "output.html"
-        result = runner.invoke(app, [
-            "export", str(sample_data_file),
-            "--format", "html",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app, ["export", str(sample_data_file), "--format", "html", "--output", str(output_path)]
+        )
 
         assert result.exit_code == 0
         assert "Exported 3 rows to" in result.stdout
@@ -126,11 +119,10 @@ class TestExportCommand:
     def test_export_to_markdown(self, sample_data_file: Path, tmp_path: Path):
         """Test export to Markdown format."""
         output_path = tmp_path / "output.md"
-        result = runner.invoke(app, [
-            "export", str(sample_data_file),
-            "--format", "markdown",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            ["export", str(sample_data_file), "--format", "markdown", "--output", str(output_path)],
+        )
 
         assert result.exit_code == 0
         assert "Exported 3 rows to" in result.stdout
@@ -140,12 +132,19 @@ class TestExportCommand:
     def test_export_with_custom_delimiter(self, sample_data_file: Path, tmp_path: Path):
         """Test export with custom delimiter."""
         output_path = tmp_path / "output.csv"
-        result = runner.invoke(app, [
-            "export", str(sample_data_file),
-            "--format", "csv",
-            "--delimiter", ";",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "export",
+                str(sample_data_file),
+                "--format",
+                "csv",
+                "--delimiter",
+                ";",
+                "--output",
+                str(output_path),
+            ],
+        )
 
         assert result.exit_code == 0
         assert "Delimiter: ';'" in result.stdout
@@ -154,12 +153,18 @@ class TestExportCommand:
     def test_export_with_index(self, sample_data_file: Path, tmp_path: Path):
         """Test export with index included."""
         output_path = tmp_path / "output.csv"
-        result = runner.invoke(app, [
-            "export", str(sample_data_file),
-            "--format", "csv",
-            "--index",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "export",
+                str(sample_data_file),
+                "--format",
+                "csv",
+                "--index",
+                "--output",
+                str(output_path),
+            ],
+        )
 
         assert result.exit_code == 0
         assert output_path.exists()
@@ -167,12 +172,19 @@ class TestExportCommand:
     def test_export_with_float_format(self, sample_data_file: Path, tmp_path: Path):
         """Test export with float formatting."""
         output_path = tmp_path / "output.csv"
-        result = runner.invoke(app, [
-            "export", str(sample_data_file),
-            "--format", "csv",
-            "--float-format", "%.1f",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "export",
+                str(sample_data_file),
+                "--format",
+                "csv",
+                "--float-format",
+                "%.1f",
+                "--output",
+                str(output_path),
+            ],
+        )
 
         assert result.exit_code == 0
         assert output_path.exists()
@@ -180,12 +192,19 @@ class TestExportCommand:
     def test_export_with_encoding(self, sample_data_file: Path, tmp_path: Path):
         """Test export with custom encoding."""
         output_path = tmp_path / "output.csv"
-        result = runner.invoke(app, [
-            "export", str(sample_data_file),
-            "--format", "csv",
-            "--encoding", "utf-8",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "export",
+                str(sample_data_file),
+                "--format",
+                "csv",
+                "--encoding",
+                "utf-8",
+                "--output",
+                str(output_path),
+            ],
+        )
 
         assert result.exit_code == 0
         assert "Encoding: utf-8" in result.stdout
@@ -194,11 +213,10 @@ class TestExportCommand:
     def test_export_from_csv(self, csv_file_for_export: Path, tmp_path: Path):
         """Test export from CSV file."""
         output_path = tmp_path / "output.json"
-        result = runner.invoke(app, [
-            "export", str(csv_file_for_export),
-            "--format", "json",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            ["export", str(csv_file_for_export), "--format", "json", "--output", str(output_path)],
+        )
 
         assert result.exit_code == 0
         assert output_path.exists()
@@ -206,23 +224,28 @@ class TestExportCommand:
     def test_export_specific_sheet(self, sample_data_file: Path, tmp_path: Path):
         """Test export from specific sheet."""
         output_path = tmp_path / "output.csv"
-        result = runner.invoke(app, [
-            "export", str(sample_data_file),
-            "--format", "csv",
-            "--sheet", "Sheet1",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "export",
+                str(sample_data_file),
+                "--format",
+                "csv",
+                "--sheet",
+                "Sheet1",
+                "--output",
+                str(output_path),
+            ],
+        )
 
         assert result.exit_code == 0
 
     def test_export_invalid_format(self, sample_data_file: Path):
         """Test export with invalid format."""
         output_path = "output.xml"
-        result = runner.invoke(app, [
-            "export", str(sample_data_file),
-            "--format", "xml",
-            "--output", output_path
-        ])
+        result = runner.invoke(
+            app, ["export", str(sample_data_file), "--format", "xml", "--output", output_path]
+        )
 
         assert result.exit_code == 1
         assert "Invalid format" in result.stdout or "Valid formats" in result.stdout
@@ -230,34 +253,37 @@ class TestExportCommand:
     def test_export_invalid_json_orient(self, sample_data_file: Path, tmp_path: Path):
         """Test export with invalid JSON orientation."""
         output_path = tmp_path / "output.json"
-        result = runner.invoke(app, [
-            "export", str(sample_data_file),
-            "--format", "json",
-            "--orient", "invalid",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "export",
+                str(sample_data_file),
+                "--format",
+                "json",
+                "--orient",
+                "invalid",
+                "--output",
+                str(output_path),
+            ],
+        )
 
         assert result.exit_code == 1
         assert "Invalid orient" in result.stdout or "Valid orients" in result.stdout
 
     def test_export_empty_file(self, empty_file: Path):
         """Test export on empty file."""
-        result = runner.invoke(app, [
-            "export", str(empty_file),
-            "--format", "csv",
-            "--output", "output.csv"
-        ])
+        result = runner.invoke(
+            app, ["export", str(empty_file), "--format", "csv", "--output", "output.csv"]
+        )
 
         assert result.exit_code == 0
         assert "empty" in result.stdout.lower()
 
     def test_export_nonexistent_file(self):
         """Test export on non-existent file."""
-        result = runner.invoke(app, [
-            "export", "missing.xlsx",
-            "--format", "csv",
-            "--output", "output.csv"
-        ])
+        result = runner.invoke(
+            app, ["export", "missing.xlsx", "--format", "csv", "--output", "output.csv"]
+        )
 
         assert result.exit_code == 1
         assert "File not found" in result.stdout or "not found" in result.stderr

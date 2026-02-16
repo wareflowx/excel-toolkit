@@ -3,26 +3,30 @@
 Fill missing values in a dataset.
 """
 
-from pathlib import Path
-
 import typer
-import pandas as pd
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
-from excel_toolkit.operations.cleaning import fill_missing_values
 from excel_toolkit.commands.common import (
+    display_table,
     read_data_file,
     write_or_display,
-    display_table,
 )
+from excel_toolkit.core import HandlerFactory
+from excel_toolkit.fp import is_err, unwrap, unwrap_err
+from excel_toolkit.operations.cleaning import fill_missing_values
 
 
 def fill(
     file_path: str = typer.Argument(..., help="Path to input file"),
-    columns: str | None = typer.Option(None, "--columns", "-c", help="Columns to fill (comma-separated)"),
+    columns: str | None = typer.Option(
+        None, "--columns", "-c", help="Columns to fill (comma-separated)"
+    ),
     value: str | None = typer.Option(None, "--value", "-v", help="Constant value to fill with"),
-    strategy: str | None = typer.Option(None, "--strategy", "-s", help="Statistical strategy: mean, median, mode, min, max, ffill, bfill"),
+    strategy: str | None = typer.Option(
+        None,
+        "--strategy",
+        "-s",
+        help="Statistical strategy: mean, median, mode, min, max, ffill, bfill",
+    ),
     output: str | None = typer.Option(None, "--output", "-o", help="Output file path"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Show preview without writing"),
     sheet: str | None = typer.Option(None, "--sheet", help="Sheet name for Excel files"),
@@ -97,7 +101,9 @@ def fill(
             # Use as string
             fill_value_arg = fill_value
 
-        result = fill_missing_values(df, strategy="constant", columns=target_columns, value=fill_value_arg)
+        result = fill_missing_values(
+            df, strategy="constant", columns=target_columns, value=fill_value_arg
+        )
     else:
         result = fill_missing_values(df, strategy=fill_strategy, columns=target_columns)
 
@@ -129,7 +135,7 @@ def fill(
     if columns:
         typer.echo(f"Columns: {', '.join(target_columns)}")
     else:
-        typer.echo(f"Columns: all columns with missing values")
+        typer.echo("Columns: all columns with missing values")
     typer.echo("")
 
     # 10. Handle dry-run mode

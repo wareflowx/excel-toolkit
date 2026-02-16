@@ -3,19 +3,15 @@
 Count occurrences of unique values in specified columns.
 """
 
-from pathlib import Path
-
-import typer
 import pandas as pd
+import typer
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
 from excel_toolkit.commands.common import (
     read_data_file,
-    write_or_display,
-    display_table,
     resolve_column_references,
+    write_or_display,
 )
+from excel_toolkit.core import HandlerFactory
 
 
 def count(
@@ -72,12 +68,12 @@ def count(
     for col in column_list:
         # Get value counts
         value_counts = df[col].value_counts().reset_index()
-        value_counts.columns = [col, 'count']
+        value_counts.columns = [col, "count"]
 
         # Add column name for multi-column case
         if len(column_list) > 1:
-            value_counts = value_counts.rename(columns={col: 'value'})
-            value_counts.insert(0, 'column', col)
+            value_counts = value_counts.rename(columns={col: "value"})
+            value_counts.insert(0, "column", col)
 
         count_dfs.append(value_counts)
 
@@ -90,7 +86,7 @@ def count(
     # 6. Sort if requested
     if sort == "count":
         # Sort by count (descending by default)
-        sort_column = 'count'
+        sort_column = "count"
         ascending_order = ascending
         df_counts = df_counts.sort_values(by=sort_column, ascending=ascending_order)
     elif sort == "name":
@@ -98,7 +94,7 @@ def count(
         if len(column_list) == 1:
             sort_column = column_list[0]
         else:
-            sort_column = 'value'
+            sort_column = "value"
         ascending_order = ascending
         df_counts = df_counts.sort_values(by=sort_column, ascending=ascending_order)
 
@@ -108,7 +104,7 @@ def count(
     # 6.5. Apply limit if specified
     if limit is not None:
         if limit <= 0:
-            typer.echo(f"Error: Limit must be a positive integer", err=True)
+            typer.echo("Error: Limit must be a positive integer", err=True)
             raise typer.Exit(1)
         df_counts = df_counts.head(limit)
 

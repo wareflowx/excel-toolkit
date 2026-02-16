@@ -6,22 +6,27 @@ Export data to various formats with customizable options.
 from pathlib import Path
 
 import typer
-import pandas as pd
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
 from excel_toolkit.commands.common import read_data_file
 
 
 def export(
     file_path: str = typer.Argument(..., help="Path to input file"),
-    format: str = typer.Option(..., "--format", "-f", help="Output format: csv, json, parquet, tsv, html, markdown"),
+    format: str = typer.Option(
+        ..., "--format", "-f", help="Output format: csv, json, parquet, tsv, html, markdown"
+    ),
     output: str = typer.Option(..., "--output", "-o", help="Output file path"),
     sheet: str | None = typer.Option(None, "--sheet", "-s", help="Sheet name for Excel files"),
-    delimiter: str = typer.Option(",", "--delimiter", "-d", help="Delimiter for CSV/TSV (default: ',' for CSV, '\\t' for TSV)"),
-    orient: str = typer.Option("records", "--orient", help="Orientation for JSON (records, index, columns, values)"),
+    delimiter: str = typer.Option(
+        ",", "--delimiter", "-d", help="Delimiter for CSV/TSV (default: ',' for CSV, '\\t' for TSV)"
+    ),
+    orient: str = typer.Option(
+        "records", "--orient", help="Orientation for JSON (records, index, columns, values)"
+    ),
     index: bool = typer.Option(False, "--index", help="Include index in output"),
-    float_format: str | None = typer.Option(None, "--float-format", help="Float format string (e.g., '%.2f')"),
+    float_format: str | None = typer.Option(
+        None, "--float-format", help="Float format string (e.g., '%.2f')"
+    ),
     encoding: str = typer.Option("utf-8", "--encoding", "-e", help="Encoding for text formats"),
 ) -> None:
     """Export data to various formats with customizable options.
@@ -58,11 +63,15 @@ def export(
         if format == "csv":
             # Use specified delimiter or default to comma
             sep = delimiter if format != "tsv" else "\t"
-            df.to_csv(output_path, index=index, sep=sep, encoding=encoding, float_format=float_format)
+            df.to_csv(
+                output_path, index=index, sep=sep, encoding=encoding, float_format=float_format
+            )
 
         elif format == "tsv":
             # TSV is just CSV with tab delimiter
-            df.to_csv(output_path, index=index, sep="\t", encoding=encoding, float_format=float_format)
+            df.to_csv(
+                output_path, index=index, sep="\t", encoding=encoding, float_format=float_format
+            )
 
         elif format == "json":
             # Validate orient parameter
@@ -79,7 +88,9 @@ def export(
             try:
                 df.to_parquet(output_path, index=index)
             except ImportError:
-                typer.echo("Error: Parquet export requires 'pyarrow' or 'fastparquet' package", err=True)
+                typer.echo(
+                    "Error: Parquet export requires 'pyarrow' or 'fastparquet' package", err=True
+                )
                 typer.echo("Install with: pip install pyarrow", err=True)
                 raise typer.Exit(1)
 
@@ -87,7 +98,7 @@ def export(
             df.to_html(output_path, index=index)
 
         elif format == "markdown":
-            with open(output_path, 'w', encoding=encoding) as f:
+            with open(output_path, "w", encoding=encoding) as f:
                 f.write(df.to_markdown(index=index))
 
         # 5. Display summary

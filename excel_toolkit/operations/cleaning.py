@@ -8,15 +8,14 @@ from typing import Any
 
 import pandas as pd
 
-from excel_toolkit.fp import ok, err, is_ok, is_err, unwrap, unwrap_err, Result
+from excel_toolkit.fp import Result, err, is_err, ok, unwrap
 from excel_toolkit.models.error_types import (
-    ColumnNotFoundError,
-    InvalidParameterError,
-    InvalidFillStrategyError,
-    FillFailedError,
     CleaningError,
+    ColumnNotFoundError,
+    FillFailedError,
+    InvalidFillStrategyError,
+    InvalidParameterError,
 )
-
 
 # =============================================================================
 # Trimming Operations
@@ -24,9 +23,7 @@ from excel_toolkit.models.error_types import (
 
 
 def trim_whitespace(
-    df: pd.DataFrame,
-    columns: list[str] | None = None,
-    side: str = "both"
+    df: pd.DataFrame, columns: list[str] | None = None, side: str = "both"
 ) -> Result[pd.DataFrame, ColumnNotFoundError | InvalidParameterError | CleaningError]:
     """Trim whitespace from string columns.
 
@@ -54,24 +51,28 @@ def trim_whitespace(
     """
     # Validate side parameter
     if side not in ["left", "right", "both"]:
-        return err(InvalidParameterError(
-            parameter="side",
-            value=side,
-            valid_values=["left", "right", "both"]
-        ))
+        return err(
+            InvalidParameterError(
+                parameter="side", value=side, valid_values=["left", "right", "both"]
+            )
+        )
 
     # Determine columns to trim
     if columns is None:
         # Find all string/object dtype columns
-        columns = df.select_dtypes(include=['object', 'string']).columns.tolist()
+        columns = df.select_dtypes(include=["object", "string"]).columns.tolist()
 
     # Validate columns exist
     missing_columns = [col for col in columns if col not in df.columns]
     if missing_columns:
-        return err(ColumnNotFoundError(
-            column=missing_columns[0] if len(missing_columns) == 1 else f"{', '.join(missing_columns[:-1])} and {missing_columns[-1]}",
-            available=list(df.columns)
-        ))
+        return err(
+            ColumnNotFoundError(
+                column=missing_columns[0]
+                if len(missing_columns) == 1
+                else f"{', '.join(missing_columns[:-1])} and {missing_columns[-1]}",
+                available=list(df.columns),
+            )
+        )
 
     # Create a copy to avoid modifying original
     df_clean = df.copy()
@@ -79,7 +80,7 @@ def trim_whitespace(
     try:
         # Apply trimming based on side
         for col in columns:
-            if df_clean[col].dtype == 'object' or str(df_clean[col].dtype) == 'string':
+            if df_clean[col].dtype == "object" or str(df_clean[col].dtype) == "string":
                 if side == "both":
                     df_clean[col] = df_clean[col].str.strip()
                 elif side == "left":
@@ -98,9 +99,7 @@ def trim_whitespace(
 
 
 def remove_duplicates(
-    df: pd.DataFrame,
-    subset: list[str] | None = None,
-    keep: str = "first"
+    df: pd.DataFrame, subset: list[str] | None = None, keep: str = "first"
 ) -> Result[pd.DataFrame, ColumnNotFoundError | InvalidParameterError | CleaningError]:
     """Remove duplicate rows from DataFrame.
 
@@ -129,20 +128,24 @@ def remove_duplicates(
     """
     # Validate keep parameter
     if keep not in ["first", "last", False]:
-        return err(InvalidParameterError(
-            parameter="keep",
-            value=str(keep),
-            valid_values=["first", "last", "False"]
-        ))
+        return err(
+            InvalidParameterError(
+                parameter="keep", value=str(keep), valid_values=["first", "last", "False"]
+            )
+        )
 
     # Validate subset columns if provided
     if subset is not None:
         missing_columns = [col for col in subset if col not in df.columns]
         if missing_columns:
-            return err(ColumnNotFoundError(
-                column=missing_columns[0] if len(missing_columns) == 1 else f"{', '.join(missing_columns[:-1])} and {missing_columns[-1]}",
-                available=list(df.columns)
-            ))
+            return err(
+                ColumnNotFoundError(
+                    column=missing_columns[0]
+                    if len(missing_columns) == 1
+                    else f"{', '.join(missing_columns[:-1])} and {missing_columns[-1]}",
+                    available=list(df.columns),
+                )
+            )
 
     try:
         df_dedup = df.drop_duplicates(subset=subset, keep=keep)
@@ -161,7 +164,7 @@ def fill_missing_values(
     df: pd.DataFrame,
     strategy: str | dict = "forward",
     columns: list[str] | None = None,
-    value: Any = None
+    value: Any = None,
 ) -> Result[pd.DataFrame, ColumnNotFoundError | InvalidFillStrategyError | FillFailedError]:
     """Fill missing values in DataFrame.
 
@@ -207,16 +210,14 @@ def fill_missing_values(
             # Validate each column exists and apply its strategy
             for col, col_strategy in strategy.items():
                 if col not in df.columns:
-                    return err(ColumnNotFoundError(
-                        column=col,
-                        available=list(df.columns)
-                    ))
+                    return err(ColumnNotFoundError(column=col, available=list(df.columns)))
 
                 if col_strategy not in valid_strategies:
-                    return err(InvalidFillStrategyError(
-                        strategy=col_strategy,
-                        valid_strategies=valid_strategies
-                    ))
+                    return err(
+                        InvalidFillStrategyError(
+                            strategy=col_strategy, valid_strategies=valid_strategies
+                        )
+                    )
 
                 # Apply strategy to column
                 result = _apply_fill_strategy(df_filled, col, col_strategy, value)
@@ -227,10 +228,9 @@ def fill_missing_values(
         else:
             # Apply same strategy to specified or all columns
             if strategy not in valid_strategies:
-                return err(InvalidFillStrategyError(
-                    strategy=strategy,
-                    valid_strategies=valid_strategies
-                ))
+                return err(
+                    InvalidFillStrategyError(strategy=strategy, valid_strategies=valid_strategies)
+                )
 
             # Determine columns to fill
             if columns is None:
@@ -240,10 +240,14 @@ def fill_missing_values(
             # Validate columns exist
             missing_columns = [col for col in columns if col not in df_filled.columns]
             if missing_columns:
-                return err(ColumnNotFoundError(
-                    column=missing_columns[0] if len(missing_columns) == 1 else f"{', '.join(missing_columns[:-1])} and {missing_columns[-1]}",
-                    available=list(df_filled.columns)
-                ))
+                return err(
+                    ColumnNotFoundError(
+                        column=missing_columns[0]
+                        if len(missing_columns) == 1
+                        else f"{', '.join(missing_columns[:-1])} and {missing_columns[-1]}",
+                        available=list(df_filled.columns),
+                    )
+                )
 
             # Handle drop strategy at DataFrame level
             if strategy == "drop":
@@ -257,19 +261,20 @@ def fill_missing_values(
                     df_filled = unwrap(result)
 
     except Exception as e:
-        return err(FillFailedError(
-            column="multiple" if columns is None or len(columns) > 1 else (columns[0] if columns else "unknown"),
-            reason=str(e)
-        ))
+        return err(
+            FillFailedError(
+                column="multiple"
+                if columns is None or len(columns) > 1
+                else (columns[0] if columns else "unknown"),
+                reason=str(e),
+            )
+        )
 
     return ok(df_filled)
 
 
 def _apply_fill_strategy(
-    df: pd.DataFrame,
-    column: str,
-    strategy: str,
-    value: Any = None
+    df: pd.DataFrame, column: str, strategy: str, value: Any = None
 ) -> Result[pd.DataFrame, FillFailedError]:
     """Apply fill strategy to a single column.
 
@@ -285,37 +290,44 @@ def _apply_fill_strategy(
             if pd.api.types.is_numeric_dtype(df[column]):
                 mean_value = df[column].mean()
                 if pd.isna(mean_value):
-                    return err(FillFailedError(
-                        column=column,
-                        reason="Cannot calculate mean (all values are NaN)"
-                    ))
+                    return err(
+                        FillFailedError(
+                            column=column, reason="Cannot calculate mean (all values are NaN)"
+                        )
+                    )
                 df[column] = df[column].fillna(mean_value)
             else:
-                return err(FillFailedError(
-                    column=column,
-                    reason=f"Cannot apply mean strategy to non-numeric column (dtype: {df[column].dtype})"
-                ))
+                return err(
+                    FillFailedError(
+                        column=column,
+                        reason=f"Cannot apply mean strategy to non-numeric column (dtype: {df[column].dtype})",
+                    )
+                )
         elif strategy == "median":
             # Only works on numeric columns
             if pd.api.types.is_numeric_dtype(df[column]):
                 median_value = df[column].median()
                 if pd.isna(median_value):
-                    return err(FillFailedError(
-                        column=column,
-                        reason="Cannot calculate median (all values are NaN)"
-                    ))
+                    return err(
+                        FillFailedError(
+                            column=column, reason="Cannot calculate median (all values are NaN)"
+                        )
+                    )
                 df[column] = df[column].fillna(median_value)
             else:
-                return err(FillFailedError(
-                    column=column,
-                    reason=f"Cannot apply median strategy to non-numeric column (dtype: {df[column].dtype})"
-                ))
+                return err(
+                    FillFailedError(
+                        column=column,
+                        reason=f"Cannot apply median strategy to non-numeric column (dtype: {df[column].dtype})",
+                    )
+                )
         elif strategy == "constant":
             if value is None and strategy == "constant":
-                return err(FillFailedError(
-                    column=column,
-                    reason="Value parameter required for constant strategy"
-                ))
+                return err(
+                    FillFailedError(
+                        column=column, reason="Value parameter required for constant strategy"
+                    )
+                )
             df[column] = df[column].fillna(value)
         elif strategy == "drop":
             # This is handled at DataFrame level, not per column
@@ -324,10 +336,7 @@ def _apply_fill_strategy(
         return ok(df)
 
     except Exception as e:
-        return err(FillFailedError(
-            column=column,
-            reason=str(e)
-        ))
+        return err(FillFailedError(column=column, reason=str(e)))
 
 
 # =============================================================================
@@ -336,10 +345,7 @@ def _apply_fill_strategy(
 
 
 def standardize_columns(
-    df: pd.DataFrame,
-    case: str = "lower",
-    separator: str = "_",
-    remove_special: bool = False
+    df: pd.DataFrame, case: str = "lower", separator: str = "_", remove_special: bool = False
 ) -> Result[pd.DataFrame, InvalidParameterError | CleaningError]:
     """Standardize column names.
 
@@ -374,11 +380,11 @@ def standardize_columns(
     """
     # Validate case parameter
     if case not in ["lower", "upper", "title", "snake"]:
-        return err(InvalidParameterError(
-            parameter="case",
-            value=case,
-            valid_values=["lower", "upper", "title", "snake"]
-        ))
+        return err(
+            InvalidParameterError(
+                parameter="case", value=case, valid_values=["lower", "upper", "title", "snake"]
+            )
+        )
 
     try:
         # Create a copy
@@ -406,15 +412,17 @@ def standardize_columns(
                 # Convert to snake_case
                 # Insert separator before capital letters (for CamelCase)
                 import re
-                col_str = re.sub(r'(?<=[a-z])(?=[A-Z])', separator, col_str)
+
+                col_str = re.sub(r"(?<=[a-z])(?=[A-Z])", separator, col_str)
                 # Convert to lowercase and replace spaces with separator
-                col_str = col_str.lower().replace(' ', separator)
+                col_str = col_str.lower().replace(" ", separator)
 
             # Remove special characters if requested (but preserve separator and spaces)
             if remove_special:
                 import re
+
                 # Keep only alphanumeric, separator, and spaces
-                col_str = re.sub(rf'[^\w\s{re.escape(separator)}]', '', col_str)
+                col_str = re.sub(rf"[^\w\s{re.escape(separator)}]", "", col_str)
 
             # Strip again after removing special chars
             col_str = col_str.strip()
@@ -463,8 +471,15 @@ def clean_dataframe(
     fill_strategy: str | dict | None = None,
     fill_value: Any = None,
     standardize: bool = False,
-    standardize_case: str = "lower"
-) -> Result[pd.DataFrame, ColumnNotFoundError | InvalidParameterError | InvalidFillStrategyError | FillFailedError | CleaningError]:
+    standardize_case: str = "lower",
+) -> Result[
+    pd.DataFrame,
+    ColumnNotFoundError
+    | InvalidParameterError
+    | InvalidFillStrategyError
+    | FillFailedError
+    | CleaningError,
+]:
     """Apply multiple cleaning operations in sequence.
 
     Args:
@@ -502,8 +517,7 @@ def clean_dataframe(
 
     if standardize:
         std_result = standardize_columns(
-            result if isinstance(result, pd.DataFrame) else unwrap(result),
-            case=standardize_case
+            result if isinstance(result, pd.DataFrame) else unwrap(result), case=standardize_case
         )
         if is_err(std_result):
             return std_result
@@ -513,7 +527,7 @@ def clean_dataframe(
         trim_result = trim_whitespace(
             result if isinstance(result, pd.DataFrame) else unwrap(result),
             columns=trim_columns,
-            side=trim_side
+            side=trim_side,
         )
         if is_err(trim_result):
             return trim_result
@@ -523,7 +537,7 @@ def clean_dataframe(
         fill_result = fill_missing_values(
             result if isinstance(result, pd.DataFrame) else unwrap(result),
             strategy=fill_strategy,
-            value=fill_value
+            value=fill_value,
         )
         if is_err(fill_result):
             return fill_result
@@ -533,7 +547,7 @@ def clean_dataframe(
         dup_result = remove_duplicates(
             result if isinstance(result, pd.DataFrame) else unwrap(result),
             subset=dup_subset,
-            keep=dup_keep
+            keep=dup_keep,
         )
         if is_err(dup_result):
             return dup_result

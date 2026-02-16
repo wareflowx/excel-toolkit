@@ -3,24 +3,26 @@
 Remove leading and trailing whitespace from cell values.
 """
 
-from pathlib import Path
-
 import typer
-import pandas as pd
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
-from excel_toolkit.operations.cleaning import trim_whitespace
 from excel_toolkit.commands.common import (
+    display_table,
     read_data_file,
     write_or_display,
-    display_table,
 )
+from excel_toolkit.core import HandlerFactory
+from excel_toolkit.fp import is_err, unwrap, unwrap_err
+from excel_toolkit.operations.cleaning import trim_whitespace
 
 
 def strip(
     file_path: str = typer.Argument(..., help="Path to input file"),
-    columns: str | None = typer.Option(None, "--columns", "-c", help="Columns to strip (comma-separated, default: all string columns)"),
+    columns: str | None = typer.Option(
+        None,
+        "--columns",
+        "-c",
+        help="Columns to strip (comma-separated, default: all string columns)",
+    ),
     left: bool = typer.Option(True, "--left", help="Strip leading whitespace (default: True)"),
     right: bool = typer.Option(True, "--right", help="Strip trailing whitespace (default: True)"),
     output: str | None = typer.Option(None, "--output", "-o", help="Output file path"),
@@ -56,12 +58,12 @@ def strip(
             raise typer.Exit(1)
     else:
         # Default: all string columns
-        column_list = df.select_dtypes(include=['object']).columns.tolist()
+        column_list = df.select_dtypes(include=["object"]).columns.tolist()
 
     # 4. Count cells modified before stripping
     cells_modified = 0
     for col in column_list:
-        if col in df.columns and df[col].dtype == 'object':
+        if col in df.columns and df[col].dtype == "object":
             if left and right:
                 cells_modified += df[col].str.strip().ne(df[col]).sum()
             elif left:
@@ -97,7 +99,9 @@ def strip(
     else:
         typer.echo(f"All string columns: {', '.join(column_list)}")
     typer.echo(f"Cells modified: {cells_modified}")
-    typer.echo(f"Strip mode: {'left' if left else ''}{'/' if left and right else ''}{'right' if right else ''}")
+    typer.echo(
+        f"Strip mode: {'left' if left else ''}{'/' if left and right else ''}{'right' if right else ''}"
+    )
     typer.echo("")
 
     # 8. Write or display

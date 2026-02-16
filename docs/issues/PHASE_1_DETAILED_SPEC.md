@@ -1,12 +1,5 @@
 # Phase 1: Core Operations - Detailed Specification
 
-**Phase:** 1 - Extract Core Operations
-**Status:** Planning
-**Duration Estimate:** 2-3 days
-**Priority:** Critical (blocks testing and reusability)
-
----
-
 ## Overview
 
 Phase 1 focuses on extracting the 5 core data manipulation operations from command files into the operations layer. These operations form the foundation of the toolkit and are used by multiple commands.

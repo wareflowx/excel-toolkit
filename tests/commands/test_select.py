@@ -3,10 +3,11 @@
 Tests for the select command that selects specific columns.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -29,7 +30,13 @@ def sample_data_file(tmp_path: Path) -> Path:
             "age": [25, 30, 35, 28, 32],
             "city": ["Paris", "London", "Berlin", "Madrid", "Rome"],
             "salary": [50000, 60000, 70000, 55000, 65000],
-            "email": ["alice@example.com", "bob@example.com", "charlie@example.com", "diana@example.com", "eve@example.com"],
+            "email": [
+                "alice@example.com",
+                "bob@example.com",
+                "charlie@example.com",
+                "diana@example.com",
+                "eve@example.com",
+            ],
         }
     )
     file_path = tmp_path / "data.xlsx"
@@ -102,11 +109,10 @@ class TestSelectCommand:
     def test_select_with_output(self, sample_data_file: Path, tmp_path: Path):
         """Test selecting with output file."""
         output_path = tmp_path / "selected.xlsx"
-        result = runner.invoke(app, [
-            "select", str(sample_data_file),
-            "--columns", "id,name",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            ["select", str(sample_data_file), "--columns", "id,name", "--output", str(output_path)],
+        )
 
         assert result.exit_code == 0
         assert "Written to:" in result.stdout
@@ -114,10 +120,7 @@ class TestSelectCommand:
 
     def test_select_exclude_columns(self, sample_data_file: Path):
         """Test excluding specific columns."""
-        result = runner.invoke(app, [
-            "select", str(sample_data_file),
-            "--exclude", "salary,email"
-        ])
+        result = runner.invoke(app, ["select", str(sample_data_file), "--exclude", "salary,email"])
 
         assert result.exit_code == 0
         assert "Selected 4 of 6 columns" in result.stdout
@@ -153,60 +156,51 @@ class TestSelectCommand:
 
     def test_select_with_rename(self, sample_data_file: Path):
         """Test selecting with column renaming."""
-        result = runner.invoke(app, [
-            "select", str(sample_data_file),
-            "--columns", "name->full_name,email->contact_email"
-        ])
+        result = runner.invoke(
+            app,
+            ["select", str(sample_data_file), "--columns", "name->full_name,email->contact_email"],
+        )
 
         assert result.exit_code == 0
         assert "Selected 2 of 6 columns" in result.stdout
 
     def test_select_dry_run(self, sample_data_file: Path):
         """Test dry-run mode."""
-        result = runner.invoke(app, [
-            "select", str(sample_data_file),
-            "--columns", "id,name",
-            "--dry-run"
-        ])
+        result = runner.invoke(
+            app, ["select", str(sample_data_file), "--columns", "id,name", "--dry-run"]
+        )
 
         assert result.exit_code == 0
         assert "Preview" in result.stdout
 
     def test_select_csv_input(self, csv_file: Path):
         """Test selecting from CSV file."""
-        result = runner.invoke(app, [
-            "select", str(csv_file),
-            "--columns", "product,price"
-        ])
+        result = runner.invoke(app, ["select", str(csv_file), "--columns", "product,price"])
 
         assert result.exit_code == 0
         assert "Selected 2 of 3 columns" in result.stdout
 
     def test_select_specific_sheet(self, sample_data_file: Path):
         """Test selecting from specific sheet."""
-        result = runner.invoke(app, [
-            "select", str(sample_data_file),
-            "--columns", "id,name",
-            "--sheet", "Sheet1"
-        ])
+        result = runner.invoke(
+            app, ["select", str(sample_data_file), "--columns", "id,name", "--sheet", "Sheet1"]
+        )
 
         assert result.exit_code == 0
 
     def test_select_invalid_column(self, sample_data_file: Path):
         """Test selecting non-existent column."""
-        result = runner.invoke(app, [
-            "select", str(sample_data_file),
-            "--columns", "invalid_column"
-        ])
+        result = runner.invoke(
+            app, ["select", str(sample_data_file), "--columns", "invalid_column"]
+        )
 
         assert result.exit_code == 1
 
     def test_select_invalid_exclude_column(self, sample_data_file: Path):
         """Test excluding non-existent column."""
-        result = runner.invoke(app, [
-            "select", str(sample_data_file),
-            "--exclude", "invalid_column"
-        ])
+        result = runner.invoke(
+            app, ["select", str(sample_data_file), "--exclude", "invalid_column"]
+        )
 
         assert result.exit_code == 1
 
@@ -218,20 +212,14 @@ class TestSelectCommand:
 
     def test_select_empty_file(self, empty_file: Path):
         """Test select on empty file."""
-        result = runner.invoke(app, [
-            "select", str(empty_file),
-            "--columns", "id"
-        ])
+        result = runner.invoke(app, ["select", str(empty_file), "--columns", "id"])
 
         assert result.exit_code == 0
         assert "empty" in result.stdout.lower()
 
     def test_select_nonexistent_file(self):
         """Test select on non-existent file."""
-        result = runner.invoke(app, [
-            "select", "missing.xlsx",
-            "--columns", "id"
-        ])
+        result = runner.invoke(app, ["select", "missing.xlsx", "--columns", "id"])
 
         assert result.exit_code == 1
 

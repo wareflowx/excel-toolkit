@@ -3,28 +3,33 @@
 Compare two files or sheets to identify differences.
 """
 
-from pathlib import Path
-
 import typer
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
-from excel_toolkit.operations.comparing import (
-    compare_dataframes,
-    ComparisonResult,
-)
 from excel_toolkit.commands.common import (
     read_data_file,
     write_or_display,
+)
+from excel_toolkit.core import HandlerFactory
+from excel_toolkit.fp import is_err, unwrap, unwrap_err
+from excel_toolkit.operations.comparing import (
+    ComparisonResult,
+    compare_dataframes,
 )
 
 
 def compare(
     file1: str = typer.Argument(..., help="Path to first file (baseline)"),
     file2: str = typer.Argument(..., help="Path to second file (comparison)"),
-    key_columns: str | None = typer.Option(None, "--key-columns", "-k", help="Columns to use as key for matching rows (comma-separated)"),
+    key_columns: str | None = typer.Option(
+        None,
+        "--key-columns",
+        "-k",
+        help="Columns to use as key for matching rows (comma-separated)",
+    ),
     output: str | None = typer.Option(None, "--output", "-o", help="Output file path"),
-    show_diffs_only: bool = typer.Option(False, "--diffs-only", "-d", help="Show only differing rows"),
+    show_diffs_only: bool = typer.Option(
+        False, "--diffs-only", "-d", help="Show only differing rows"
+    ),
     sheet1: str | None = typer.Option(None, "--sheet1", "-s1", help="Sheet name for first file"),
     sheet2: str | None = typer.Option(None, "--sheet2", "-s2", help="Sheet name for second file"),
 ) -> None:
@@ -50,7 +55,7 @@ def compare(
     if df1.empty:
         typer.echo(f"File1 is empty, File2 has {len(df2)} rows")
         # Mark all as added
-        df2['_diff_status'] = 'added'
+        df2["_diff_status"] = "added"
         factory = HandlerFactory()
         write_or_display(df2, factory, output, "table")
         raise typer.Exit(0)
@@ -58,7 +63,7 @@ def compare(
     if df2.empty:
         typer.echo(f"File2 is empty, File1 has {len(df1)} rows")
         # Mark all as deleted
-        df1['_diff_status'] = 'deleted'
+        df1["_diff_status"] = "deleted"
         factory = HandlerFactory()
         write_or_display(df1, factory, output, "table")
         raise typer.Exit(0)
@@ -95,7 +100,7 @@ def compare(
     # 6. Filter if diffs only requested
     df_result = comparison.df_result
     if show_diffs_only:
-        df_result = df_result[df_result['_diff_status'] != 'unchanged']
+        df_result = df_result[df_result["_diff_status"] != "unchanged"]
         if df_result.empty:
             typer.echo("No differences to display")
             raise typer.Exit(0)

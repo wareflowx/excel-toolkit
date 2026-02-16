@@ -5,16 +5,15 @@ Concatenate multiple datasets vertically by adding rows.
 
 from pathlib import Path
 
-import typer
 import pandas as pd
+import typer
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
 from excel_toolkit.commands.common import (
+    display_table,
     read_data_file,
     write_or_display,
-    display_table,
 )
+from excel_toolkit.core import HandlerFactory
 
 
 def append(
@@ -24,7 +23,9 @@ def append(
     ignore_index: bool = typer.Option(False, "--ignore-index", help="Reset index in result"),
     sort: bool = typer.Option(False, "--sort", help="Sort result by first column"),
     sheet: str | None = typer.Option(None, "--sheet", "-s", help="Sheet name for Excel files"),
-    additional_sheets: list[str] = typer.Option(None, "--sheet", help="Sheet names for additional files"),
+    additional_sheets: list[str] = typer.Option(
+        None, "--sheet", help="Sheet names for additional files"
+    ),
 ) -> None:
     """Append datasets from multiple files vertically.
 

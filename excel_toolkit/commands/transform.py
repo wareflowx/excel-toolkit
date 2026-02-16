@@ -3,24 +3,28 @@
 Apply transformations to columns.
 """
 
-from pathlib import Path
-
-import typer
 import pandas as pd
+import typer
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
 from excel_toolkit.commands.common import (
+    display_table,
     read_data_file,
     write_or_display,
-    display_table,
 )
+from excel_toolkit.core import HandlerFactory
 
 
 def transform(
     file_path: str = typer.Argument(..., help="Path to input file"),
-    columns: str = typer.Option(..., "--columns", "-c", help="Columns to transform (comma-separated)"),
-    operation: str | None = typer.Option(None, "--operation", "-op", help="String operation: uppercase, lowercase, titlecase, strip, replace, length"),
+    columns: str = typer.Option(
+        ..., "--columns", "-c", help="Columns to transform (comma-separated)"
+    ),
+    operation: str | None = typer.Option(
+        None,
+        "--operation",
+        "-op",
+        help="String operation: uppercase, lowercase, titlecase, strip, replace, length",
+    ),
     multiply: str | None = typer.Option(None, "--multiply", help="Multiply by value"),
     add: str | None = typer.Option(None, "--add", help="Add value"),
     subtract: str | None = typer.Option(None, "--subtract", help="Subtract value"),
@@ -44,12 +48,12 @@ def transform(
     """
     # 1. Validate transformation options
     math_operations = {
-        'multiply': multiply,
-        'add': add,
-        'subtract': subtract,
-        'divide': divide,
-        'power': power,
-        'mod': mod
+        "multiply": multiply,
+        "add": add,
+        "subtract": subtract,
+        "divide": divide,
+        "power": power,
+        "mod": mod,
     }
 
     has_math_op = any(v is not None for v in math_operations.values())
@@ -58,7 +62,9 @@ def transform(
     if not has_math_op and not has_string_op:
         typer.echo("Error: Must specify a transformation", err=True)
         typer.echo("Math operations: --multiply, --add, --subtract, --divide, --power, --mod")
-        typer.echo("String operations: --operation (uppercase, lowercase, titlecase, strip, replace, length)")
+        typer.echo(
+            "String operations: --operation (uppercase, lowercase, titlecase, strip, replace, length)"
+        )
         raise typer.Exit(1)
 
     if has_math_op and has_string_op:
@@ -72,7 +78,10 @@ def transform(
     if has_math_op:
         active_math_ops = [k for k, v in math_operations.items() if v is not None]
         if len(active_math_ops) > 1:
-            typer.echo(f"Error: Cannot use multiple math operations: {', '.join(active_math_ops)}", err=True)
+            typer.echo(
+                f"Error: Cannot use multiple math operations: {', '.join(active_math_ops)}",
+                err=True,
+            )
             raise typer.Exit(1)
 
         math_op = active_math_ops[0]
@@ -95,7 +104,7 @@ def transform(
     # Special validation for replace
     if operation == "replace" and not replace:
         typer.echo("Error: --replace is required when operation is 'replace'", err=True)
-        typer.echo("Format: --replace \"old_pattern,new_pattern\"")
+        typer.echo('Format: --replace "old_pattern,new_pattern"')
         raise typer.Exit(1)
 
     # 3. Read file
@@ -123,7 +132,10 @@ def transform(
         if has_math_op:
             # Apply math operation
             if not pd.api.types.is_numeric_dtype(df_transformed[col]):
-                typer.echo(f"Warning: Column '{col}' is not numeric, skipping math transformation", err=True)
+                typer.echo(
+                    f"Warning: Column '{col}' is not numeric, skipping math transformation",
+                    err=True,
+                )
                 continue
 
             if math_op == "multiply":
@@ -151,9 +163,13 @@ def transform(
             # Parse replace pattern
             if "," in replace:
                 old_pattern, new_pattern = replace.split(",", 1)
-                df_transformed[col] = df_transformed[col].astype(str).str.replace(old_pattern, new_pattern)
+                df_transformed[col] = (
+                    df_transformed[col].astype(str).str.replace(old_pattern, new_pattern)
+                )
             else:
-                typer.echo(f"Warning: Invalid replace pattern '{replace}', expected 'old,new'", err=True)
+                typer.echo(
+                    f"Warning: Invalid replace pattern '{replace}', expected 'old,new'", err=True
+                )
         elif operation == "length":
             df_transformed[col] = df_transformed[col].astype(str).str.len()
 

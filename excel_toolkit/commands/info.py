@@ -4,20 +4,15 @@ Displays metadata and information about data files (Excel, CSV).
 """
 
 from pathlib import Path
-import sys
 
 import typer
 
 from excel_toolkit.core import (
-    HandlerFactory,
-    ExcelHandler,
     CSVHandler,
-    FileNotFoundError,
-    UnsupportedFormatError,
-    InvalidFileError,
-    FileAccessError,
+    ExcelHandler,
+    HandlerFactory,
 )
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
+from excel_toolkit.fp import is_err, is_ok, unwrap, unwrap_err
 
 
 def info(file_path: str, verbose: bool = False) -> None:
@@ -159,12 +154,14 @@ def _display_csv_info(handler: CSVHandler, path: Path, verbose: bool) -> None:
         encoding = "Unknown"
 
     # Detect delimiter
-    delimiter_result = handler.detect_delimiter(path, encoding if encoding != "Unknown" else "utf-8")
+    delimiter_result = handler.detect_delimiter(
+        path, encoding if encoding != "Unknown" else "utf-8"
+    )
     if is_ok(delimiter_result):
         delimiter = unwrap(delimiter_result)
         typer.echo(f"Delimiter: {_delimiter_name(delimiter)}")
     else:
-        typer.echo(f"Delimiter: comma (,)")  # Default
+        typer.echo("Delimiter: comma (,)")  # Default
 
     # Read to get row/column count if verbose
     if verbose:

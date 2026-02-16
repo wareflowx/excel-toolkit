@@ -3,19 +3,17 @@
 Cleans data by removing whitespace, standardizing case, and fixing formatting issues.
 """
 
-from pathlib import Path
-
-import typer
 import pandas as pd
+import typer
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
-from excel_toolkit.operations.cleaning import trim_whitespace
 from excel_toolkit.commands.common import (
+    display_table,
     read_data_file,
     write_or_display,
-    display_table,
 )
+from excel_toolkit.core import HandlerFactory
+from excel_toolkit.fp import is_err, unwrap, unwrap_err
+from excel_toolkit.operations.cleaning import trim_whitespace
 
 
 def clean(
@@ -24,10 +22,18 @@ def clean(
     lowercase: bool = typer.Option(False, "--lowercase", help="Convert to lowercase"),
     uppercase: bool = typer.Option(False, "--uppercase", help="Convert to uppercase"),
     titlecase: bool = typer.Option(False, "--titlecase", help="Convert to title case"),
-    casefold: bool = typer.Option(False, "--casefold", help="Apply casefold for case-insensitive comparison"),
-    whitespace: bool = typer.Option(False, "--whitespace", help="Normalize multiple whitespace to single space"),
-    remove_special: bool = typer.Option(False, "--remove-special", help="Remove special characters"),
-    keep_alphanumeric: bool = typer.Option(False, "--keep-alphanumeric", help="Keep only alphanumeric characters"),
+    casefold: bool = typer.Option(
+        False, "--casefold", help="Apply casefold for case-insensitive comparison"
+    ),
+    whitespace: bool = typer.Option(
+        False, "--whitespace", help="Normalize multiple whitespace to single space"
+    ),
+    remove_special: bool = typer.Option(
+        False, "--remove-special", help="Remove special characters"
+    ),
+    keep_alphanumeric: bool = typer.Option(
+        False, "--keep-alphanumeric", help="Keep only alphanumeric characters"
+    ),
     columns: str | None = typer.Option(None, "--columns", "-c", help="Specific columns to clean"),
     output: str | None = typer.Option(None, "--output", "-o", help="Output file path"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Show preview without writing"),
@@ -65,7 +71,9 @@ def clean(
 
     if not operations:
         typer.echo("Error: At least one cleaning operation must be specified", err=True)
-        typer.echo("Available operations: --trim, --lowercase, --uppercase, --titlecase, --casefold, --whitespace, --remove-special, --keep-alphanumeric")
+        typer.echo(
+            "Available operations: --trim, --lowercase, --uppercase, --titlecase, --casefold, --whitespace, --remove-special, --keep-alphanumeric"
+        )
         raise typer.Exit(1)
 
     # Check for conflicting operations
@@ -82,7 +90,10 @@ def clean(
         raise typer.Exit(1)
 
     if casefold and (lowercase or uppercase or titlecase):
-        typer.echo("Warning: --casefold combined with case operation. Case operations will be applied first.", err=False)
+        typer.echo(
+            "Warning: --casefold combined with case operation. Case operations will be applied first.",
+            err=False,
+        )
 
     if remove_special and keep_alphanumeric:
         typer.echo("Error: Cannot specify both --remove-special and --keep-alphanumeric", err=True)
@@ -188,7 +199,7 @@ def _trim_whitespace(series: pd.Series) -> pd.Series:
 def _normalize_whitespace(series: pd.Series) -> pd.Series:
     """Normalize multiple whitespace characters to single space."""
     # Replace multiple whitespace characters with single space
-    return series.astype(str).str.replace(r'\s+', ' ', regex=True)
+    return series.astype(str).str.replace(r"\s+", " ", regex=True)
 
 
 def _apply_case(series: pd.Series, case_type: str) -> pd.Series:
@@ -207,13 +218,13 @@ def _apply_case(series: pd.Series, case_type: str) -> pd.Series:
 def _remove_special_chars(series: pd.Series) -> pd.Series:
     """Remove special characters, keeping only letters, numbers, and basic punctuation."""
     # Keep alphanumeric, spaces, and basic punctuation (. , - _ @)
-    return series.astype(str).str.replace(r'[^\w\s\.\,\-\_@]', '', regex=True)
+    return series.astype(str).str.replace(r"[^\w\s\.\,\-\_@]", "", regex=True)
 
 
 def _keep_alphanumeric(series: pd.Series) -> pd.Series:
     """Keep only alphanumeric characters (letters and numbers)."""
     # Remove everything except letters and numbers
-    return series.astype(str).str.replace(r'[^a-zA-Z0-9]', '', regex=True)
+    return series.astype(str).str.replace(r"[^a-zA-Z0-9]", "", regex=True)
 
 
 # Create CLI app for this command

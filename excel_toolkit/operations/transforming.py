@@ -4,22 +4,21 @@ This module provides data transformation operations that can be applied to panda
 All functions return Result types for explicit error handling.
 """
 
-from typing import Any, Callable
 import re
+from typing import Any, Callable
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
-from excel_toolkit.fp import ok, err, is_ok, is_err, unwrap, unwrap_err, Result
+from excel_toolkit.fp import Result, err, is_err, ok
 from excel_toolkit.models.error_types import (
+    CastFailedError,
     ColumnNotFoundError,
     InvalidExpressionError,
-    InvalidTypeError,
-    CastFailedError,
     InvalidTransformationError,
+    InvalidTypeError,
     TransformingError,
 )
-
 
 # =============================================================================
 # Expression Operations
@@ -27,22 +26,22 @@ from excel_toolkit.models.error_types import (
 
 # Dangerous patterns to block in expressions
 DANGEROUS_PATTERNS = [
-    r'\bimport\b',
-    r'\bexec\b',
-    r'\beval\b',
-    r'\b__',
-    r'\\_|__',
-    r'\borg\.',
-    r'\bsys\.',
-    r'\bos\.',
-    r'\bopen\b',
-    r'\bcompile\b',
-    r'\bgetattr\b',
-    r'\bsetattr\b',
-    r'\bdelaylass\b',
-    r'\bglobals\b',
-    r'\blocals\b',
-    r'\bvars\b',
+    r"\bimport\b",
+    r"\bexec\b",
+    r"\beval\b",
+    r"\b__",
+    r"\\_|__",
+    r"\borg\.",
+    r"\bsys\.",
+    r"\bos\.",
+    r"\bopen\b",
+    r"\bcompile\b",
+    r"\bgetattr\b",
+    r"\bsetattr\b",
+    r"\bdelaylass\b",
+    r"\bglobals\b",
+    r"\blocals\b",
+    r"\bvars\b",
 ]
 
 
@@ -57,32 +56,24 @@ def validate_expression_security(expression: str) -> Result[None, InvalidExpress
     """
     for pattern in DANGEROUS_PATTERNS:
         if re.search(pattern, expression, re.IGNORECASE):
-            return err(InvalidExpressionError(
-                expression=expression,
-                reason=f"Contains dangerous pattern: {pattern}"
-            ))
+            return err(
+                InvalidExpressionError(
+                    expression=expression, reason=f"Contains dangerous pattern: {pattern}"
+                )
+            )
 
     # Check for balanced parentheses, brackets
-    if expression.count('(') != expression.count(')'):
-        return err(InvalidExpressionError(
-            expression=expression,
-            reason="Unbalanced parentheses"
-        ))
+    if expression.count("(") != expression.count(")"):
+        return err(InvalidExpressionError(expression=expression, reason="Unbalanced parentheses"))
 
-    if expression.count('[') != expression.count(']'):
-        return err(InvalidExpressionError(
-            expression=expression,
-            reason="Unbalanced brackets"
-        ))
+    if expression.count("[") != expression.count("]"):
+        return err(InvalidExpressionError(expression=expression, reason="Unbalanced brackets"))
 
     return ok(None)
 
 
 def apply_expression(
-    df: pd.DataFrame,
-    column: str,
-    expression: str,
-    validate: bool = True
+    df: pd.DataFrame, column: str, expression: str, validate: bool = True
 ) -> Result[pd.DataFrame, InvalidExpressionError | ColumnNotFoundError | TransformingError]:
     """Apply expression to create or modify column.
 
@@ -134,10 +125,7 @@ def apply_expression(
         except NameError as e:
             # Column referenced in expression doesn't exist
             missing_col = str(e).split("'")[1] if "'" in str(e) else "unknown"
-            return err(ColumnNotFoundError(
-                column=missing_col,
-                available=list(df.columns)
-            ))
+            return err(ColumnNotFoundError(column=missing_col, available=list(df.columns)))
         except TypeError:
             # If eval fails with TypeError, try direct Series operations
             # This handles string concatenation and other operations
@@ -148,9 +136,7 @@ def apply_expression(
                 result = eval(expression, {"__builtins__": {}}, series_dict)
                 df_transform[column] = result
             except Exception as e:
-                return err(TransformingError(
-                    message=f"Failed to apply expression: {str(e)}"
-                ))
+                return err(TransformingError(message=f"Failed to apply expression: {str(e)}"))
 
         return ok(df_transform)
 
@@ -158,13 +144,8 @@ def apply_expression(
         # Check if it's a KeyError (column not found)
         if isinstance(e, KeyError):
             missing_col = str(e).strip("'\"")
-            return err(ColumnNotFoundError(
-                column=missing_col,
-                available=list(df.columns)
-            ))
-        return err(TransformingError(
-            message=f"Failed to apply expression: {str(e)}"
-        ))
+            return err(ColumnNotFoundError(column=missing_col, available=list(df.columns)))
+        return err(TransformingError(message=f"Failed to apply expression: {str(e)}"))
 
 
 # =============================================================================
@@ -173,8 +154,7 @@ def apply_expression(
 
 
 def cast_columns(
-    df: pd.DataFrame,
-    column_types: dict[str, str]
+    df: pd.DataFrame, column_types: dict[str, str]
 ) -> Result[pd.DataFrame, ColumnNotFoundError | InvalidTypeError | CastFailedError]:
     """Cast columns to specified types.
 
@@ -205,18 +185,26 @@ def cast_columns(
     # Validate columns exist
     missing_columns = [col for col in column_types.keys() if col not in df.columns]
     if missing_columns:
-        return err(ColumnNotFoundError(
-            column=missing_columns[0] if len(missing_columns) == 1 else f"{', '.join(missing_columns[:-1])} and {missing_columns[-1]}",
-            available=list(df.columns)
-        ))
+        return err(
+            ColumnNotFoundError(
+                column=missing_columns[0]
+                if len(missing_columns) == 1
+                else f"{', '.join(missing_columns[:-1])} and {missing_columns[-1]}",
+                available=list(df.columns),
+            )
+        )
 
     # Validate types
     invalid_types = [t for t in column_types.values() if t not in valid_types]
     if invalid_types:
-        return err(InvalidTypeError(
-            type_name=invalid_types[0] if len(invalid_types) == 1 else f"{', '.join(invalid_types[:-1])} and {invalid_types[-1]}",
-            valid_types=valid_types
-        ))
+        return err(
+            InvalidTypeError(
+                type_name=invalid_types[0]
+                if len(invalid_types) == 1
+                else f"{', '.join(invalid_types[:-1])} and {invalid_types[-1]}",
+                valid_types=valid_types,
+            )
+        )
 
     # Create a copy
     df_cast = df.copy()
@@ -229,11 +217,13 @@ def cast_columns(
                 df_cast[col] = pd.to_numeric(df_cast[col], errors="raise")
                 # Check for NaN values (can't convert to int with NaN)
                 if df_cast[col].isna().any():
-                    return err(CastFailedError(
-                        column=col,
-                        target_type=target_type,
-                        reason="Cannot convert column with NaN values to int"
-                    ))
+                    return err(
+                        CastFailedError(
+                            column=col,
+                            target_type=target_type,
+                            reason="Cannot convert column with NaN values to int",
+                        )
+                    )
                 df_cast[col] = df_cast[col].astype(int)
 
             elif target_type == "float":
@@ -249,9 +239,9 @@ def cast_columns(
                         return False
                     if isinstance(val, str):
                         val_lower = val.lower()
-                        if val_lower in ['true', 'yes', '1', 't', 'y']:
+                        if val_lower in ["true", "yes", "1", "t", "y"]:
                             return True
-                        elif val_lower in ['false', 'no', '0', 'f', 'n']:
+                        elif val_lower in ["false", "no", "0", "f", "n"]:
                             return False
                         else:
                             raise ValueError(f"Cannot convert {val} to bool")
@@ -268,27 +258,21 @@ def cast_columns(
                     df_cast[col] = pd.to_datetime(df_cast[col], errors="coerce")
                     # Check if we made progress or if all values are still NaT
                     if df_cast[col].isna().all() and not original_was_na.all():
-                        return err(CastFailedError(
-                            column=col,
-                            target_type=target_type,
-                            reason="Could not parse any values as datetime"
-                        ))
+                        return err(
+                            CastFailedError(
+                                column=col,
+                                target_type=target_type,
+                                reason="Could not parse any values as datetime",
+                            )
+                        )
 
             elif target_type == "category":
                 df_cast[col] = df_cast[col].astype("category")
 
         except ValueError as e:
-            return err(CastFailedError(
-                column=col,
-                target_type=target_type,
-                reason=str(e)
-            ))
+            return err(CastFailedError(column=col, target_type=target_type, reason=str(e)))
         except Exception as e:
-            return err(CastFailedError(
-                column=col,
-                target_type=target_type,
-                reason=str(e)
-            ))
+            return err(CastFailedError(column=col, target_type=target_type, reason=str(e)))
 
     return ok(df_cast)
 
@@ -302,7 +286,7 @@ def transform_column(
     df: pd.DataFrame,
     column: str,
     transformation: str | Callable,
-    params: dict[str, Any] | None = None
+    params: dict[str, Any] | None = None,
 ) -> Result[pd.DataFrame, ColumnNotFoundError | InvalidTransformationError | TransformingError]:
     """Apply transformation to column.
 
@@ -338,10 +322,7 @@ def transform_column(
 
     # Validate column exists
     if column not in df.columns:
-        return err(ColumnNotFoundError(
-            column=column,
-            available=list(df.columns)
-        ))
+        return err(ColumnNotFoundError(column=column, available=list(df.columns)))
 
     # Create a copy
     df_transform = df.copy()
@@ -350,27 +331,32 @@ def transform_column(
         if isinstance(transformation, str):
             # Named transformation
             if transformation not in valid_transformations:
-                return err(InvalidTransformationError(
-                    transformation=transformation,
-                    valid_transformations=valid_transformations
-                ))
+                return err(
+                    InvalidTransformationError(
+                        transformation=transformation, valid_transformations=valid_transformations
+                    )
+                )
 
             col_data = df_transform[column]
 
             if transformation == "log":
                 # Check for non-positive values
                 if (col_data <= 0).any():
-                    return err(TransformingError(
-                        message=f"Cannot apply log to column with non-positive values"
-                    ))
+                    return err(
+                        TransformingError(
+                            message="Cannot apply log to column with non-positive values"
+                        )
+                    )
                 df_transform[column] = np.log(col_data)
 
             elif transformation == "sqrt":
                 # Check for negative values
                 if (col_data < 0).any():
-                    return err(TransformingError(
-                        message=f"Cannot apply sqrt to column with negative values"
-                    ))
+                    return err(
+                        TransformingError(
+                            message="Cannot apply sqrt to column with negative values"
+                        )
+                    )
                 df_transform[column] = np.sqrt(col_data)
 
             elif transformation == "abs":
@@ -384,9 +370,11 @@ def transform_column(
                 mean = col_data.mean()
                 std = col_data.std()
                 if std == 0:
-                    return err(TransformingError(
-                        message=f"Cannot standardize column with zero standard deviation"
-                    ))
+                    return err(
+                        TransformingError(
+                            message="Cannot standardize column with zero standard deviation"
+                        )
+                    )
                 df_transform[column] = (col_data - mean) / std
 
             elif transformation == "normalize":
@@ -394,9 +382,9 @@ def transform_column(
                 min_val = col_data.min()
                 max_val = col_data.max()
                 if max_val == min_val:
-                    return err(TransformingError(
-                        message=f"Cannot normalize column where min == max"
-                    ))
+                    return err(
+                        TransformingError(message="Cannot normalize column where min == max")
+                    )
                 df_transform[column] = (col_data - min_val) / (max_val - min_val)
 
         elif callable(transformation):
@@ -404,14 +392,13 @@ def transform_column(
             df_transform[column] = df_transform[column].apply(transformation)
 
         else:
-            return err(InvalidTransformationError(
-                transformation=str(transformation),
-                valid_transformations=valid_transformations
-            ))
+            return err(
+                InvalidTransformationError(
+                    transformation=str(transformation), valid_transformations=valid_transformations
+                )
+            )
 
         return ok(df_transform)
 
     except Exception as e:
-        return err(TransformingError(
-            message=f"Transformation failed: {str(e)}"
-        ))
+        return err(TransformingError(message=f"Transformation failed: {str(e)}"))

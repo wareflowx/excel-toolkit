@@ -6,11 +6,11 @@ Users should not import this module directly - use the functions in result.py in
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TypeVar, Generic, Callable, TypeVar, Any
+from typing import Callable, Generic, TypeVar
 
-T = TypeVar('T')
-E = TypeVar('E')
-U = TypeVar('U')
+T = TypeVar("T")
+E = TypeVar("E")
+U = TypeVar("U")
 
 
 class Result(ABC, Generic[T, E]):
@@ -23,7 +23,7 @@ class Result(ABC, Generic[T, E]):
     """
 
     @abstractmethod
-    def map(self, fn: Callable[[T], U]) -> 'Result[U, E]':
+    def map(self, fn: Callable[[T], U]) -> "Result[U, E]":
         """Apply function if Ok, pass through if Err.
 
         Args:
@@ -35,9 +35,7 @@ class Result(ABC, Generic[T, E]):
         pass
 
     @abstractmethod
-    def and_then(
-        self, fn: Callable[[T], 'Result[U, E]']
-    ) -> 'Result[U, E]':
+    def and_then(self, fn: Callable[[T], "Result[U, E]"]) -> "Result[U, E]":
         """Chain Result-returning function.
 
         Args:
@@ -49,7 +47,7 @@ class Result(ABC, Generic[T, E]):
         pass
 
     @abstractmethod
-    def or_else(self, default: 'Result[T, E]') -> 'Result[T, E]':
+    def or_else(self, default: "Result[T, E]") -> "Result[T, E]":
         """Provide fallback Result if this is Err.
 
         Args:
@@ -61,9 +59,7 @@ class Result(ABC, Generic[T, E]):
         pass
 
     @abstractmethod
-    def or_else_try(
-        self, fn: Callable[[], 'Result[T, E]']
-    ) -> 'Result[T, E]':
+    def or_else_try(self, fn: Callable[[], "Result[T, E]"]) -> "Result[T, E]":
         """Provide lazy fallback Result if this is Err.
 
         Args:
@@ -87,23 +83,19 @@ class Ok(Result[T, E]):
 
     _value: T
 
-    def map(self, fn: Callable[[T], U]) -> 'Result[U, E]':
+    def map(self, fn: Callable[[T], U]) -> "Result[U, E]":
         """Apply function to the value."""
         return Ok(fn(self._value))
 
-    def and_then(
-        self, fn: Callable[[T], 'Result[U, E]']
-    ) -> 'Result[U, E]':
+    def and_then(self, fn: Callable[[T], "Result[U, E]"]) -> "Result[U, E]":
         """Chain Result-returning function."""
         return fn(self._value)
 
-    def or_else(self, default: 'Result[T, E]') -> 'Result[T, E]':
+    def or_else(self, default: "Result[T, E]") -> "Result[T, E]":
         """Return this Ok, ignore default."""
         return self
 
-    def or_else_try(
-        self, fn: Callable[[], 'Result[T, E]']
-    ) -> 'Result[T, E]':
+    def or_else_try(self, fn: Callable[[], "Result[T, E]"]) -> "Result[T, E]":
         """Return this Ok, ignore fn."""
         return self
 
@@ -120,22 +112,18 @@ class Err(Result[T, E]):
 
     _error: E
 
-    def map(self, fn: Callable[[T], U]) -> 'Result[U, E]':
+    def map(self, fn: Callable[[T], U]) -> "Result[U, E]":
         """Return this Err, ignore function."""
         return self
 
-    def and_then(
-        self, fn: Callable[[T], 'Result[U, E]']
-    ) -> 'Result[U, E]':
+    def and_then(self, fn: Callable[[T], "Result[U, E]"]) -> "Result[U, E]":
         """Return this Err, ignore function."""
         return self
 
-    def or_else(self, default: 'Result[T, E]') -> 'Result[T, E]':
+    def or_else(self, default: "Result[T, E]") -> "Result[T, E]":
         """Return the fallback Result."""
         return default
 
-    def or_else_try(
-        self, fn: Callable[[], 'Result[T, E]']
-    ) -> 'Result[T, E]':
+    def or_else_try(self, fn: Callable[[], "Result[T, E]"]) -> "Result[T, E]":
         """Return result of fallback function."""
         return fn()

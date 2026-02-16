@@ -3,19 +3,16 @@
 Computes statistical summaries for data files.
 """
 
-from pathlib import Path
-from typing import Any
 import json
+from pathlib import Path
 
-import typer
-import pandas as pd
 import numpy as np
+import pandas as pd
+import typer
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
 from excel_toolkit.commands.common import (
-    read_data_file,
     display_table,
+    read_data_file,
     resolve_column_reference,
 )
 
@@ -23,9 +20,15 @@ from excel_toolkit.commands.common import (
 def stats(
     file_path: str = typer.Argument(..., help="Path to input file"),
     column: str | None = typer.Option(None, "--column", "-c", help="Specific column to analyze"),
-    all_columns: bool = typer.Option(False, "--all-columns", "-a", help="Analyze all numeric columns"),
-    percentiles: str = typer.Option("25,50,75", "--percentiles", "-p", help="Percentiles to compute (comma-separated)"),
-    include: str = typer.Option("numeric", "--include", help="Column types to include (numeric, categorical, datetime, all)"),
+    all_columns: bool = typer.Option(
+        False, "--all-columns", "-a", help="Analyze all numeric columns"
+    ),
+    percentiles: str = typer.Option(
+        "25,50,75", "--percentiles", "-p", help="Percentiles to compute (comma-separated)"
+    ),
+    include: str = typer.Option(
+        "numeric", "--include", help="Column types to include (numeric, categorical, datetime, all)"
+    ),
     output: str | None = typer.Option(None, "--output", "-o", help="Output file path"),
     format: str = typer.Option("table", "--format", "-f", help="Output format (table, json, csv)"),
     sheet: str | None = typer.Option(None, "--sheet", "-s", help="Sheet name for Excel files"),
@@ -171,11 +174,7 @@ def _compute_numeric_stats(series: pd.Series, percentiles: list[float]) -> dict:
     clean_series = series.dropna()
 
     if clean_series.empty:
-        return {
-            "count": 0,
-            "missing": len(series),
-            "error": "No valid numeric values"
-        }
+        return {"count": 0, "missing": len(series), "error": "No valid numeric values"}
 
     stats_dict = {
         "count": len(clean_series),
@@ -228,11 +227,7 @@ def _compute_datetime_stats(series: pd.Series) -> dict:
     clean_series = series.dropna()
 
     if clean_series.empty:
-        return {
-            "count": 0,
-            "missing": len(series),
-            "error": "No valid datetime values"
-        }
+        return {"count": 0, "missing": len(series), "error": "No valid datetime values"}
 
     min_date = clean_series.min()
     max_date = clean_series.max()
@@ -293,37 +288,42 @@ def _display_multi_column_stats(all_stats: dict) -> None:
             continue
 
         if "mean" in stats:  # Numeric
-            rows.append([
-                col,
-                f"{stats['count']}",
-                f"{stats.get('mean', 0):.2f}",
-                f"{stats.get('std', 0):.2f}",
-                f"{stats.get('min', 0):.2f}",
-                f"{stats.get('max', 0):.2f}"
-            ])
+            rows.append(
+                [
+                    col,
+                    f"{stats['count']}",
+                    f"{stats.get('mean', 0):.2f}",
+                    f"{stats.get('std', 0):.2f}",
+                    f"{stats.get('min', 0):.2f}",
+                    f"{stats.get('max', 0):.2f}",
+                ]
+            )
         elif "unique" in stats:  # Categorical
-            rows.append([
-                col,
-                f"{stats['count']}",
-                f"{stats['unique']} unique",
-                stats.get('top', 'N/A'),
-                f"{stats.get('freq', 0)}"
-            ])
+            rows.append(
+                [
+                    col,
+                    f"{stats['count']}",
+                    f"{stats['unique']} unique",
+                    stats.get("top", "N/A"),
+                    f"{stats.get('freq', 0)}",
+                ]
+            )
         elif "min" in stats:  # Datetime
-            rows.append([
-                col,
-                f"{stats['count']}",
-                str(stats.get('min', '')),
-                str(stats.get('max', '')),
-                f"{stats.get('range_days', 0)} days"
-            ])
+            rows.append(
+                [
+                    col,
+                    f"{stats['count']}",
+                    str(stats.get("min", "")),
+                    str(stats.get("max", "")),
+                    f"{stats.get('range_days', 0)} days",
+                ]
+            )
 
     if rows:
         if any("mean" in all_stats[col] for col in all_stats if "error" not in all_stats[col]):
             # Numeric columns
             df_display = pd.DataFrame(
-                rows,
-                columns=["Column", "Count", "Mean", "Std", "Min", "Max"]
+                rows, columns=["Column", "Count", "Mean", "Std", "Min", "Max"]
             )
         else:
             # Mixed types

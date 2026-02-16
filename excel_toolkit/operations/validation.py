@@ -8,17 +8,16 @@ from typing import Any
 
 import pandas as pd
 
-from excel_toolkit.fp import ok, err, is_ok, is_err, unwrap, unwrap_err, Result
+from excel_toolkit.fp import Result, err, is_err, ok, unwrap, unwrap_err
 from excel_toolkit.models.error_types import (
     ColumnNotFoundError,
-    TypeMismatchError,
-    ValueOutOfRangeError,
-    NullValueThresholdExceededError,
-    UniquenessViolationError,
     InvalidRuleError,
+    NullValueThresholdExceededError,
+    TypeMismatchError,
+    UniquenessViolationError,
     ValidationReport,
+    ValueOutOfRangeError,
 )
-
 
 # =============================================================================
 # Column Existence Validation
@@ -26,8 +25,7 @@ from excel_toolkit.models.error_types import (
 
 
 def validate_column_exists(
-    df: pd.DataFrame,
-    columns: list[str] | str
+    df: pd.DataFrame, columns: list[str] | str
 ) -> Result[None, ColumnNotFoundError]:
     """Validate that columns exist in DataFrame.
 
@@ -60,10 +58,14 @@ def validate_column_exists(
     missing_columns = [col for col in columns if col not in df.columns]
 
     if missing_columns:
-        return err(ColumnNotFoundError(
-            column=missing_columns[0] if len(missing_columns) == 1 else f"{', '.join(missing_columns[:-1])} and {missing_columns[-1]}",
-            available=list(df.columns)
-        ))
+        return err(
+            ColumnNotFoundError(
+                column=missing_columns[0]
+                if len(missing_columns) == 1
+                else f"{', '.join(missing_columns[:-1])} and {missing_columns[-1]}",
+                available=list(df.columns),
+            )
+        )
 
     return ok(None)
 
@@ -74,8 +76,7 @@ def validate_column_exists(
 
 
 def validate_column_type(
-    df: pd.DataFrame,
-    column_types: dict[str, str | list[str]]
+    df: pd.DataFrame, column_types: dict[str, str | list[str]]
 ) -> Result[None, ColumnNotFoundError | TypeMismatchError]:
     """Validate column data types.
 
@@ -124,11 +125,11 @@ def validate_column_type(
                 break
 
         if not type_matches:
-            return err(TypeMismatchError(
-                column=column,
-                expected_type=expected_types,
-                actual_type=actual_type
-            ))
+            return err(
+                TypeMismatchError(
+                    column=column, expected_type=expected_types, actual_type=actual_type
+                )
+            )
 
     return ok(None)
 
@@ -167,7 +168,7 @@ def validate_value_range(
     column: str,
     min_value: Any | None = None,
     max_value: Any | None = None,
-    allow_equal: bool = True
+    allow_equal: bool = True,
 ) -> Result[None, ColumnNotFoundError | ValueOutOfRangeError]:
     """Validate values are within range.
 
@@ -227,14 +228,17 @@ def validate_value_range(
             violations.append(f"{len(above_max)} values above maximum")
 
     if violations:
-        return err(ValueOutOfRangeError(
-            column=column,
-            min_value=min_value,
-            max_value=max_value,
-            violation_count=len(df) if (min_value is None and max_value is None) else
-                              (len(below_min) if min_value is not None else 0) +
-                              (len(above_max) if max_value is not None else 0)
-        ))
+        return err(
+            ValueOutOfRangeError(
+                column=column,
+                min_value=min_value,
+                max_value=max_value,
+                violation_count=len(df)
+                if (min_value is None and max_value is None)
+                else (len(below_min) if min_value is not None else 0)
+                + (len(above_max) if max_value is not None else 0),
+            )
+        )
 
     return ok(None)
 
@@ -245,9 +249,7 @@ def validate_value_range(
 
 
 def check_null_values(
-    df: pd.DataFrame,
-    columns: list[str] | None = None,
-    threshold: float | None = None
+    df: pd.DataFrame, columns: list[str] | None = None, threshold: float | None = None
 ) -> Result[ValidationReport, NullValueThresholdExceededError]:
     """Check null values in DataFrame.
 
@@ -282,12 +284,11 @@ def check_null_values(
     existence_check = validate_column_exists(df, columns)
     if is_err(existence_check):
         # For validation, we'll just report this as a failed check
-        return ok(ValidationReport(
-            passed=0,
-            failed=1,
-            errors=[{"error": "Column not found"}],
-            warnings=[]
-        ))
+        return ok(
+            ValidationReport(
+                passed=0, failed=1, errors=[{"error": "Column not found"}], warnings=[]
+            )
+        )
 
     # Check null values
     errors = []
@@ -301,20 +302,24 @@ def check_null_values(
 
         if threshold is not None and null_percent > threshold:
             failed += 1
-            errors.append({
-                "column": col,
-                "null_count": null_count,
-                "null_percent": null_percent,
-                "threshold": threshold
-            })
+            errors.append(
+                {
+                    "column": col,
+                    "null_count": null_count,
+                    "null_percent": null_percent,
+                    "threshold": threshold,
+                }
+            )
         else:
             passed += 1
             if null_count > 0:
-                warnings.append({
-                    "column": col,
-                    "null_count": int(null_count),
-                    "null_percent": float(null_percent)
-                })
+                warnings.append(
+                    {
+                        "column": col,
+                        "null_count": int(null_count),
+                        "null_percent": float(null_percent),
+                    }
+                )
 
     # Check if threshold was exceeded
     if failed > 0 and threshold is not None:
@@ -323,19 +328,23 @@ def check_null_values(
             null_count = df[col].isna().sum()
             null_percent = null_count / len(df) if len(df) > 0 else 0
             if null_percent > threshold:
-                return err(NullValueThresholdExceededError(
-                    column=col,
-                    null_count=int(null_count),
-                    null_percent=float(null_percent),
-                    threshold=threshold
-                ))
+                return err(
+                    NullValueThresholdExceededError(
+                        column=col,
+                        null_count=int(null_count),
+                        null_percent=float(null_percent),
+                        threshold=threshold,
+                    )
+                )
 
-    return ok(ValidationReport(
-        passed=passed,
-        failed=failed,
-        errors=errors if errors else None,
-        warnings=warnings if warnings else None
-    ))
+    return ok(
+        ValidationReport(
+            passed=passed,
+            failed=failed,
+            errors=errors if errors else None,
+            warnings=warnings if warnings else None,
+        )
+    )
 
 
 # =============================================================================
@@ -344,9 +353,7 @@ def check_null_values(
 
 
 def validate_unique(
-    df: pd.DataFrame,
-    columns: list[str] | str,
-    ignore_null: bool = True
+    df: pd.DataFrame, columns: list[str] | str, ignore_null: bool = True
 ) -> Result[None, UniquenessViolationError]:
     """Validate that values are unique.
 
@@ -390,19 +397,21 @@ def validate_unique(
     if ignore_null:
         subset = subset.dropna()
 
-    duplicates = subset.duplicated(keep='first')
+    duplicates = subset.duplicated(keep="first")
     duplicate_count = duplicates.sum()
 
     if duplicate_count > 0:
         # Get sample duplicates (all duplicate rows)
         duplicate_rows = subset[duplicates]
-        sample_duplicates = duplicate_rows.to_dict('records') if len(duplicate_rows) > 0 else []
+        sample_duplicates = duplicate_rows.to_dict("records") if len(duplicate_rows) > 0 else []
 
-        return err(UniquenessViolationError(
-            columns=columns,
-            duplicate_count=int(duplicate_count),
-            sample_duplicates=sample_duplicates
-        ))
+        return err(
+            UniquenessViolationError(
+                columns=columns,
+                duplicate_count=int(duplicate_count),
+                sample_duplicates=sample_duplicates,
+            )
+        )
 
     return ok(None)
 
@@ -413,8 +422,7 @@ def validate_unique(
 
 
 def validate_dataframe(
-    df: pd.DataFrame,
-    rules: list[dict]
+    df: pd.DataFrame, rules: list[dict]
 ) -> Result[ValidationReport, InvalidRuleError]:
     """Validate DataFrame against multiple rules.
 
@@ -462,11 +470,7 @@ def validate_dataframe(
                 if is_err(result):
                     failed += 1
                     error = unwrap_err(result)
-                    errors.append({
-                        "rule": i,
-                        "type": "column_exists",
-                        "error": str(error)
-                    })
+                    errors.append({"rule": i, "type": "column_exists", "error": str(error)})
                 else:
                     passed += 1
 
@@ -476,11 +480,7 @@ def validate_dataframe(
                 if is_err(result):
                     failed += 1
                     error = unwrap_err(result)
-                    errors.append({
-                        "rule": i,
-                        "type": "column_type",
-                        "error": str(error)
-                    })
+                    errors.append({"rule": i, "type": "column_type", "error": str(error)})
                 else:
                     passed += 1
 
@@ -493,11 +493,7 @@ def validate_dataframe(
                 if is_err(result):
                     failed += 1
                     error = unwrap_err(result)
-                    errors.append({
-                        "rule": i,
-                        "type": "value_range",
-                        "error": str(error)
-                    })
+                    errors.append({"rule": i, "type": "value_range", "error": str(error)})
                 else:
                     passed += 1
 
@@ -508,11 +504,7 @@ def validate_dataframe(
                 if is_err(result):
                     failed += 1
                     error = unwrap_err(result)
-                    errors.append({
-                        "rule": i,
-                        "type": "unique",
-                        "error": str(error)
-                    })
+                    errors.append({"rule": i, "type": "unique", "error": str(error)})
                 else:
                     passed += 1
 
@@ -523,11 +515,7 @@ def validate_dataframe(
                 if is_err(result):
                     failed += 1
                     error = unwrap_err(result)
-                    errors.append({
-                        "rule": i,
-                        "type": "null_threshold",
-                        "error": str(error)
-                    })
+                    errors.append({"rule": i, "type": "null_threshold", "error": str(error)})
                 else:
                     report = unwrap(result)
                     passed += report.passed
@@ -538,20 +526,24 @@ def validate_dataframe(
                         warnings.extend([{"rule": i, **w} for w in report.warnings])
 
             else:
-                return err(InvalidRuleError(
-                    rule_type=rule_type or "unknown",
-                    reason=f"Unknown rule type: {rule_type}"
-                ))
+                return err(
+                    InvalidRuleError(
+                        rule_type=rule_type or "unknown", reason=f"Unknown rule type: {rule_type}"
+                    )
+                )
 
         except Exception as e:
-            return err(InvalidRuleError(
-                rule_type=rule_type or "unknown",
-                reason=f"Rule execution failed: {str(e)}"
-            ))
+            return err(
+                InvalidRuleError(
+                    rule_type=rule_type or "unknown", reason=f"Rule execution failed: {str(e)}"
+                )
+            )
 
-    return ok(ValidationReport(
-        passed=passed,
-        failed=failed,
-        errors=errors if errors else None,
-        warnings=warnings if warnings else None
-    ))
+    return ok(
+        ValidationReport(
+            passed=passed,
+            failed=failed,
+            errors=errors if errors else None,
+            warnings=warnings if warnings else None,
+        )
+    )

@@ -3,10 +3,11 @@
 Tests for the count command that counts occurrences of unique values.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -26,7 +27,18 @@ def sample_data_file(tmp_path: Path) -> Path:
         {
             "id": range(1, 11),
             "category": ["A", "B", "A", "C", "B", "A", "C", "B", "A", "C"],
-            "status": ["active", "inactive", "active", "active", "inactive", "active", "inactive", "active", "active", "inactive"],
+            "status": [
+                "active",
+                "inactive",
+                "active",
+                "active",
+                "inactive",
+                "active",
+                "inactive",
+                "active",
+                "active",
+                "inactive",
+            ],
             "value": [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
         }
     )
@@ -83,10 +95,7 @@ class TestCountCommand:
 
     def test_count_single_column(self, sample_data_file: Path):
         """Test count on a single column."""
-        result = runner.invoke(app, [
-            "count", str(sample_data_file),
-            "--columns", "category"
-        ])
+        result = runner.invoke(app, ["count", str(sample_data_file), "--columns", "category"])
 
         assert result.exit_code == 0
         assert "Total rows:" in result.stdout
@@ -94,10 +103,9 @@ class TestCountCommand:
 
     def test_count_multiple_columns(self, multi_column_file: Path):
         """Test count on multiple columns."""
-        result = runner.invoke(app, [
-            "count", str(multi_column_file),
-            "--columns", "region,product"
-        ])
+        result = runner.invoke(
+            app, ["count", str(multi_column_file), "--columns", "region,product"]
+        )
 
         assert result.exit_code == 0
         assert "Columns: region, product" in result.stdout
@@ -105,57 +113,63 @@ class TestCountCommand:
 
     def test_count_sort_by_count_descending(self, sample_data_file: Path):
         """Test count sorted by count (descending default)."""
-        result = runner.invoke(app, [
-            "count", str(sample_data_file),
-            "--columns", "category",
-            "--sort", "count"
-        ])
+        result = runner.invoke(
+            app, ["count", str(sample_data_file), "--columns", "category", "--sort", "count"]
+        )
 
         assert result.exit_code == 0
         assert "Sorted by: count (descending)" in result.stdout
 
     def test_count_sort_by_count_ascending(self, sample_data_file: Path):
         """Test count sorted by count (ascending)."""
-        result = runner.invoke(app, [
-            "count", str(sample_data_file),
-            "--columns", "category",
-            "--sort", "count",
-            "--ascending"
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "count",
+                str(sample_data_file),
+                "--columns",
+                "category",
+                "--sort",
+                "count",
+                "--ascending",
+            ],
+        )
 
         assert result.exit_code == 0
         assert "Sorted by: count (ascending)" in result.stdout
 
     def test_count_sort_by_name_descending(self, sample_data_file: Path):
         """Test count sorted by name (descending)."""
-        result = runner.invoke(app, [
-            "count", str(sample_data_file),
-            "--columns", "category",
-            "--sort", "name"
-        ])
+        result = runner.invoke(
+            app, ["count", str(sample_data_file), "--columns", "category", "--sort", "name"]
+        )
 
         assert result.exit_code == 0
         assert "Sorted by: name (descending)" in result.stdout
 
     def test_count_sort_by_name_ascending(self, sample_data_file: Path):
         """Test count sorted by name (ascending)."""
-        result = runner.invoke(app, [
-            "count", str(sample_data_file),
-            "--columns", "category",
-            "--sort", "name",
-            "--ascending"
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "count",
+                str(sample_data_file),
+                "--columns",
+                "category",
+                "--sort",
+                "name",
+                "--ascending",
+            ],
+        )
 
         assert result.exit_code == 0
         assert "Sorted by: name (ascending)" in result.stdout
 
     def test_count_no_sort(self, sample_data_file: Path):
         """Test count without sorting."""
-        result = runner.invoke(app, [
-            "count", str(sample_data_file),
-            "--columns", "category",
-            "--sort", "none"
-        ])
+        result = runner.invoke(
+            app, ["count", str(sample_data_file), "--columns", "category", "--sort", "none"]
+        )
 
         assert result.exit_code == 0
         assert "Sorted by: none" in result.stdout
@@ -163,11 +177,10 @@ class TestCountCommand:
     def test_count_with_output(self, sample_data_file: Path, tmp_path: Path):
         """Test count with output file."""
         output_path = tmp_path / "counts.xlsx"
-        result = runner.invoke(app, [
-            "count", str(sample_data_file),
-            "--columns", "category",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            ["count", str(sample_data_file), "--columns", "category", "--output", str(output_path)],
+        )
 
         assert result.exit_code == 0
         assert "Written to:" in result.stdout
@@ -175,71 +188,54 @@ class TestCountCommand:
 
     def test_count_csv_input(self, csv_file_for_count: Path):
         """Test count from CSV file."""
-        result = runner.invoke(app, [
-            "count", str(csv_file_for_count),
-            "--columns", "product"
-        ])
+        result = runner.invoke(app, ["count", str(csv_file_for_count), "--columns", "product"])
 
         assert result.exit_code == 0
         assert "Total rows:" in result.stdout
 
     def test_count_specific_sheet(self, sample_data_file: Path):
         """Test count from specific sheet."""
-        result = runner.invoke(app, [
-            "count", str(sample_data_file),
-            "--columns", "category",
-            "--sheet", "Sheet1"
-        ])
+        result = runner.invoke(
+            app, ["count", str(sample_data_file), "--columns", "category", "--sheet", "Sheet1"]
+        )
 
         assert result.exit_code == 0
 
     def test_count_invalid_sort(self, sample_data_file: Path):
         """Test count with invalid sort value."""
-        result = runner.invoke(app, [
-            "count", str(sample_data_file),
-            "--columns", "category",
-            "--sort", "invalid"
-        ])
+        result = runner.invoke(
+            app, ["count", str(sample_data_file), "--columns", "category", "--sort", "invalid"]
+        )
 
         assert result.exit_code == 1
         assert "Valid values" in result.stdout or "Invalid sort" in result.stdout
 
     def test_count_missing_column(self, sample_data_file: Path):
         """Test count with non-existent column."""
-        result = runner.invoke(app, [
-            "count", str(sample_data_file),
-            "--columns", "invalid_column"
-        ])
+        result = runner.invoke(app, ["count", str(sample_data_file), "--columns", "invalid_column"])
 
         assert result.exit_code == 1
         assert "Columns not found" in result.stdout or "Available columns" in result.stdout
 
     def test_count_partial_missing_columns(self, multi_column_file: Path):
         """Test count with some valid and some invalid columns."""
-        result = runner.invoke(app, [
-            "count", str(multi_column_file),
-            "--columns", "region,invalid"
-        ])
+        result = runner.invoke(
+            app, ["count", str(multi_column_file), "--columns", "region,invalid"]
+        )
 
         assert result.exit_code == 1
         assert "Columns not found" in result.stdout or "Available columns" in result.stdout
 
     def test_count_empty_file(self, empty_file: Path):
         """Test count on empty file."""
-        result = runner.invoke(app, [
-            "count", str(empty_file),
-            "--columns", "category"
-        ])
+        result = runner.invoke(app, ["count", str(empty_file), "--columns", "category"])
 
         assert result.exit_code == 0
         assert "empty" in result.stdout.lower()
 
     def test_count_nonexistent_file(self):
         """Test count on non-existent file."""
-        result = runner.invoke(app, [
-            "count", "missing.xlsx",
-            "--columns", "category"
-        ])
+        result = runner.invoke(app, ["count", "missing.xlsx", "--columns", "category"])
 
         assert result.exit_code == 1
         assert "File not found" in result.stdout or "File not found" in result.stderr

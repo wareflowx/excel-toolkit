@@ -3,10 +3,11 @@
 Tests for the pivot command that creates pivot table summaries.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -103,7 +104,17 @@ class TestPivotCommand:
     def test_pivot_basic(self, sales_data_for_pivot: Path):
         """Test basic pivot table creation."""
         result = runner.invoke(
-            app, ["pivot", str(sales_data_for_pivot), "--rows", "date", "--columns", "product", "--values", "sales"]
+            app,
+            [
+                "pivot",
+                str(sales_data_for_pivot),
+                "--rows",
+                "date",
+                "--columns",
+                "product",
+                "--values",
+                "sales",
+            ],
         )
 
         assert result.exit_code == 0
@@ -118,10 +129,14 @@ class TestPivotCommand:
             [
                 "pivot",
                 str(sales_data_for_pivot),
-                "--rows", "region",
-                "--columns", "product",
-                "--values", "sales",
-                "--aggfunc", "sum",
+                "--rows",
+                "region",
+                "--columns",
+                "product",
+                "--values",
+                "sales",
+                "--aggfunc",
+                "sum",
             ],
         )
 
@@ -135,10 +150,14 @@ class TestPivotCommand:
             [
                 "pivot",
                 str(sales_data_for_pivot),
-                "--rows", "product",
-                "--columns", "region",
-                "--values", "sales",
-                "--aggfunc", "mean",
+                "--rows",
+                "product",
+                "--columns",
+                "region",
+                "--values",
+                "sales",
+                "--aggfunc",
+                "mean",
             ],
         )
 
@@ -152,10 +171,14 @@ class TestPivotCommand:
             [
                 "pivot",
                 str(sales_data_for_pivot),
-                "--rows", "date",
-                "--columns", "product",
-                "--values", "sales",
-                "--aggfunc", "avg",
+                "--rows",
+                "date",
+                "--columns",
+                "product",
+                "--values",
+                "sales",
+                "--aggfunc",
+                "avg",
             ],
         )
 
@@ -168,10 +191,14 @@ class TestPivotCommand:
             [
                 "pivot",
                 str(sales_data_for_pivot),
-                "--rows", "region",
-                "--columns", "product",
-                "--values", "quantity",
-                "--aggfunc", "count",
+                "--rows",
+                "region",
+                "--columns",
+                "product",
+                "--values",
+                "quantity",
+                "--aggfunc",
+                "count",
             ],
         )
 
@@ -184,10 +211,14 @@ class TestPivotCommand:
             [
                 "pivot",
                 str(sales_data_for_pivot),
-                "--rows", "product",
-                "--columns", "date",
-                "--values", "sales",
-                "--aggfunc", "min",
+                "--rows",
+                "product",
+                "--columns",
+                "date",
+                "--values",
+                "sales",
+                "--aggfunc",
+                "min",
             ],
         )
 
@@ -200,10 +231,14 @@ class TestPivotCommand:
             [
                 "pivot",
                 str(sales_data_for_pivot),
-                "--rows", "region",
-                "--columns", "date",
-                "--values", "quantity",
-                "--aggfunc", "max",
+                "--rows",
+                "region",
+                "--columns",
+                "date",
+                "--values",
+                "quantity",
+                "--aggfunc",
+                "max",
             ],
         )
 
@@ -216,10 +251,14 @@ class TestPivotCommand:
             [
                 "pivot",
                 str(sales_data_for_pivot),
-                "--rows", "product",
-                "--columns", "region",
-                "--values", "sales",
-                "--aggfunc", "median",
+                "--rows",
+                "product",
+                "--columns",
+                "region",
+                "--values",
+                "sales",
+                "--aggfunc",
+                "median",
             ],
         )
 
@@ -232,10 +271,14 @@ class TestPivotCommand:
             [
                 "pivot",
                 str(multi_index_pivot_file),
-                "--rows", "year,quarter",
-                "--columns", "product",
-                "--values", "revenue",
-                "--aggfunc", "sum",
+                "--rows",
+                "year,quarter",
+                "--columns",
+                "product",
+                "--values",
+                "revenue",
+                "--aggfunc",
+                "sum",
             ],
         )
 
@@ -249,9 +292,12 @@ class TestPivotCommand:
             [
                 "pivot",
                 str(multi_index_pivot_file),
-                "--rows", "year",
-                "--columns", "quarter,product",
-                "--values", "revenue",
+                "--rows",
+                "year",
+                "--columns",
+                "quarter,product",
+                "--values",
+                "revenue",
             ],
         )
 
@@ -265,9 +311,12 @@ class TestPivotCommand:
             [
                 "pivot",
                 str(sales_data_for_pivot),
-                "--rows", "date",
-                "--columns", "product",
-                "--values", "sales,quantity",
+                "--rows",
+                "date",
+                "--columns",
+                "product",
+                "--values",
+                "sales,quantity",
             ],
         )
 
@@ -281,10 +330,14 @@ class TestPivotCommand:
             [
                 "pivot",
                 str(sales_data_for_pivot),
-                "--rows", "region",
-                "--columns", "product",
-                "--values", "sales",
-                "--fill", "0",
+                "--rows",
+                "region",
+                "--columns",
+                "product",
+                "--values",
+                "sales",
+                "--fill",
+                "0",
             ],
         )
 
@@ -299,10 +352,14 @@ class TestPivotCommand:
             [
                 "pivot",
                 str(sales_data_for_pivot),
-                "--rows", "region",
-                "--columns", "product",
-                "--values", "sales",
-                "--output", str(output_path),
+                "--rows",
+                "region",
+                "--columns",
+                "product",
+                "--values",
+                "sales",
+                "--output",
+                str(output_path),
             ],
         )
 
@@ -317,9 +374,12 @@ class TestPivotCommand:
             [
                 "pivot",
                 str(sales_data_for_pivot),
-                "--rows", "region",
-                "--columns", "product",
-                "--values", "sales",
+                "--rows",
+                "region",
+                "--columns",
+                "product",
+                "--values",
+                "sales",
                 "--dry-run",
             ],
         )
@@ -331,7 +391,16 @@ class TestPivotCommand:
         """Test pivoting from CSV file."""
         result = runner.invoke(
             app,
-            ["pivot", str(csv_file_for_pivot), "--rows", "category", "--columns", "month", "--values", "value"],
+            [
+                "pivot",
+                str(csv_file_for_pivot),
+                "--rows",
+                "category",
+                "--columns",
+                "month",
+                "--values",
+                "value",
+            ],
         )
 
         assert result.exit_code == 0
@@ -343,10 +412,14 @@ class TestPivotCommand:
             [
                 "pivot",
                 str(sales_data_for_pivot),
-                "--rows", "date",
-                "--columns", "product",
-                "--values", "sales",
-                "--sheet", "Sheet1",
+                "--rows",
+                "date",
+                "--columns",
+                "product",
+                "--values",
+                "sales",
+                "--sheet",
+                "Sheet1",
             ],
         )
 
@@ -359,9 +432,12 @@ class TestPivotCommand:
             [
                 "pivot",
                 str(sales_data_for_pivot),
-                "--rows", "invalid_column",
-                "--columns", "product",
-                "--values", "sales",
+                "--rows",
+                "invalid_column",
+                "--columns",
+                "product",
+                "--values",
+                "sales",
             ],
         )
 
@@ -374,9 +450,12 @@ class TestPivotCommand:
             [
                 "pivot",
                 str(sales_data_for_pivot),
-                "--rows", "date",
-                "--columns", "invalid_column",
-                "--values", "sales",
+                "--rows",
+                "date",
+                "--columns",
+                "invalid_column",
+                "--values",
+                "sales",
             ],
         )
 
@@ -389,9 +468,12 @@ class TestPivotCommand:
             [
                 "pivot",
                 str(sales_data_for_pivot),
-                "--rows", "date",
-                "--columns", "product",
-                "--values", "invalid_column",
+                "--rows",
+                "date",
+                "--columns",
+                "product",
+                "--values",
+                "invalid_column",
             ],
         )
 
@@ -404,10 +486,14 @@ class TestPivotCommand:
             [
                 "pivot",
                 str(sales_data_for_pivot),
-                "--rows", "date",
-                "--columns", "product",
-                "--values", "sales",
-                "--aggfunc", "invalid",
+                "--rows",
+                "date",
+                "--columns",
+                "product",
+                "--values",
+                "sales",
+                "--aggfunc",
+                "invalid",
             ],
         )
 
@@ -423,7 +509,9 @@ class TestPivotCommand:
 
     def test_pivot_missing_columns_parameter(self, sales_data_for_pivot: Path):
         """Test pivot without --columns parameter."""
-        result = runner.invoke(app, ["pivot", str(sales_data_for_pivot), "--rows", "date", "--values", "sales"])
+        result = runner.invoke(
+            app, ["pivot", str(sales_data_for_pivot), "--rows", "date", "--values", "sales"]
+        )
 
         assert result.exit_code == 1
 
@@ -442,9 +530,12 @@ class TestPivotCommand:
             [
                 "pivot",
                 str(empty_file_pivot),
-                "--rows", "column",
-                "--columns", "col2",
-                "--values", "value",
+                "--rows",
+                "column",
+                "--columns",
+                "col2",
+                "--values",
+                "value",
             ],
         )
 
@@ -454,7 +545,17 @@ class TestPivotCommand:
     def test_pivot_nonexistent_file(self):
         """Test pivot on non-existent file."""
         result = runner.invoke(
-            app, ["pivot", "missing.xlsx", "--rows", "date", "--columns", "product", "--values", "sales"]
+            app,
+            [
+                "pivot",
+                "missing.xlsx",
+                "--rows",
+                "date",
+                "--columns",
+                "product",
+                "--values",
+                "sales",
+            ],
         )
 
         assert result.exit_code == 1
@@ -476,10 +577,14 @@ class TestPivotCommand:
             [
                 "pivot",
                 str(file_with_nulls_pivot),
-                "--rows", "region",
-                "--columns", "product",
-                "--values", "sales",
-                "--fill", "0",
+                "--rows",
+                "region",
+                "--columns",
+                "product",
+                "--values",
+                "sales",
+                "--fill",
+                "0",
             ],
         )
 

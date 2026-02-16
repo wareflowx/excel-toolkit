@@ -253,6 +253,7 @@ FILE_HANDLER_ERRORS = {
 # Utility Functions
 # =============================================================================
 
+
 def get_error_category(code: ErrorCode) -> str | None:
     """Get the category name for an error code.
 

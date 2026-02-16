@@ -3,35 +3,38 @@
 Sorts rows from data files by column values.
 """
 
-from pathlib import Path
 import typer
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
-from excel_toolkit.operations.sorting import (
-    validate_sort_columns,
-    sort_dataframe,
-)
-from excel_toolkit.operations.filtering import (
-    validate_condition,
-    normalize_condition,
-    apply_filter,
-)
 from excel_toolkit.commands.common import (
     read_data_file,
-    write_or_display,
     resolve_column_references,
+    write_or_display,
+)
+from excel_toolkit.core import HandlerFactory
+from excel_toolkit.fp import is_err, unwrap, unwrap_err
+from excel_toolkit.operations.filtering import (
+    apply_filter,
+    normalize_condition,
+    validate_condition,
+)
+from excel_toolkit.operations.sorting import (
+    sort_dataframe,
+    validate_sort_columns,
 )
 
 
 def sort(
     file_path: str = typer.Argument(..., help="Path to input file"),
-    columns: str = typer.Option(..., "--columns", "-c", help="Column(s) to sort by (comma-separated)"),
+    columns: str = typer.Option(
+        ..., "--columns", "-c", help="Column(s) to sort by (comma-separated)"
+    ),
     output: str | None = typer.Option(None, "--output", "-o", help="Output file path"),
     rows: int | None = typer.Option(None, "--rows", "-n", help="Limit number of results"),
     desc: bool = typer.Option(False, "--desc", "-d", help="Sort in descending order"),
     where: str | None = typer.Option(None, "--where", "-w", help="Filter condition before sorting"),
-    na_placement: str = typer.Option("last", "--na-placement", help="Where to place NaN values ('first' or 'last')"),
+    na_placement: str = typer.Option(
+        "last", "--na-placement", help="Where to place NaN values ('first' or 'last')"
+    ),
     format: str = typer.Option("table", "--format", "-f", help="Output format (table, csv, json)"),
     sheet: str | None = typer.Option(None, "--sheet", "-s", help="Sheet name for Excel files"),
 ) -> None:
@@ -108,7 +111,9 @@ def sort(
     sort_columns = column_list
 
     # 7. Sort data
-    result = sort_dataframe(df, sort_columns, ascending=not desc, na_position=na_placement, limit=rows)
+    result = sort_dataframe(
+        df, sort_columns, ascending=not desc, na_position=na_placement, limit=rows
+    )
     if is_err(result):
         error = unwrap_err(result)
         typer.echo(f"Error sorting data: {error}", err=True)
@@ -122,7 +127,9 @@ def sort(
     typer.echo(f"Columns: {columns}")
     typer.echo(f"Order: {'descending' if desc else 'ascending'}")
     if where:
-        typer.echo(f"Filter: {where} ({filtered_count} of {len(read_data_file(file_path, sheet))} rows matched)")
+        typer.echo(
+            f"Filter: {where} ({filtered_count} of {len(read_data_file(file_path, sheet))} rows matched)"
+        )
     if na_placement:
         typer.echo(f"NaN placement: {na_placement}")
     typer.echo("")

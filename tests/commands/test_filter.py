@@ -3,10 +3,11 @@
 Tests for the filter command that filters rows based on conditions.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -25,9 +26,31 @@ def sample_excel_file(tmp_path: Path) -> Path:
     df = pd.DataFrame(
         {
             "id": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            "name": ["Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace", "Henry", "Ivy", "Jack"],
+            "name": [
+                "Alice",
+                "Bob",
+                "Charlie",
+                "Diana",
+                "Eve",
+                "Frank",
+                "Grace",
+                "Henry",
+                "Ivy",
+                "Jack",
+            ],
             "age": [25, 30, 35, 28, 32, 27, 38, 29, 31, 26],
-            "city": ["Paris", "London", "Berlin", "Madrid", "Rome", "Vienna", "Athens", "Lisbon", "Dublin", "Prague"],
+            "city": [
+                "Paris",
+                "London",
+                "Berlin",
+                "Madrid",
+                "Rome",
+                "Vienna",
+                "Athens",
+                "Lisbon",
+                "Dublin",
+                "Prague",
+            ],
             "salary": [50000, 60000, 70000, 55000, 65000, 52000, 75000, 58000, 62000, 48000],
         }
     )
@@ -101,14 +124,18 @@ class TestFilterCommand:
 
     def test_filter_and_condition(self, sample_excel_file: Path):
         """Test AND logical operator."""
-        result = runner.invoke(app, ["filter", str(sample_excel_file), "age > 30 and salary > 60000"])
+        result = runner.invoke(
+            app, ["filter", str(sample_excel_file), "age > 30 and salary > 60000"]
+        )
 
         assert result.exit_code == 0
         assert "Filtered" in result.stdout
 
     def test_filter_or_condition(self, sample_excel_file: Path):
         """Test OR logical operator."""
-        result = runner.invoke(app, ["filter", str(sample_excel_file), "age > 35 or city == 'Paris'"])
+        result = runner.invoke(
+            app, ["filter", str(sample_excel_file), "age > 35 or city == 'Paris'"]
+        )
 
         assert result.exit_code == 0
         assert "Filtered" in result.stdout
@@ -133,21 +160,27 @@ class TestFilterCommand:
 
     def test_filter_select_columns(self, sample_excel_file: Path):
         """Test selecting specific columns."""
-        result = runner.invoke(app, ["filter", str(sample_excel_file), "age > 25", "--columns", "name,age"])
+        result = runner.invoke(
+            app, ["filter", str(sample_excel_file), "age > 25", "--columns", "name,age"]
+        )
 
         assert result.exit_code == 0
         assert "Filtered" in result.stdout
 
     def test_filter_csv_format(self, sample_excel_file: Path):
         """Test CSV output format."""
-        result = runner.invoke(app, ["filter", str(sample_excel_file), "age > 30", "--format", "csv"])
+        result = runner.invoke(
+            app, ["filter", str(sample_excel_file), "age > 30", "--format", "csv"]
+        )
 
         assert result.exit_code == 0
         assert "," in result.stdout or "name,age" in result.stdout
 
     def test_filter_json_format(self, sample_excel_file: Path):
         """Test JSON output format."""
-        result = runner.invoke(app, ["filter", str(sample_excel_file), "age > 30", "--format", "json"])
+        result = runner.invoke(
+            app, ["filter", str(sample_excel_file), "age > 30", "--format", "json"]
+        )
 
         assert result.exit_code == 0
         assert "[" in result.stdout or "{" in result.stdout
@@ -181,7 +214,9 @@ class TestFilterCommand:
 
     def test_filter_invalid_columns_param(self, sample_excel_file: Path):
         """Test invalid columns parameter."""
-        result = runner.invoke(app, ["filter", str(sample_excel_file), "age > 25", "--columns", "invalid,age"])
+        result = runner.invoke(
+            app, ["filter", str(sample_excel_file), "age > 25", "--columns", "invalid,age"]
+        )
 
         assert result.exit_code == 1
 
@@ -215,7 +250,14 @@ class TestFilterCommand:
 
     def test_filter_complex_nested(self, sample_excel_file: Path):
         """Test complex nested conditions."""
-        result = runner.invoke(app, ["filter", str(sample_excel_file), "(age > 30 and city == 'Berlin') or (age > 35 and city == 'Athens')"])
+        result = runner.invoke(
+            app,
+            [
+                "filter",
+                str(sample_excel_file),
+                "(age > 30 and city == 'Berlin') or (age > 35 and city == 'Athens')",
+            ],
+        )
 
         assert result.exit_code == 0
         assert "Filtered" in result.stdout

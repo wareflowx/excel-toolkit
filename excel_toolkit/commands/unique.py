@@ -3,24 +3,23 @@
 Extract unique values from a dataset.
 """
 
-from pathlib import Path
-
-import typer
 import pandas as pd
+import typer
 
-from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
 from excel_toolkit.commands.common import (
-    read_data_file,
-    write_or_display,
     display_table,
+    read_data_file,
     resolve_column_references,
+    write_or_display,
 )
+from excel_toolkit.core import HandlerFactory
 
 
 def unique(
     file_path: str = typer.Argument(..., help="Path to input file"),
-    columns: str | None = typer.Option(None, "--columns", "-c", help="Columns to get unique values from (comma-separated)"),
+    columns: str | None = typer.Option(
+        None, "--columns", "-c", help="Columns to get unique values from (comma-separated)"
+    ),
     count: bool = typer.Option(False, "--count", help="Show count of each unique value"),
     output: str | None = typer.Option(None, "--output", "-o", help="Output file path"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Show preview without writing"),
@@ -70,7 +69,7 @@ def unique(
         if count:
             # Get value counts
             value_counts = df[col].value_counts().reset_index()
-            value_counts.columns = [col, 'count']
+            value_counts.columns = [col, "count"]
             df_unique = value_counts
         else:
             # Just unique values
@@ -82,7 +81,7 @@ def unique(
 
         if count:
             # Add count column
-            df_unique['count'] = df_subset.groupby(column_list, dropna=False).size().values
+            df_unique["count"] = df_subset.groupby(column_list, dropna=False).size().values
 
     unique_count = len(df_unique)
 

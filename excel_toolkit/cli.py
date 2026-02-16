@@ -4,37 +4,37 @@ from importlib.metadata import version
 
 import typer
 
-# Configure warnings first (before importing other modules)
-from excel_toolkit.warnings_config import *  # noqa: F401, F403
-
-from excel_toolkit.commands.info import info as info_command
-from excel_toolkit.commands.head import head as head_command
-from excel_toolkit.commands.filter import filter as filter_command
-from excel_toolkit.commands.sort import sort as sort_command
-from excel_toolkit.commands.stats import stats as stats_command
-from excel_toolkit.commands.validate import validate as validate_command
-from excel_toolkit.commands.clean import clean as clean_command
-from excel_toolkit.commands.select import select as select_command
-from excel_toolkit.commands.dedupe import dedupe as dedupe_command
-from excel_toolkit.commands.fill import fill as fill_command
-from excel_toolkit.commands.group import group as group_command
-from excel_toolkit.commands.unique import unique as unique_command
-from excel_toolkit.commands.transform import transform as transform_command
-from excel_toolkit.commands.rename import rename as rename_command
-from excel_toolkit.commands.search import search as search_command
-from excel_toolkit.commands.convert import convert as convert_command
-from excel_toolkit.commands.merge import merge as merge_command
-from excel_toolkit.commands.join import join as join_command
-from excel_toolkit.commands.tail import tail as tail_command
-from excel_toolkit.commands.count import count as count_command
+from excel_toolkit.commands.aggregate import aggregate as aggregate_command
 from excel_toolkit.commands.append import append as append_command
-from excel_toolkit.commands.strip import strip as strip_command
+from excel_toolkit.commands.calculate import calculate as calculate_command
+from excel_toolkit.commands.clean import clean as clean_command
+from excel_toolkit.commands.compare import compare as compare_command
+from excel_toolkit.commands.convert import convert as convert_command
+from excel_toolkit.commands.count import count as count_command
+from excel_toolkit.commands.dedupe import dedupe as dedupe_command
 from excel_toolkit.commands.export import export as export_command
 from excel_toolkit.commands.extract import extract as extract_command
-from excel_toolkit.commands.calculate import calculate as calculate_command
+from excel_toolkit.commands.fill import fill as fill_command
+from excel_toolkit.commands.filter import filter as filter_command
+from excel_toolkit.commands.group import group as group_command
+from excel_toolkit.commands.head import head as head_command
+from excel_toolkit.commands.info import info as info_command
+from excel_toolkit.commands.join import join as join_command
+from excel_toolkit.commands.merge import merge as merge_command
 from excel_toolkit.commands.pivot import pivot as pivot_command
-from excel_toolkit.commands.aggregate import aggregate as aggregate_command
-from excel_toolkit.commands.compare import compare as compare_command
+from excel_toolkit.commands.rename import rename as rename_command
+from excel_toolkit.commands.search import search as search_command
+from excel_toolkit.commands.select import select as select_command
+from excel_toolkit.commands.sort import sort as sort_command
+from excel_toolkit.commands.stats import stats as stats_command
+from excel_toolkit.commands.strip import strip as strip_command
+from excel_toolkit.commands.tail import tail as tail_command
+from excel_toolkit.commands.transform import transform as transform_command
+from excel_toolkit.commands.unique import unique as unique_command
+from excel_toolkit.commands.validate import validate as validate_command
+
+# Configure warnings first (before importing other modules)
+from excel_toolkit.warnings_config import *  # noqa: F401, F403
 
 try:
     __version__ = version("excel-toolkit")
@@ -58,7 +58,7 @@ def sysinfo():
     typer.echo("Excel CLI Toolkit")
     typer.echo("Command-line toolkit for Excel data manipulation and analysis")
     typer.echo(f"Version: {__version__}")
-    typer.echo(f"Python: 3.14")
+    typer.echo("Python: 3.14")
 
 
 # Register commands from commands module

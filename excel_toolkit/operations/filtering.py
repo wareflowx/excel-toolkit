@@ -5,22 +5,21 @@ All functions return Result types for explicit error handling.
 """
 
 import re
-from typing import Any
 
 import pandas as pd
 
-from excel_toolkit.fp import ok, err, Result
+from excel_toolkit.fp import Result, err, ok
 from excel_toolkit.models.error_types import (
-    DangerousPatternError,
-    ConditionTooLongError,
-    UnbalancedParenthesesError,
-    UnbalancedBracketsError,
-    UnbalancedQuotesError,
-    ColumnNotFoundError,
-    QueryFailedError,
     ColumnMismatchError,
+    ColumnNotFoundError,
     ColumnsNotFoundError,
+    ConditionTooLongError,
+    DangerousPatternError,
     FilterError,
+    QueryFailedError,
+    UnbalancedBracketsError,
+    UnbalancedParenthesesError,
+    UnbalancedQuotesError,
     ValidationError,
 )
 
@@ -86,34 +85,19 @@ def validate_condition(condition: str) -> Result[str, ValidationError]:
 
     # Check length
     if len(condition) > MAX_CONDITION_LENGTH:
-        return err(
-            ConditionTooLongError(
-                length=len(condition),
-                max_length=MAX_CONDITION_LENGTH
-            )
-        )
+        return err(ConditionTooLongError(length=len(condition), max_length=MAX_CONDITION_LENGTH))
 
     # Check balanced parentheses
     open_count = condition.count("(")
     close_count = condition.count(")")
     if open_count != close_count:
-        return err(
-            UnbalancedParenthesesError(
-                open_count=open_count,
-                close_count=close_count
-            )
-        )
+        return err(UnbalancedParenthesesError(open_count=open_count, close_count=close_count))
 
     # Check balanced brackets
     open_brackets = condition.count("[")
     close_brackets = condition.count("]")
     if open_brackets != close_brackets:
-        return err(
-            UnbalancedBracketsError(
-                open_count=open_brackets,
-                close_count=close_brackets
-            )
-        )
+        return err(UnbalancedBracketsError(open_count=open_brackets, close_count=close_brackets))
 
     # Check balanced quotes
     single_quotes = condition.count("'")
@@ -151,13 +135,13 @@ def normalize_condition(condition: str, df: pd.DataFrame = None) -> str:
     if df is not None:
         for col in df.columns:
             # Check if column name needs backticks (contains space, special char, or is a keyword)
-            if not col.replace('_', '').replace(' ', '').isalnum():
+            if not col.replace("_", "").replace(" ", "").isalnum():
                 # Column has special characters or spaces, needs backticks
                 # Use word boundary to avoid partial matches
-                pattern = r'\b' + re.escape(col) + r'\b'
+                pattern = r"\b" + re.escape(col) + r"\b"
                 # Only replace if not already in backticks
-                if '`' not in condition or pattern not in condition:
-                    condition = re.sub(pattern, f'`{col}`', condition)
+                if "`" not in condition or pattern not in condition:
+                    condition = re.sub(pattern, f"`{col}`", condition)
 
     # Convert 'value is None' to 'value.isna()'
     condition = re.sub(r"(\w+)\s+is\s+None\b", r"\1.isna()", condition)
@@ -199,10 +183,7 @@ def _extract_column_name(error_msg: str) -> str:
 
 
 def apply_filter(
-    df: pd.DataFrame,
-    condition: str,
-    columns: list[str] | None = None,
-    limit: int | None = None
+    df: pd.DataFrame, condition: str, columns: list[str] | None = None, limit: int | None = None
 ) -> Result[pd.DataFrame, FilterError]:
     """Apply filter condition to DataFrame.
 
@@ -224,7 +205,7 @@ def apply_filter(
     try:
         # Use Python engine for better special character support
         # The backticks allow column names with spaces and special characters
-        df_filtered = df.query(condition, engine='python')
+        df_filtered = df.query(condition, engine="python")
     except pd.errors.UndefinedVariableError as e:
         col = _extract_column_name(str(e))
         return err(ColumnNotFoundError(col, list(df.columns)))

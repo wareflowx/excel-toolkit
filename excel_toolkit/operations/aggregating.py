@@ -4,24 +4,20 @@ This module provides aggregation operations that can be applied to pandas DataFr
 All functions return Result types for explicit error handling.
 """
 
-from typing import Any
-
 import pandas as pd
 
-from excel_toolkit.fp import ok, err, is_ok, is_err, unwrap, unwrap_err, Result
+from excel_toolkit.fp import Result, err, ok
 from excel_toolkit.models.error_types import (
-    InvalidFormatError,
-    InvalidFunctionError,
-    NoValidSpecsError,
-    GroupColumnsNotFoundError,
     AggColumnsNotFoundError,
-    OverlappingColumnsError,
-    AggregationFailedError,
-    ParseError,
-    AggregationValidationError,
     AggregationError,
+    AggregationFailedError,
+    AggregationValidationError,
+    GroupColumnsNotFoundError,
+    InvalidFormatError,
+    NoValidSpecsError,
+    OverlappingColumnsError,
+    ParseError,
 )
-
 
 # =============================================================================
 # Constants
@@ -47,9 +43,7 @@ VALID_AGGREGATION_FUNCTIONS = [
 # =============================================================================
 
 
-def parse_aggregation_specs(
-    specs: str
-) -> Result[dict[str, list[str]], ParseError]:
+def parse_aggregation_specs(specs: str) -> Result[dict[str, list[str]], ParseError]:
     """Parse aggregation specifications from command line.
 
     Args:
@@ -113,7 +107,9 @@ def parse_aggregation_specs(
             # Validate functions
             invalid_funcs = [f for f in func_list if f not in VALID_AGGREGATION_FUNCTIONS]
             if invalid_funcs:
-                parse_errors.append(f"Invalid functions for column '{col_name}': {', '.join(invalid_funcs)}")
+                parse_errors.append(
+                    f"Invalid functions for column '{col_name}': {', '.join(invalid_funcs)}"
+                )
                 current_column = None
                 current_funcs = []
                 continue
@@ -146,10 +142,9 @@ def parse_aggregation_specs(
             agg_specs[current_column] = current_funcs
 
     if parse_errors:
-        return err(InvalidFormatError(
-            spec="; ".join(parse_errors),
-            expected_format="column:func1,func2"
-        ))
+        return err(
+            InvalidFormatError(spec="; ".join(parse_errors), expected_format="column:func1,func2")
+        )
 
     if not agg_specs:
         return err(NoValidSpecsError())
@@ -163,9 +158,7 @@ def parse_aggregation_specs(
 
 
 def validate_aggregation_columns(
-    df: pd.DataFrame,
-    group_columns: list[str],
-    agg_columns: list[str]
+    df: pd.DataFrame, group_columns: list[str], agg_columns: list[str]
 ) -> Result[None, AggregationValidationError]:
     """Validate aggregation columns.
 
@@ -185,25 +178,17 @@ def validate_aggregation_columns(
     # Check group columns exist
     missing_group = [c for c in group_columns if c not in df.columns]
     if missing_group:
-        return err(GroupColumnsNotFoundError(
-            missing=missing_group,
-            available=list(df.columns)
-        ))
+        return err(GroupColumnsNotFoundError(missing=missing_group, available=list(df.columns)))
 
     # Check agg columns exist
     missing_agg = [c for c in agg_columns if c not in df.columns]
     if missing_agg:
-        return err(AggColumnsNotFoundError(
-            missing=missing_agg,
-            available=list(df.columns)
-        ))
+        return err(AggColumnsNotFoundError(missing=missing_agg, available=list(df.columns)))
 
     # Check for overlap
     overlap_cols = set(group_columns) & set(agg_columns)
     if overlap_cols:
-        return err(OverlappingColumnsError(
-            overlap=list(overlap_cols)
-        ))
+        return err(OverlappingColumnsError(overlap=list(overlap_cols)))
 
     return ok(None)
 
@@ -214,9 +199,7 @@ def validate_aggregation_columns(
 
 
 def aggregate_groups(
-    df: pd.DataFrame,
-    group_columns: list[str],
-    aggregations: dict[str, list[str]]
+    df: pd.DataFrame, group_columns: list[str], aggregations: dict[str, list[str]]
 ) -> Result[pd.DataFrame, AggregationError]:
     """Group and aggregate DataFrame.
 
@@ -242,11 +225,11 @@ def aggregate_groups(
 
         # Flatten column names (MultiIndex from agg with multiple functions)
         if isinstance(df_aggregated.columns, pd.MultiIndex):
-            df_aggregated.columns = ['_'.join(col).strip() for col in df_aggregated.columns.values]
+            df_aggregated.columns = ["_".join(col).strip() for col in df_aggregated.columns.values]
             # Remove trailing underscores from group columns
             new_columns = []
             for col in df_aggregated.columns:
-                if col.endswith('_'):
+                if col.endswith("_"):
                     # Check if it's a group column (base name without underscore)
                     base_name = col[:-1]
                     if base_name in group_columns:

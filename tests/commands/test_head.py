@@ -3,10 +3,11 @@
 Tests for the head command that displays the first N rows of data files.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -138,7 +139,9 @@ class TestHeadCommand:
 
     def test_head_csv_format(self, sample_excel_file: Path):
         """Test CSV output format."""
-        result = runner.invoke(app, ["head", str(sample_excel_file), "--format", "csv", "--rows", "3"])
+        result = runner.invoke(
+            app, ["head", str(sample_excel_file), "--format", "csv", "--rows", "3"]
+        )
 
         assert result.exit_code == 0
         # CSV output should have commas
@@ -146,7 +149,9 @@ class TestHeadCommand:
 
     def test_head_json_format(self, sample_excel_file: Path):
         """Test JSON output format."""
-        result = runner.invoke(app, ["head", str(sample_excel_file), "--format", "json", "--rows", "2"])
+        result = runner.invoke(
+            app, ["head", str(sample_excel_file), "--format", "json", "--rows", "2"]
+        )
 
         assert result.exit_code == 0
         # JSON output should have brackets
@@ -207,7 +212,8 @@ class TestHeadCommand:
     def test_head_combined_options(self, sample_excel_file: Path):
         """Test combining multiple options."""
         result = runner.invoke(
-            app, ["head", str(sample_excel_file), "--rows", "3", "--show-columns", "--format", "table"]
+            app,
+            ["head", str(sample_excel_file), "--rows", "3", "--show-columns", "--format", "table"],
         )
 
         assert result.exit_code == 0

@@ -3,10 +3,11 @@
 Tests for the clean command that removes whitespace and standardizes case.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 
@@ -26,9 +27,21 @@ def messy_data_file(tmp_path: Path) -> Path:
         {
             "id": [1, 2, 3, 4, 5],
             "name": ["  Alice  ", "BOB", "  Charlie  ", "DIANA", "  Eve  "],
-            "email": ["alice@example.com", "  BOB@EXAMPLE.COM  ", "charlie@example.com", "diana@example.com", "eve@example.com"],
+            "email": [
+                "alice@example.com",
+                "  BOB@EXAMPLE.COM  ",
+                "charlie@example.com",
+                "diana@example.com",
+                "eve@example.com",
+            ],
             "city": ["New  York", "los  angeles", "  Chicago  ", "Houston", "  Phoenix  "],
-            "phone": ["123-456-7890", " (555) 123-4567 ", "555.987.6543", " 444-555-6666", "777 888 9999"],
+            "phone": [
+                "123-456-7890",
+                " (555) 123-4567 ",
+                "555.987.6543",
+                " 444-555-6666",
+                "777 888 9999",
+            ],
         }
     )
     file_path = tmp_path / "messy.xlsx"
@@ -91,28 +104,36 @@ class TestCleanCommand:
 
     def test_clean_lowercase(self, messy_data_file: Path):
         """Test converting to lowercase."""
-        result = runner.invoke(app, ["clean", str(messy_data_file), "--lowercase", "--columns", "email"])
+        result = runner.invoke(
+            app, ["clean", str(messy_data_file), "--lowercase", "--columns", "email"]
+        )
 
         assert result.exit_code == 0
         assert "Cleaned" in result.stdout
 
     def test_clean_uppercase(self, messy_data_file: Path):
         """Test converting to uppercase."""
-        result = runner.invoke(app, ["clean", str(messy_data_file), "--uppercase", "--columns", "city"])
+        result = runner.invoke(
+            app, ["clean", str(messy_data_file), "--uppercase", "--columns", "city"]
+        )
 
         assert result.exit_code == 0
         assert "Cleaned" in result.stdout
 
     def test_clean_titlecase(self, messy_data_file: Path):
         """Test converting to title case."""
-        result = runner.invoke(app, ["clean", str(messy_data_file), "--titlecase", "--columns", "city"])
+        result = runner.invoke(
+            app, ["clean", str(messy_data_file), "--titlecase", "--columns", "city"]
+        )
 
         assert result.exit_code == 0
         assert "Cleaned" in result.stdout
 
     def test_clean_whitespace_normalization(self, messy_data_file: Path):
         """Test normalizing multiple whitespace."""
-        result = runner.invoke(app, ["clean", str(messy_data_file), "--whitespace", "--columns", "city"])
+        result = runner.invoke(
+            app, ["clean", str(messy_data_file), "--whitespace", "--columns", "city"]
+        )
 
         assert result.exit_code == 0
         assert "Cleaned" in result.stdout
@@ -133,20 +154,27 @@ class TestCleanCommand:
 
     def test_clean_casefold(self, messy_data_file: Path):
         """Test casefold operation."""
-        result = runner.invoke(app, ["clean", str(messy_data_file), "--casefold", "--columns", "email"])
+        result = runner.invoke(
+            app, ["clean", str(messy_data_file), "--casefold", "--columns", "email"]
+        )
 
         assert result.exit_code == 0
         assert "Cleaned" in result.stdout
 
     def test_clean_multiple_operations(self, messy_data_file: Path):
         """Test applying multiple operations."""
-        result = runner.invoke(app, [
-            "clean", str(messy_data_file),
-            "--trim",
-            "--lowercase",
-            "--whitespace",
-            "--columns", "name,city"
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "clean",
+                str(messy_data_file),
+                "--trim",
+                "--lowercase",
+                "--whitespace",
+                "--columns",
+                "name,city",
+            ],
+        )
 
         assert result.exit_code == 0
         assert "Cleaned" in result.stdout
@@ -154,12 +182,10 @@ class TestCleanCommand:
     def test_clean_with_output(self, messy_data_file: Path, tmp_path: Path):
         """Test cleaning with output file."""
         output_path = tmp_path / "cleaned.xlsx"
-        result = runner.invoke(app, [
-            "clean", str(messy_data_file),
-            "--trim",
-            "--lowercase",
-            "--output", str(output_path)
-        ])
+        result = runner.invoke(
+            app,
+            ["clean", str(messy_data_file), "--trim", "--lowercase", "--output", str(output_path)],
+        )
 
         assert result.exit_code == 0
         assert "Written to:" in result.stdout
@@ -167,55 +193,40 @@ class TestCleanCommand:
 
     def test_clean_dry_run(self, messy_data_file: Path):
         """Test dry-run mode."""
-        result = runner.invoke(app, [
-            "clean", str(messy_data_file),
-            "--trim",
-            "--lowercase",
-            "--dry-run"
-        ])
+        result = runner.invoke(
+            app, ["clean", str(messy_data_file), "--trim", "--lowercase", "--dry-run"]
+        )
 
         assert result.exit_code == 0
         assert "Preview" in result.stdout
 
     def test_clean_all_string_columns(self, messy_data_file: Path):
         """Test cleaning all string columns."""
-        result = runner.invoke(app, [
-            "clean", str(messy_data_file),
-            "--trim"
-        ])
+        result = runner.invoke(app, ["clean", str(messy_data_file), "--trim"])
 
         assert result.exit_code == 0
         assert "Cleaned" in result.stdout
 
     def test_clean_specific_columns(self, messy_data_file: Path):
         """Test cleaning specific columns only."""
-        result = runner.invoke(app, [
-            "clean", str(messy_data_file),
-            "--trim",
-            "--lowercase",
-            "--columns", "name,email"
-        ])
+        result = runner.invoke(
+            app, ["clean", str(messy_data_file), "--trim", "--lowercase", "--columns", "name,email"]
+        )
 
         assert result.exit_code == 0
         assert "Columns: name,email" in result.stdout
 
     def test_clean_conflicting_lowercase_uppercase(self, messy_data_file: Path):
         """Test conflicting lowercase and uppercase."""
-        result = runner.invoke(app, [
-            "clean", str(messy_data_file),
-            "--lowercase",
-            "--uppercase"
-        ])
+        result = runner.invoke(app, ["clean", str(messy_data_file), "--lowercase", "--uppercase"])
 
         assert result.exit_code == 1
 
     def test_clean_conflicting_remove_special_keep_alphanumeric(self, messy_data_file: Path):
         """Test conflicting remove-special and keep-alphanumeric."""
-        result = runner.invoke(app, [
-            "clean", str(messy_data_file),
-            "--remove-special",
-            "--keep-alphanumeric"
-        ])
+        result = runner.invoke(
+            app, ["clean", str(messy_data_file), "--remove-special", "--keep-alphanumeric"]
+        )
 
         assert result.exit_code == 1
 
@@ -241,11 +252,9 @@ class TestCleanCommand:
 
     def test_clean_invalid_column(self, messy_data_file: Path):
         """Test clean with non-existent column."""
-        result = runner.invoke(app, [
-            "clean", str(messy_data_file),
-            "--trim",
-            "--columns", "nonexistent"
-        ])
+        result = runner.invoke(
+            app, ["clean", str(messy_data_file), "--trim", "--columns", "nonexistent"]
+        )
 
         assert result.exit_code == 1
 

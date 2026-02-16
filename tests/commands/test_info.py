@@ -3,16 +3,17 @@
 Tests for the info command that displays file metadata.
 """
 
-import pytest
 from pathlib import Path
-from typer.testing import CliRunner
+
 import pandas as pd
+import pytest
+from typer.testing import CliRunner
 
 from excel_toolkit.cli import app
 from excel_toolkit.commands.info import (
-    _get_file_type,
-    _format_size,
     _delimiter_name,
+    _format_size,
+    _get_file_type,
 )
 
 # Initialize CLI test runner
@@ -55,7 +56,9 @@ def multi_sheet_excel_file(tmp_path: Path) -> Path:
 @pytest.fixture
 def sample_csv_file(tmp_path: Path) -> Path:
     """Create a sample CSV file for testing."""
-    df = pd.DataFrame({"product": ["A", "B", "C"], "price": [10.5, 20.0, 15.3], "stock": [100, 50, 75]})
+    df = pd.DataFrame(
+        {"product": ["A", "B", "C"], "price": [10.5, 20.0, 15.3], "stock": [100, 50, 75]}
+    )
     file_path = tmp_path / "test.csv"
     df.to_csv(file_path, index=False)
     return file_path

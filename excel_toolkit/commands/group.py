@@ -3,32 +3,37 @@
 Group data and perform aggregations.
 """
 
-from pathlib import Path
-
 import typer
-import pandas as pd
 
+from excel_toolkit.commands.common import (
+    display_table,
+    read_data_file,
+    resolve_column_references,
+    write_or_display,
+)
 from excel_toolkit.core import HandlerFactory
-from excel_toolkit.fp import is_ok, is_err, unwrap, unwrap_err
+from excel_toolkit.fp import is_err, unwrap, unwrap_err
 from excel_toolkit.operations.aggregating import (
+    aggregate_groups,
     parse_aggregation_specs,
     validate_aggregation_columns,
-    aggregate_groups,
-)
-from excel_toolkit.commands.common import (
-    read_data_file,
-    write_or_display,
-    display_table,
-    resolve_column_references,
 )
 
 
 def group(
     file_path: str = typer.Argument(..., help="Path to input file"),
-    by: str | None = typer.Option(None, "--by", "-b", "-c", help="Columns to group by (comma-separated)"),
-    aggregate: str | None = typer.Option(None, "--aggregate", "-a", help="Aggregations: column:func (comma-separated)"),
-    sort: str | None = typer.Option(None, "--sort", help="Sort results by aggregation column (asc or desc)"),
-    sort_column: str | None = typer.Option(None, "--sort-column", help="Column to sort by (default: first aggregation column)"),
+    by: str | None = typer.Option(
+        None, "--by", "-b", "-c", help="Columns to group by (comma-separated)"
+    ),
+    aggregate: str | None = typer.Option(
+        None, "--aggregate", "-a", help="Aggregations: column:func (comma-separated)"
+    ),
+    sort: str | None = typer.Option(
+        None, "--sort", help="Sort results by aggregation column (asc or desc)"
+    ),
+    sort_column: str | None = typer.Option(
+        None, "--sort-column", help="Column to sort by (default: first aggregation column)"
+    ),
     output: str | None = typer.Option(None, "--output", "-o", help="Output file path"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Show preview without writing"),
     sheet: str | None = typer.Option(None, "--sheet", "-s", help="Sheet name for Excel files"),
@@ -75,7 +80,6 @@ def group(
     # 3. Read file
     df = read_data_file(file_path, sheet)
     original_count = len(df)
-    original_cols = len(df.columns)
 
     # 4. Handle empty file
     if df.empty:
@@ -122,7 +126,6 @@ def group(
 
     df_grouped = unwrap(result)
     grouped_count = len(df_grouped)
-    grouped_cols = len(df_grouped.columns)
 
     # 8.5. Sort if requested
     if sort:
@@ -130,7 +133,9 @@ def group(
         if sort_column:
             # Validate sort_column exists
             if sort_column not in df_grouped.columns:
-                typer.echo(f"Error: Sort column '{sort_column}' not found in grouped data", err=True)
+                typer.echo(
+                    f"Error: Sort column '{sort_column}' not found in grouped data", err=True
+                )
                 typer.echo(f"Available columns: {', '.join(df_grouped.columns)}")
                 raise typer.Exit(1)
             sort_col = sort_column
@@ -144,7 +149,7 @@ def group(
             sort_col = agg_cols[0]
 
         # Sort the dataframe
-        ascending = (sort == "asc")
+        ascending = sort == "asc"
         df_grouped = df_grouped.sort_values(by=sort_col, ascending=ascending)
         # Reset index after sorting
         df_grouped = df_grouped.reset_index(drop=True)
@@ -155,7 +160,11 @@ def group(
     typer.echo(f"Grouped by: {', '.join(group_cols)}")
     typer.echo(f"Aggregations: {aggregate}")
     if sort:
-        sort_col_display = sort_column if sort_column else [col for col in df_grouped.columns if col not in group_cols][0]
+        sort_col_display = (
+            sort_column
+            if sort_column
+            else [col for col in df_grouped.columns if col not in group_cols][0]
+        )
         typer.echo(f"Sorted by: {sort_col_display} ({sort})")
     typer.echo("")
 
