@@ -119,12 +119,14 @@ class TestParseAggregationSpecs:
         assert specs == {"Sales": ["sum", "mean", "count"]}
 
     def test_duplicate_columns_merge(self):
-        """Test that duplicate column specs merge functions."""
+        """Test that duplicate column specs are rejected with helpful error."""
         result = parse_aggregation_specs("Sales:sum,Sales:mean")
 
-        assert is_ok(result)
-        specs = unwrap(result)
-        assert specs == {"Sales": ["sum", "mean"]}
+        assert is_err(result)
+        error = unwrap_err(result)
+        assert isinstance(error, InvalidFormatError)
+        assert "Sales" in str(error)
+        assert "specified multiple times" in str(error)
 
     def test_missing_colon_error(self):
         """Test error when colon is missing."""
