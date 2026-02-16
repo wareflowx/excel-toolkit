@@ -80,7 +80,9 @@ def trim_whitespace(
     try:
         # Apply trimming based on side
         for col in columns:
-            if df_clean[col].dtype == "object" or str(df_clean[col].dtype) == "string":
+            if pd.api.types.is_string_dtype(df_clean[col]) or pd.api.types.is_object_dtype(
+                df_clean[col]
+            ):
                 if side == "both":
                     df_clean[col] = df_clean[col].str.strip()
                 elif side == "left":

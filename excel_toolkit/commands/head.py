@@ -41,8 +41,15 @@ def head(
         format: Output format: table, csv, or json
 
     Raises:
-        typer.Exit: If file cannot be read
+        typer.Exit: If file cannot be read or invalid format
     """
+    # 0. Validate format
+    valid_formats = ["table", "csv", "json"]
+    if format not in valid_formats:
+        typer.echo(f"Unknown format: {format}", err=True)
+        typer.echo(f"Supported formats: {', '.join(valid_formats)}", err=True)
+        raise typer.Exit(1)
+
     # 1. Read file
     df = read_data_file(file_path, sheet)
 
@@ -60,7 +67,7 @@ def head(
 
     # 5. Display file info
     path = Path(file_path)
-    format_file_info(path, len(df), len(df.columns))
+    typer.echo(format_file_info(str(path), sheet=sheet, total_rows=len(df), total_cols=len(df.columns)))
 
     # 6. Show column information if requested
     if show_columns:
