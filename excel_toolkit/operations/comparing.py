@@ -5,6 +5,7 @@ All functions return Result types for explicit error handling.
 """
 
 from dataclasses import dataclass
+from typing import Any
 
 import pandas as pd
 

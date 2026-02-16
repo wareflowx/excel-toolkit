@@ -3,9 +3,8 @@
 This module provides a decorator for creating immutable dataclasses.
 """
 
-from typing import Any
-
 from dataclasses import dataclass
+from typing import Any
 
 
 def immutable(cls: type) -> type:
