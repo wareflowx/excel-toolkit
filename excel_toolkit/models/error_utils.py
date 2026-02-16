@@ -30,7 +30,7 @@ class ErrorSerializable:
         error_dict = error.to_dict()
     """
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Convert the error to a JSON-serializable dictionary.
 
         Returns:
@@ -69,7 +69,7 @@ class ErrorSerializable:
         return result
 
 
-def error_to_dict(error: Any) -> dict:
+def error_to_dict(error: Any) -> dict[str, Any]:
     """Convert an error object to a JSON-serializable dictionary.
 
     This function handles the conversion of error dataclasses to dictionaries,
@@ -182,7 +182,7 @@ def get_error_code_value(error: Any) -> int | None:
     return getattr(error, "ERROR_CODE", None) or getattr(error, "error_code", None)
 
 
-def _add_suggestions(error: Any, error_dict: dict) -> dict:
+def _add_suggestions(error: Any, error_dict: dict[str, Any]) -> dict[str, Any]:
     """Add automatic suggestions to error dictionary based on error type.
 
     Uses fuzzy matching to suggest similar values for typos and invalid inputs.

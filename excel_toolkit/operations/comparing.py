@@ -30,9 +30,9 @@ class DifferencesResult:
         modified_rows: List of indices with different values (modified rows)
     """
 
-    only_df1: set
-    only_df2: set
-    modified_rows: list
+    only_df1: set[Any]
+    only_df2: set[Any]
+    modified_rows: list[Any]
 
 
 @dataclass

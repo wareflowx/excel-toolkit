@@ -19,12 +19,12 @@ warnings.filterwarnings("ignore", message=".*PerformanceWarning.*")
 
 # Set up warning output to stderr instead of stdout
 # This allows users to redirect warnings separately: 2>/dev/null
-def show_warnings_as_errors():
+def show_warnings_as_errors() -> None:
     """Show all warnings as errors (for debugging)."""
     warnings.filterwarnings("error")
 
 
-def setup_warnings(quiet: bool = False, verbose: bool = False):
+def setup_warnings(quiet: bool = False, verbose: bool = False) -> None:
     """Configure warning display based on verbosity settings.
 
     Args:

@@ -6,7 +6,7 @@ Users should not import this module directly - use the functions in maybe.py ins
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Callable, Generic, TypeVar
+from typing import Any, Callable, Generic, TypeVar, cast
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -96,11 +96,11 @@ class Nothing(Maybe[T]):
 
     def map(self, fn: Callable[[T], U]) -> "Maybe[U]":
         """Return this Nothing, ignore function."""
-        return self
+        return cast("Maybe[U]", self)
 
     def and_then(self, fn: Callable[[T], "Maybe[U]"]) -> "Maybe[U]":
         """Return this Nothing, ignore function."""
-        return self
+        return cast("Maybe[U]", self)
 
     def or_else(self, default: T) -> T:
         """Return the default value."""

@@ -687,7 +687,7 @@ class UniquenessViolationError:
 
     columns: list[str]
     duplicate_count: int
-    sample_duplicates: list = field(default_factory=list)
+    sample_duplicates: list[Any] = field(default_factory=list)
     ERROR_CODE: int = ErrorCode.UNIQUENESS_VIOLATION
 
 
@@ -720,8 +720,8 @@ class ValidationReport:
         self,
         passed: int,
         failed: int,
-        errors: list[dict] | None = None,
-        warnings: list[dict] | None = None,
+        errors: list[dict[str, Any]] | None = None,
+        warnings: list[dict[str, Any]] | None = None,
     ):
         self.passed = passed
         self.failed = failed

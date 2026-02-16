@@ -3,6 +3,8 @@
 This module provides a decorator for creating immutable dataclasses.
 """
 
+from typing import Any
+
 from dataclasses import dataclass
 
 
@@ -27,7 +29,7 @@ def immutable(cls: type) -> type:
     """
     # Mark class as needing frozen dataclass
     # The actual dataclass decorator will pick this up
-    cls.__immutable__ = True
+    setattr(cls, "__immutable__", True)
     return cls
 
 
@@ -35,15 +37,15 @@ def immutable(cls: type) -> type:
 _original_dataclass = dataclass
 
 
-def _immutable_dataclass(cls=None, /, **kwargs):
+def _immutable_dataclass(cls: type | None = None, /, **kwargs: Any) -> type | Any:
     """Dataclass decorator that respects @immutable marker."""
 
-    def wrap(cls):
+    def wrap(c: type) -> type:
         # Check if class was marked with @immutable
-        if hasattr(cls, "__immutable__"):
+        if hasattr(c, "__immutable__"):
             kwargs["frozen"] = True
-            delattr(cls, "__immutable__")
-        return _original_dataclass(cls, **kwargs)
+            delattr(c, "__immutable__")
+        return _original_dataclass(c, **kwargs)
 
     # Handle both @dataclass and @dataclass(...)
     if cls is not None:

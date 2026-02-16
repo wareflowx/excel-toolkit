@@ -6,7 +6,7 @@ Users should not import this module directly - use the functions in result.py in
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Callable, Generic, TypeVar
+from typing import Callable, Generic, TypeVar, cast
 
 T = TypeVar("T")
 E = TypeVar("E")
@@ -114,11 +114,11 @@ class Err(Result[T, E]):
 
     def map(self, fn: Callable[[T], U]) -> "Result[U, E]":
         """Return this Err, ignore function."""
-        return self
+        return cast("Result[U, E]", self)
 
     def and_then(self, fn: Callable[[T], "Result[U, E]"]) -> "Result[U, E]":
         """Return this Err, ignore function."""
-        return self
+        return cast("Result[U, E]", self)
 
     def or_else(self, default: "Result[T, E]") -> "Result[T, E]":
         """Return the fallback Result."""

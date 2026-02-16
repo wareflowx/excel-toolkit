@@ -162,7 +162,7 @@ def remove_duplicates(
 
 def fill_missing_values(
     df: pd.DataFrame,
-    strategy: str | dict = "forward",
+    strategy: str | dict[str, str] = "forward",
     columns: list[str] | None = None,
     value: Any = None,
 ) -> Result[pd.DataFrame, ColumnNotFoundError | InvalidFillStrategyError | FillFailedError]:
@@ -468,7 +468,7 @@ def clean_dataframe(
     remove_dup: bool = False,
     dup_subset: list[str] | None = None,
     dup_keep: str = "first",
-    fill_strategy: str | dict | None = None,
+    fill_strategy: str | dict[str, str] | None = None,
     fill_value: Any = None,
     standardize: bool = False,
     standardize_case: str = "lower",

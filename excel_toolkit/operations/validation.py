@@ -422,7 +422,7 @@ def validate_unique(
 
 
 def validate_dataframe(
-    df: pd.DataFrame, rules: list[dict]
+    df: pd.DataFrame, rules: list[dict[str, Any]]
 ) -> Result[ValidationReport, InvalidRuleError]:
     """Validate DataFrame against multiple rules.
 

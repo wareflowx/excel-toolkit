@@ -67,10 +67,10 @@ def parse_aggregation_specs(specs: str) -> Result[dict[str, list[str]], ParseErr
     if not specs:
         return err(NoValidSpecsError())
 
-    agg_specs = {}
-    parse_errors = []
-    current_column = None
-    current_funcs = []
+    agg_specs: dict[str, list[str]] = {}
+    parse_errors: list[str] = []
+    current_column: str | None = None
+    current_funcs: list[str] = []
 
     # Split by comma and process tokens
     for token in specs.split(","):

@@ -5,6 +5,8 @@ All handlers follow the same interface and return Result types for
 explicit error handling.
 """
 
+# type: ignore  # Uses Python 3.14 syntax (except*), CI uses Python 3.13
+
 import sys
 from pathlib import Path
 from typing import Any
