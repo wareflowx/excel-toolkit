@@ -51,6 +51,14 @@ def join(
         raise typer.Exit(0)
 
     # 3. Parse join columns
+    # 3.1. Validate mutually exclusive options
+    if on and (left_on or right_on):
+        typer.echo(
+            "Error: Cannot specify both --on and --left-on/--right-on. Use --on for simple joins or --left-on/--right-on for complex joins.",
+            err=True
+        )
+        raise typer.Exit(1)
+
     on_cols = None
     left_on_cols = None
     right_on_cols = None
