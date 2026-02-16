@@ -67,7 +67,9 @@ def head(
 
     # 5. Display file info
     path = Path(file_path)
-    typer.echo(format_file_info(str(path), sheet=sheet, total_rows=len(df), total_cols=len(df.columns)))
+    typer.echo(
+        format_file_info(str(path), sheet=sheet, total_rows=len(df), total_cols=len(df.columns))
+    )
 
     # 6. Show column information if requested
     if show_columns:

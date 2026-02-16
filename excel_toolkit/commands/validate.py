@@ -17,7 +17,9 @@ from excel_toolkit.operations.validation import (
 def validate(
     file_path: str = typer.Argument(..., help="Path to input file"),
     rules: str | None = typer.Option(
-        None, "--rules", help="Validation rules (format: col:type or col:type:min-max or col:pattern or col:required or col:unique)"
+        None,
+        "--rules",
+        help="Validation rules (format: col:type or col:type:min-max or col:pattern or col:required or col:unique)",
     ),
     rules_file: str | None = typer.Option(
         None, "--rules-file", help="JSON file with validation rules"
@@ -274,7 +276,7 @@ def validate(
     if not rules_list:
         typer.echo(
             "Error: No validation rules specified. Use --rules, --columns, --types, --range, --unique, or --null-threshold",
-            err=True
+            err=True,
         )
         typer.echo("Run 'xl validate --help' for examples")
         raise typer.Exit(1)
@@ -292,9 +294,7 @@ def validate(
     if email_columns:
         import re
 
-        email_pattern = re.compile(
-            r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        )
+        email_pattern = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 
         for email_col in email_columns:
             if email_col not in df.columns:
@@ -305,9 +305,7 @@ def validate(
                 if pd.notna(value):
                     value_str = str(value).strip()
                     if value_str and not email_pattern.match(value_str):
-                        invalid_emails.append(
-                            {"row": idx, "value": value_str}
-                        )
+                        invalid_emails.append({"row": idx, "value": value_str})
 
             if invalid_emails:
                 # Add email pattern errors to the report
@@ -365,7 +363,8 @@ def validate(
     # Only exit with code 1 if there are actual critical errors (not just type mismatches)
     # Type mismatches (column_type) are considered warnings for data quality validation
     critical_errors = [
-        e for e in report.errors
+        e
+        for e in report.errors
         if e.get("type") != "column_type"  # Filter out type mismatches, keep pattern errors
     ]
     if critical_errors:
