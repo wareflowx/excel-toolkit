@@ -21,15 +21,12 @@ jobs:
           python-version: '3.13'
           cache: 'pip'
 
-      - name: Install uv
-        run: pip install uv
-
       - name: Install dependencies
-        run: uv pip install -e ".[dev]"
+        run: pip install -e ".[dev]"
 
       - name: Run tests with coverage
         run: |
-          uv run pytest \
+          pytest \
             tests/ \
             --cov=excel_toolkit \
             --cov-fail-under=80 \

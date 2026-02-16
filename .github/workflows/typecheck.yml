@@ -21,15 +21,12 @@ jobs:
           python-version: '3.13'
           cache: 'pip'
 
-      - name: Install uv
-        run: pip install uv
-
       - name: Install dependencies
-        run: uv pip install -e ".[dev]"
+        run: pip install -e ".[dev]"
 
       - name: Install pandas-stubs
-        run: uv pip install pandas-stubs
+        run: pip install pandas-stubs
 
       - name: Run mypy
         run: |
-          uv run mypy excel_toolkit/
+          mypy excel_toolkit/

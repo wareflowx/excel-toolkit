@@ -21,16 +21,13 @@ jobs:
           python-version: '3.13'
           cache: 'pip'
 
-      - name: Install uv
-        run: pip install uv
-
       - name: Install dependencies
-        run: uv pip install -e ".[dev]"
+        run: pip install -e ".[dev]"
 
       - name: Run ruff check
         run: |
-          uv run ruff check . --output-format=github
+          ruff check . --output-format=github
 
       - name: Run ruff format check
         run: |
-          uv run ruff format --check .
+          ruff format --check .
