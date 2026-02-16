@@ -59,6 +59,11 @@ def sort(
     # 1. Read file
     df = read_data_file(file_path, sheet)
 
+    # 1.1. Handle empty file
+    if df.empty:
+        typer.echo("File is empty (no data rows)")
+        raise typer.Exit(0)
+
     # 2. Validate na_placement
     if na_placement not in ["first", "last"]:
         typer.echo(f"Invalid na_placement: {na_placement}. Must be 'first' or 'last'", err=True)
@@ -90,7 +95,7 @@ def sort(
             raise typer.Exit(1)
 
         # Normalize and apply
-        normalized = unwrap(normalize_condition(where))
+        normalized = normalize_condition(where, df)
         result = apply_filter(df, normalized)
         if is_err(result):
             error = unwrap_err(result)
