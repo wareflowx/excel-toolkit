@@ -23,8 +23,8 @@ def strip(
         "-c",
         help="Columns to strip (comma-separated, default: all string columns)",
     ),
-    left: bool = typer.Option(True, "--left", help="Strip leading whitespace (default: True)"),
-    right: bool = typer.Option(True, "--right", help="Strip trailing whitespace (default: True)"),
+    left: bool = typer.Option(False, "--left", help="Strip leading whitespace only"),
+    right: bool = typer.Option(False, "--right", help="Strip trailing whitespace only"),
     output: str | None = typer.Option(None, "--output", "-o", help="Output file path"),
     sheet: str | None = typer.Option(None, "--sheet", "-s", help="Sheet name for Excel files"),
 ) -> None:
@@ -72,14 +72,19 @@ def strip(
                 cells_modified += df[col].str.rstrip().ne(df[col]).sum()
 
     # 5. Determine strip side
-    if left and right:
+    # Default: if neither flag specified, strip both sides
+    if not left and not right:
         side = "both"
+        side_display = "left/right"
+    elif left and right:
+        side = "both"
+        side_display = "left/right"
     elif left:
         side = "left"
-    elif right:
+        side_display = "left"
+    else:  # right only
         side = "right"
-    else:
-        side = "both"
+        side_display = "right"
 
     # 6. Strip whitespace using operation
     result = trim_whitespace(df, columns=column_list, side=side)
@@ -99,9 +104,7 @@ def strip(
     else:
         typer.echo(f"All string columns: {', '.join(column_list)}")
     typer.echo(f"Cells modified: {cells_modified}")
-    typer.echo(
-        f"Strip mode: {'left' if left else ''}{'/' if left and right else ''}{'right' if right else ''}"
-    )
+    typer.echo(f"Strip mode: {side_display}")
     typer.echo("")
 
     # 8. Write or display
